@@ -10,36 +10,6 @@ namespace Alliance
 {
   public static class Extensions
   {
-    public static int ForEachIf<T>(this IList<T> list, Func<T, bool> predicate, Action<T> action)
-    {
-      int count = 0;
-      foreach (T item in list)
-      {
-        if (!predicate(item))
-          continue;
-        ++count;
-        action(item);
-      }
-      return count;
-    }
-
-    public static T[,] To2D<T>(this T[] arr, int columns, int rows)
-    {
-      T[,] a = new T[columns, rows];
-      int c = 0, r = 0;
-      for (int i = 0; i < arr.Length; ++i)
-      {
-        a[c, r] = arr[i];
-        ++c;
-        if (c == columns)
-        {
-          c = 0;
-          r++;
-        }
-      }
-      return a;
-    }
-
     public static Color[] GetFrame(this Color[,] data, Rectangle src, int length)
     {
       Color[] arr = new Color[length];
@@ -52,32 +22,6 @@ namespace Alliance
         }
       }
       return arr;
-    }
-
-    public static Vector2[] CreateConvexHull(this Texture2D texture)
-    {
-      Color[] colorData = new Color[texture.Width * texture.Height];
-      texture.GetData<Color>(colorData);
-
-      List<Vector2> pixels = new List<Vector2>(colorData.Length);
-      for (int x = 0; x < texture.Width; ++x)
-      {
-        for (int y = 0; y < texture.Height; ++y)
-        {
-          Color color = colorData[x + (y * texture.Width)];
-          if (color.A > 250)
-          {
-            pixels.Add(new Vector2(x, y));
-          }
-        }
-      }
-
-      Vector2[] polygon = pixels.Select(v => new Vector2(v.X, v.Y)).ToArray();
-      Vector2[] H = new Vector2[polygon.Length];
-      int n = ChainConvexHull.ComputeHull(polygon, polygon.Length, ref H);
-      Vector2[] values = new Vector2[n];
-      Array.Copy(H, values, n);
-      return values;
     }
   }
 }
