@@ -53,7 +53,7 @@ namespace Alliance
       Color = Color.White;
 
       // get the image
-      Texture2D image = GetImage();
+      AImage image = GetImage();
       FrameSize = new Size(image.Width / (NumberIndexFrames + 1), image.Height);
       LightningColor = ColorHelper.Blend(
         new Color[] { Color.Purple, Color.DarkBlue, Color.Red },
@@ -73,7 +73,7 @@ namespace Alliance
       return projectile;
     }
 
-    public override Texture2D GetDisplayImage()
+    public override AImage GetDisplayImage()
     {
       return AllianceGame.Images[ImageKey][0].Texture;
     }
@@ -196,7 +196,7 @@ namespace Alliance
       BoxF bounds = outin.First;
       BoxF inside = outin.Second;
 
-      Texture2D wtower = GetImage();
+      AImage wtower = GetImage();
       SizeF imgSize = new SizeF(FrameSize.Width, FrameSize.Height);
       SizeF actSize = new SizeF(bounds.Width, bounds.Height);
 

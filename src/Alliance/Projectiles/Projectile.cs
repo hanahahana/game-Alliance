@@ -28,33 +28,33 @@ namespace Alliance
       Parent = parent;
     }
 
-    public virtual void Update(GameTime gameTime)
+    public virtual void Update(TimeSpan elapsed)
     {
-      UpdateTimeToLive(gameTime);
-      UpdatePosition(gameTime);
+      UpdateTimeToLive(elapsed);
+      UpdatePosition(elapsed);
     }
 
-    protected virtual void UpdateTimeToLive(GameTime gameTime)
+    protected virtual void UpdateTimeToLive(TimeSpan elapsed)
     {
       // update the time to live
-      mTimeToLive -= gameTime.ElapsedGameTime.TotalSeconds;
+      mTimeToLive -= elapsed.TotalSeconds;
       mTimeToLive = Math.Max(0, mTimeToLive);
       IsAlive = mTimeToLive > 0;
     }
 
-    protected virtual void UpdatePosition(GameTime gameTime)
+    protected virtual void UpdatePosition(TimeSpan elapsed)
     {
       if (IsAlive)
       {
         // if we're still alive, then move the projectile
-        float time = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        float time = (float)elapsed.TotalSeconds;
         Position += (time * Velocity * VelocityFactor);
       }
     }
 
-    public virtual void UpdateByFrameCount(GameTime gameTime, int frameCount)
+    public virtual void UpdateByFrameCount(TimeSpan elapsed, int frameCount)
     {
-      float time = (float)(gameTime.ElapsedGameTime.TotalSeconds * (frameCount + 1.0));
+      float time = (float)(elapsed.TotalSeconds * (frameCount + 1.0));
       Position += (time * VelocityFactor * VelocityFactor);
     }
 

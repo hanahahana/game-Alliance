@@ -50,7 +50,7 @@ namespace Alliance
 
     protected override TextureDrawData GetTextureDrawData(Vector2 offset)
     {
-      Texture2D projectile = GetImage();
+      AImage projectile = GetImage();
       SizeF projectileSize = new SizeF(projectile.Width, projectile.Height);
 
       Vector2 origin = projectileSize.ToVector2() * .5f;

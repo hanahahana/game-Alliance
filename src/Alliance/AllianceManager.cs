@@ -7,8 +7,7 @@ using SharpDX.Toolkit.Graphics;
 
 namespace Alliance
 {
-  [Serializable]
-  public partial class GridComponent : GameSystem
+  public partial class AllianceManager
   {
     public const int CellWidth = 20;
     public const int CellHeight = 20;
@@ -67,14 +66,13 @@ namespace Alliance
       set { X = value.X; Y = value.Y; }
     }
 
-    static GridComponent()
+    static AllianceManager()
     {
       FlashStart = Color.Red;
       FlashEnd = Color.Pink.NewAlpha(100);
     }
 
-    public GridComponent(Game game)
-      : base(game)
+    public AllianceManager(Game game)
     {
       FillMode = GridFillMode.Solid;
       input = new InputState(game);
@@ -194,7 +192,7 @@ namespace Alliance
       pieceObjects.ForEach(p => p.DisplayUpgradeInfo = false);
       pieceObjects.Sort((a, b) => a.LevelVisibility.CompareTo(b.LevelVisibility));
 
-      lstPieces.ImageList = new List<Texture2D>(pieceObjects.Count);
+      lstPieces.ImageList = new List<AImage>(pieceObjects.Count);
       lstPieces.Visible = true;
     }
 

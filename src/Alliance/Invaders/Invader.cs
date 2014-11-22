@@ -5,11 +5,7 @@ using System.Text;
 
 namespace Alliance
 {
-  /// <summary>
-  /// 
-  /// </summary>
-  [Serializable]
-  public class Invader : Sprite, ITextDisplay
+  public class Invader : Sprite
   {
     public const float SecondsPerFrame = 1f / 5.3456789f;
 
@@ -25,19 +21,19 @@ namespace Alliance
     public static float AtkFactor = 5f / 10000f;
     public static float DefFactor = 1f / 25000f;
 
-    static readonly Dictionary<Element, Color> Colors;
+    static readonly Dictionary<Element, AColor> Colors;
     static readonly Dictionary<InvaderAttributes, Tuple<float, float>> MinMaxValues;
     static readonly Dictionary<int, string[]> BaseImageKeys;
     static Invader()
     {
-      Colors = new Dictionary<Element, Color>
+      Colors = new Dictionary<Element, AColor>
       {
-        {Element.Air, Color.Yellow},
-        {Element.Earth, Color.DarkGreen},
-        {Element.Electricity, Color.Purple},
-        {Element.Fire, Color.Red},
-        {Element.None, Color.White},
-        {Element.Water, Color.Blue},
+        {Element.Air, AColor.Yellow},
+        {Element.Earth, AColor.DarkGreen},
+        {Element.Electricity, AColor.Purple},
+        {Element.Fire, AColor.Red},
+        {Element.None, AColor.White},
+        {Element.Water, AColor.Blue},
       };
 
       MinMaxValues = new Dictionary<InvaderAttributes, Tuple<float, float>>
@@ -91,7 +87,7 @@ namespace Alliance
       mAttributes = new Dictionary<InvaderAttributes, float>();
 
       // load in the minimum values
-      MinMaxValues.Keys.ToList().ForEach(attr => mAttributes[attr] = MinMaxValues[attr].First);
+      MinMaxValues.Keys.ToList().ForEach(attr => mAttributes[attr] = MinMaxValues[attr].Item1);
 
       // set the level denominator
       LevelDenominator = (MaxInvaderLevel / (float)BaseImageKeys.Count);
@@ -110,7 +106,7 @@ namespace Alliance
       Experience += experiencePts;
 
       // from here, determine the mu
-      float mu = ArithmeticHelper.CalculatePercent(level, MinInvaderLevel, MaxInvaderLevel);
+      float mu = AMath.CalculatePercent(level, MinInvaderLevel, MaxInvaderLevel);
 
       // now, determine the level (make sure we're at least lvl1)
       Level = level;
@@ -119,7 +115,7 @@ namespace Alliance
       Value = (float)Math.Ceiling(Level * 5);
 
       // calculate the maximum life
-      MaximumLife = (float)Math.Floor(MathHelper.SmoothStep(MinInvaderLife, MaxInvaderLife, mu));
+      MaximumLife = (float)Math.Floor(AMath.SmoothStep(MinInvaderLife, MaxInvaderLife, mu));
 
       // get the elements with the highest count
       int max = info.ElementCounts.Max(i => i.Value);
@@ -137,7 +133,7 @@ namespace Alliance
       foreach (InvaderAttributes attribute in attributes)
       {
         Tuple<float, float> minmax = MinMaxValues[attribute];
-        mAttributes[attribute] = (float)Math.Floor(MathHelper.SmoothStep(minmax.First, minmax.Second, mu));
+        mAttributes[attribute] = (float)Math.Floor(AMath.SmoothStep(minmax.Item1, minmax.Item2, mu));
 
         // TODO:
         // here, we need to determine if we're going to increase/decrease the defense, skill, or speed
@@ -162,8 +158,8 @@ namespace Alliance
       ImageKey = BaseImageKeys[key][Flying ? 1 : 0];
 
       // randomize the animation settings
-      mIndex = RandomHelper.Next() % AllianceGame.Images[ImageKey].NumberFrames;
-      mTotalElapsedSeconds = RandomHelper.Next(10) * SecondsPerFrame;
+      mIndex = AllianceSystem.Random.Next() % AllianceSystem.Images[ImageKey].NumberFrames;
+      mTotalElapsedSeconds = AllianceSystem.Random.Next(10) * SecondsPerFrame;
     }
 
     /// <summary>
@@ -182,20 +178,20 @@ namespace Alliance
       float dx = (DijkstraKey == DijkstraType.LeftToRight ? TargetCell.Width * 2f : 0);
       float dy = (DijkstraKey == DijkstraType.TopToBottom ? TargetCell.Height * 2f : 0);
 
-      float mux = RandomHelper.NextSingle();
-      float muy = RandomHelper.NextSingle();
+      float mux = AllianceSystem.Random.NextSingle();
+      float muy = AllianceSystem.Random.NextSingle();
 
-      X = TargetCell.X - (dx * MathHelper.SmoothStep(1, 5, mux));
-      Y = TargetCell.Y - (dy * MathHelper.SmoothStep(1, 5, muy));
+      X = TargetCell.X - (dx * AMath.SmoothStep(1, 5, mux));
+      Y = TargetCell.Y - (dy * AMath.SmoothStep(1, 5, muy));
 
       Width = TargetCell.Width * (Flying ? 1.5f : 1f);
       Height = TargetCell.Height * (Flying ? 1.5f : 1f);
 
-      Velocity = new Vector2(mAttributes[InvaderAttributes.Speed]);
+      Velocity = new APoint(mAttributes[InvaderAttributes.Speed]);
       AdjustOrientation();
 
-      Texture2D texture = GetImage();
-      Origin = new Vector2(texture.Width / 2f, texture.Height / 2f);
+      AImage texture = GetImage();
+      Origin = new APoint(texture.Width / 2f, texture.Height / 2f);
 
       CurrentLife = MaximumLife;
       TargetCell = Flying ? goal : start;
@@ -245,7 +241,7 @@ namespace Alliance
       Element element = projectile.Parent.Element;
 
       // compare the two elements
-      sbyte comparison = AllianceUtilities.CompareElements(Element, element);
+      sbyte comparison = Element.CompareWith(element);
 
       // determine how much to heal based on the projectile
       float lifeBoost = 0f;
@@ -289,7 +285,7 @@ namespace Alliance
       CurrentLife -= Math.Max(1, lifeDelta);
     }
 
-    public void Update(GameTime gameTime)
+    public void Update(TimeSpan elapsed)
     {
       // if we're not alive, then don't call this
       if (State != InvaderState.Alive)
@@ -311,23 +307,23 @@ namespace Alliance
         if (TargetCell == null && CurrentCell != null)
         {
           // then move off of it
-          MoveOffCurrentCell(gameTime);
+          MoveOffCurrentCell(elapsed);
         }
         else
         {
           // otherwise, move to the target cell
-          MoveToTargetCell(gameTime);
+          MoveToTargetCell(elapsed);
         }
 
         // scale the seconds per frame
         float factor = SecondsPerFrame * (Flying ? 1.5f : 1f);
 
         // update the animation
-        mTotalElapsedSeconds += (float)(gameTime.ElapsedGameTime.TotalSeconds);
+        mTotalElapsedSeconds += (float)(elapsed.TotalSeconds);
         if (mTotalElapsedSeconds >= factor)
         {
           mTotalElapsedSeconds -= factor;
-          mIndex = (mIndex + 1) % (AllianceGame.Images[ImageKey].NumberFrames);
+          mIndex = (mIndex + 1) % (AllianceSystem.Images[ImageKey].NumberFrames);
         }
       }
 
@@ -338,23 +334,24 @@ namespace Alliance
       }
     }
 
-    public override Texture2D GetImage()
+    public override AImage GetImage()
     {
-      return AllianceGame.Images[ImageKey][mIndex].Texture;
+      return AllianceSystem.Images[ImageKey][mIndex].Texture;
     }
 
-    protected override Vector2[] GetImageHull()
+    protected override APoint[] GetImageHull()
     {
-      return AllianceGame.Images[ImageKey][mIndex].Hull;
+      return AllianceSystem.Images[ImageKey][mIndex].Hull;
     }
 
-    protected override TextureDrawData GetTextureDrawData(Vector2 offset)
+    protected override TextureDrawData GetTextureDrawData(APoint offset)
     {
       // get the draw data of the base
       TextureDrawData data = base.GetTextureDrawData(offset);
 
       // get the correct position
-      Vector2 position = Position + offset + (Size.ToVector2() * .5f);
+      APoint sz = new APoint(Size.Width, Size.Height);
+      APoint position = Position + offset + (sz * .5f);
 
       // return the updated draw data
       return new TextureDrawData(data.Texture, data.TextureSize, position, data.Origin, data.Scale);

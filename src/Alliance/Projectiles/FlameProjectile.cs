@@ -35,7 +35,7 @@ namespace Alliance
 
     protected override TextureDrawData GetTextureDrawData(Vector2 offset)
     {
-      Texture2D image = GetImage();
+      AImage image = GetImage();
       SizeF imgSize = new SizeF(image.Width, image.Height);
       Vector2 scale = MathematicsHelper.ComputeScale(imgSize, Size);
       return new TextureDrawData(image, imgSize, Position + offset, Origin, scale);

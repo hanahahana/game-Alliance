@@ -5,7 +5,6 @@ namespace Alliance
   /// <summary>
   /// The projectile fired by the machine gun tower.
   /// </summary>
-  [Serializable]
   public class BulletProjectile : Projectile
   {
     public BulletProjectile(Piece parent, double timeToLiveInSeconds)
@@ -15,9 +14,9 @@ namespace Alliance
       ImageKey = "bullet";
     }
 
-    public override void UpdateByFrameCount(GameTime gameTime, int frameCount)
+    public override void UpdateByFrameCount(TimeSpan elapsed, int frameCount)
     {
-      float time = (float)(gameTime.ElapsedGameTime.TotalSeconds * (frameCount + 1.0));
+      float time = (float)(elapsed.TotalSeconds * (frameCount + 1.0));
       Position += (time * VelocityFactor * VelocityFactor);
     }
   }

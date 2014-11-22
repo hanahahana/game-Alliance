@@ -20,7 +20,7 @@ namespace Alliance
     /// <param name="n">the number of points in P[]</param>
     /// <param name="H">an array of the convex hull vertices (max is n)</param>
     /// <returns>the number of points in H[]</returns>
-    public static int ComputeHull(Vector2[] P, int n, ref Vector2[] H)
+    public static int ComputeHull(APoint[] P, int n, ref APoint[] H)
     {
       // the output array H[] will be used as the stack
       int bot = 0, top = (-1);  // indices for bottom and top of the stack
@@ -106,7 +106,7 @@ namespace Alliance
     /// =0 for P2 on the line
     /// &lt;0 for P2 right of the line
     /// </returns>
-    private static float isLeft(Vector2 P0, Vector2 P1, Vector2 P2)
+    private static float isLeft(APoint P0, APoint P1, APoint P2)
     {
       return (P1.X - P0.X) * (P2.Y - P0.Y) - (P2.X - P0.X) * (P1.Y - P0.Y);
     }

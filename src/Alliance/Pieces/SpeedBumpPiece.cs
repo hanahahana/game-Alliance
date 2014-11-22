@@ -59,7 +59,7 @@ namespace Alliance
     protected override void DrawWeaponBase(DrawParams dparams, BoxF bounds, BoxF inside)
     {
       // draw a speed bump!
-      Texture2D speedbump = GetImage();
+      AImage speedbump = GetImage();
       SizeF speedbumpSize = new SizeF(speedbump.Width, speedbump.Height);
 
       Vector2 scale = MathematicsHelper.ComputeScale(speedbumpSize, bounds.Size);

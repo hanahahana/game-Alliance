@@ -99,7 +99,7 @@ namespace Alliance
       Tuple<BoxF, BoxF> outin = GetOutsideInsideBounds(offset);
       BoxF bounds = outin.First;
 
-      Texture2D wtower = GetImage();
+      AImage wtower = GetImage();
       SizeF imgSize = new SizeF(wtower.Width, wtower.Height);
       SizeF actSize = new SizeF(bounds.Width, bounds.Height);
 

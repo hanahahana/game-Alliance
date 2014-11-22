@@ -2,19 +2,15 @@ using System;
 
 namespace Alliance
 {
-  /// <summary>
-  /// 
-  /// </summary>
-  [Serializable]
   public abstract class Sprite
   {
-    private BoxF previousBounds;
+    private ARect previousBounds;
     private Polygon hullCache;
 
     /// <summary>
     /// Gets or sets the color to draw the sprite.
     /// </summary>
-    public Color Color { get; set; }
+    public AColor Color { get; set; }
 
     /// <summary>
     /// Gets or sets the orientation of the sprite (the angle).
@@ -44,29 +40,29 @@ namespace Alliance
     /// <summary>
     /// Gets or sets the position of the sprite (X,Y)
     /// </summary>
-    public Vector2 Position { get { return new Vector2(X, Y); } set { X = value.X; Y = value.Y; } }
+    public APoint Position { get { return new APoint(X, Y); } set { X = value.X; Y = value.Y; } }
 
     /// <summary>
     /// Gets or sets the size of the sprite (Width,Height)
     /// </summary>
-    public SizeF Size { get { return new SizeF(Width, Height); } set { Width = value.Width; Height = value.Height; } }
+    public ASize Size { get { return new ASize(Width, Height); } set { Width = value.Width; Height = value.Height; } }
 
     /// <summary>
     /// Gets or sets the bounds of the sprite (X,Y,Width,Height) or (Position,Size)
     /// </summary>
-    public BoxF Bounds { get { return new BoxF(Position, Size); } set { Position = value.Location; Size = value.Size; } }
+    public ARect Bounds { get { return new ARect(Position, Size); } set { Position = value.Location; Size = value.Size; } }
 
     /// <summary>
     /// Gets or sets the velocity of the sprite (how fast and in what direction). This is usually multipled by a scalar value reprsenting
     /// the speed.
     /// </summary>
     /// <example>X += Velocity * Scalar * elapsedSeconds.</example>
-    public Vector2 Velocity { get; set; }
+    public APoint Velocity { get; set; }
 
     /// <summary>
     /// Gets or sets the factor to apply to the velocity.
     /// </summary>
-    public Vector2 VelocityFactor { get; set; }
+    public APoint VelocityFactor { get; set; }
 
     /// <summary>
     /// Gets the image key to use when retrieving the image for this sprite.
@@ -76,152 +72,101 @@ namespace Alliance
     /// <summary>
     /// Gets the origin to use when drawing the sprite
     /// </summary>
-    public Vector2 Origin { get; protected set; }
+    public APoint Origin { get; protected set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public Sprite()
     {
       Orientation = 0f;
-      Bounds = BoxF.Empty;
+      Bounds = ARect.Empty;
       previousBounds = Bounds;
       hullCache = null;
-      VelocityFactor = Vector2.One;
-      Origin = Vector2.Zero;
+      VelocityFactor = APoint.One;
+      Origin = APoint.Zero;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public virtual Texture2D GetImage()
+    public virtual AImage GetImage()
     {
-      return AllianceGame.Images[ImageKey].Texture;
+      return AllianceSystem.Images[ImageKey];
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public virtual Texture2D GetDisplayImage()
+    public virtual AImage GetDisplayImage()
     {
       return GetImage();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    protected virtual Vector2[] GetImageHull()
+    protected virtual APoint[] GetImageHull()
     {
-      return AllianceGame.Images[ImageKey].Hull;
+      return AllianceSystem.Images[ImageKey].Hull;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="offset"></param>
-    /// <returns></returns>
-    public virtual BoxF GetBoundingBox(Vector2 offset)
+    public virtual ARect GetBoundingBox(APoint offset)
     {
       // get the center of the projectile
-      Vector2 center = GetCenter(offset);
+      APoint center = GetCenter(offset);
 
       // create a rough box that has the projectile inside of it
       float dW = Width * .5f;
       float dH = Height * .5f;
-      return new BoxF(
+      return new ARect(
         center.X - dW,
         center.Y - dH,
         dW * 2f,
         dH * 2f);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="offset"></param>
-    /// <returns></returns>
-    protected virtual Vector2 GetCenter(Vector2 offset)
+    protected virtual APoint GetCenter(APoint offset)
     {
       // get the drawing data
       TextureDrawData data = GetTextureDrawData(offset);
 
       // get the center of the image
-      Vector2 center = (data.TextureSize / 2f).ToVector2();
+      var center = (data.TextureSize / 2f);
 
       // compute the transform
-      Matrix transform = CreateTransform(data);
+      AMatrix transform = CreateTransform(data);
 
       // return the center transformated
-      Vector2 result;
-      Vector2.Transform(ref center, ref transform, out result);
-      return result;
+      return APoint.Transform(center, transform);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="offset"></param>
-    /// <returns></returns>
-    protected virtual TextureDrawData GetTextureDrawData(Vector2 offset)
+    protected virtual TextureDrawData GetTextureDrawData(APoint offset)
     {
-      Texture2D image = GetImage();
-      SizeF imgSize = new SizeF(image.Width, image.Height);
-      Vector2 scale = MathematicsHelper.ComputeScale(imgSize, Size);
+      AImage image = GetImage();
+      var imgSize = new APoint(image.Width, image.Height);
+      var scale = AMath.ComputeScale(imgSize, Size);
       return new TextureDrawData(image, imgSize, Position + offset, Origin, scale);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="data"></param>
-    /// <returns></returns>
-    protected virtual Matrix CreateTransform(TextureDrawData data)
+    protected virtual AMatrix CreateTransform(TextureDrawData data)
     {
       // create the matrix for transforming the center
-      Matrix transform =
-        Matrix.CreateTranslation(-data.Origin.X, -data.Origin.Y, 0) *
-        Matrix.CreateRotationZ(Orientation) *
-        Matrix.CreateScale(data.Scale.X, data.Scale.Y, 1f) *
-        Matrix.CreateTranslation(data.Position.X, data.Position.Y, 0);
+      AMatrix transform =
+        AMatrix.CreateTranslation(-data.Origin.X, -data.Origin.Y, 0) *
+        AMatrix.CreateRotationZ(Orientation) *
+        AMatrix.CreateScale(data.Scale.X, data.Scale.Y, 1f) *
+        AMatrix.CreateTranslation(data.Position.X, data.Position.Y, 0);
 
       // return the transform
       return transform;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="offset"></param>
-    /// <returns></returns>
-    public Polygon GetHull(Vector2 offset)
+    public Polygon GetHull(APoint offset)
     {
-      Vector2[] polygon = GetImageHull();
+      var polygon = GetImageHull();
       if (hullCache == null || Bounds != previousBounds)
       {
-        Matrix transform = CreateTransform(GetTextureDrawData(offset));
+        AMatrix transform = CreateTransform(GetTextureDrawData(offset));
         hullCache = new Polygon(polygon, transform);
         previousBounds = Bounds;
       }
       return hullCache;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
     public override int GetHashCode()
     {
       return Bounds.GetHashCode();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="obj"></param>
-    /// <returns></returns>
     public override bool Equals(object obj)
     {
       Sprite polygon = obj as Sprite;

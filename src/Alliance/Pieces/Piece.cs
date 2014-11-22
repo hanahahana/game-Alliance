@@ -358,7 +358,7 @@ namespace Alliance
 
     protected virtual void DrawWeaponBase(DrawParams dparams, BoxF bounds, BoxF inside)
     {
-      Texture2D wbase = AllianceGame.Images["towerBase"].Texture;
+      AImage wbase = AllianceGame.Images["towerBase"].Texture;
       Vector2 scale = MathematicsHelper.ComputeScale(new SizeF(wbase.Width, wbase.Height), bounds.Size);
 
       Color color = ColorHelper.NewAlpha(Color.Gray, .5f);
@@ -382,7 +382,7 @@ namespace Alliance
       BoxF bounds = outin.First;
       BoxF inside = outin.Second;
 
-      Texture2D wtower = GetImage();
+      AImage wtower = GetImage();
       SizeF imgSize = new SizeF(wtower.Width, wtower.Height);
       SizeF actSize = new SizeF(bounds.Width - Pad, inside.Height);
 
