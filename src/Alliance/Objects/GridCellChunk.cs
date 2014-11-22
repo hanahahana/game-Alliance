@@ -1,4 +1,5 @@
-﻿namespace Alliance
+﻿using SharpDX;
+namespace Alliance
 {
   public class GridCellChunk
   {

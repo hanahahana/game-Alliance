@@ -1,14 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using GuiSystem;
 using SharpDX;
 using SharpDX.Toolkit;
 using SharpDX.Toolkit.Graphics;
+using SharpDX.Toolkit.Input;
 
 namespace Alliance
 {
   [Serializable]
-  public partial class GridComponent : GameSystem
+  public partial class GridComponent : BaseComponent,
+    IGuiInputManager,
+    IGuiRenderer,
+    IGuiSurface
   {
     public const int CellWidth = 20;
     public const int CellHeight = 20;
@@ -42,18 +48,21 @@ namespace Alliance
     private List<Invader> mInvaders;
     private List<Projectile> mProjectiles;
     private InputState input;
-    private GuiComponent mGui;
+    private GuiManager mGui;
     private ListBox lstPieces;
     private TextBox txtDescription;
     private Button btnSell;
     private Button btnUpgrade;
     private SpriteFont captionFont;
-    private PrimitiveGraphics mGraphics;
-    private RectangleF currentArea = RectangleF.Empty;
+    private GraphicsBase mGraphics;
+    private BoxF currentArea = BoxF.Empty;
     private Dictionary<GridCell, double> cellsToFlash;
     private InvaderMothership invaderMothership;
-    private RectangleF gridBounds;
+    private BoxF gridBounds;
     private List<Piece> pieceObjects;
+
+    private PrimitiveBatch<VertexPositionColor> primitiveBatch;
+    private BasicEffect basicEffect;
 
     public GridFillMode FillMode { get; set; }
     public float X { get; set; }
@@ -85,11 +94,13 @@ namespace Alliance
     public override void LoadContent()
     {
       mSpriteBatch = new SpriteBatch(GraphicsDevice);
-      mGraphics = new PrimitiveGraphics(mSpriteBatch);
+      mGraphics = new SharpDXGraphics(this, GraphicsDevice);
 
-      mGui = new GuiComponent(Game, mSpriteBatch);
-      mGui.AllControlsVisibleWhenAdded = false;
-      mGui.LoadContent();
+      primitiveBatch = new PrimitiveBatch<VertexPositionColor>(GraphicsDevice);
+      basicEffect = new BasicEffect(GraphicsDevice);
+      basicEffect.VertexColorEnabled = true;
+
+      mGui = new GuiManager(this, this, this);
 
       captionFont = Program.Resources.Fonts["ComicSans"];
       Player.InitializePlayer(500000, 500000);
@@ -115,7 +126,7 @@ namespace Alliance
       input.Update(gameTime);
 
       // update the gui
-      mGui.Update(gameTime);
+      mGui.Update(gameTime.ElapsedGameTime.TotalMilliseconds);
 
       // construct new updata parameters for the functions
       UpdateParams uparams = new UpdateParams(gameTime, input, (Vector2)MiddleOffset + Position);
@@ -151,7 +162,7 @@ namespace Alliance
     public override void Draw(GameTime gameTime)
     {
       DrawParams dparams = new DrawParams(gameTime, (Vector2)MiddleOffset + Position, FillMode, mSpriteBatch, mGraphics);
-      mSpriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.Deferred, SaveStateMode.SaveState);
+      mSpriteBatch.Begin(SpriteSortMode.Deferred, GraphicsDevice.BlendStates.AlphaBlend);
 
       DrawGrid(dparams);
       DrawPieces(dparams);
@@ -160,7 +171,7 @@ namespace Alliance
       DrawPieceRadius(dparams);
 
       mSpriteBatch.End();
-      mGui.Draw(gameTime);
+      mGui.Draw();
     }
 
     #region Functions
@@ -182,8 +193,8 @@ namespace Alliance
       const int ListDelta = 10;
       lstPieces = new ListBox();
       lstPieces.X = (int)(X + Width + ListDelta);
-      lstPieces.Y = (int)(Y + MiddleOffset.Height);
-      lstPieces.Width = (GraphicsDevice.Viewport.Width - (lstPieces.X + ListDelta));
+      lstPieces.Y = (int)(Y + MiddleOffset.Y);
+      lstPieces.Width = (int)(GraphicsDevice.BackBuffer.Width - (lstPieces.X + ListDelta));
       lstPieces.Height = (int)(lstPieces.Width * .60f);
       lstPieces.HideSelection = false;
       lstPieces.DisplayStyle = ListBoxDisplayStyle.ImageAndText;
@@ -194,7 +205,7 @@ namespace Alliance
       pieceObjects.ForEach(p => p.DisplayUpgradeInfo = false);
       pieceObjects.Sort((a, b) => a.LevelVisibility.CompareTo(b.LevelVisibility));
 
-      lstPieces.ImageList = new List<Texture2D>(pieceObjects.Count);
+      lstPieces.ImageList = new List<GuiImage>(pieceObjects.Count);
       lstPieces.Visible = true;
     }
 
@@ -202,13 +213,9 @@ namespace Alliance
     {
       txtDescription = new TextBox();
       txtDescription.X = lstPieces.X;
-      txtDescription.Y = lstPieces.Bounds.Bottom + 5;
+      txtDescription.Y = lstPieces.Y + lstPieces.Height + 5;
       txtDescription.Width = lstPieces.Width;
-      txtDescription.Height = Height - (lstPieces.Bounds.Bottom + 5);
-
-      txtDescription.BackColor = Color.White;
-      txtDescription.BorderColor = Color.Blue;
-      txtDescription.BorderThickness = 1;
+      txtDescription.Height = Height - (lstPieces.Y + lstPieces.Height + 5);
       txtDescription.Visible = false;
 
       mGui.Controls.Add(txtDescription);
@@ -216,35 +223,35 @@ namespace Alliance
 
     private void InitializeButtons()
     {
-      Point center = txtDescription.Bounds.Center;
+      Point center = new Point(txtDescription.X + txtDescription.Width / 2, txtDescription.Y + txtDescription.Height / 2);
       const int BtnOffset = 6;
 
-      SpriteFont font = AllianceGame.Fonts["BookmanOldStyle"];
+      SpriteFont font = Program.Resources.Fonts["BookmanOldStyle"];
       int width = Math.Min(80, (txtDescription.Width / 2) - BtnOffset);
       int height = 25;
-      int y = txtDescription.Bounds.Bottom - (height + BtnOffset);
+      int y = (txtDescription.Y + txtDescription.Height) - (height + BtnOffset);
 
       btnSell = new Button();
       btnSell.Text = "Sell";
-      btnSell.Font = font;
+      btnSell.Font = new GuiFont { Data = font };
       btnSell.Width = width;
       btnSell.Height = height;
       btnSell.X = center.X - (width + BtnOffset);
       btnSell.Y = y;
-      btnSell.BackColor = Color.Green;
+      btnSell.BackColor = GuiColor.Green;
       btnSell.Visible = false;
-      btnSell.TextAlignment = DataAlignment.MiddleCenter;
+      btnSell.TextAlignment = GuiTextAlignment.MiddleCenter;
 
       btnUpgrade = new Button();
       btnUpgrade.Text = "Upgrade";
-      btnUpgrade.Font = font;
+      btnUpgrade.Font = new GuiFont { Data = font };
       btnUpgrade.Width = width;
       btnUpgrade.Height = height;
       btnUpgrade.X = center.X + BtnOffset;
       btnUpgrade.Y = y;
-      btnUpgrade.BackColor = Color.Red;
+      btnUpgrade.BackColor = GuiColor.Red;
       btnUpgrade.Visible = false;
-      btnUpgrade.TextAlignment = DataAlignment.MiddleCenter;
+      btnUpgrade.TextAlignment = GuiTextAlignment.MiddleCenter;
 
       btnSell.Click += new EventHandler(btnSell_Click);
       btnUpgrade.Click += new EventHandler(btnUpgrade_Click);
@@ -326,7 +333,7 @@ namespace Alliance
 
     private void InitializeProperties()
     {
-      Width = (int)((double)GraphicsDevice.Viewport.Height * .85);
+      Width = (int)((double)GraphicsDevice.BackBuffer.Height * .85);
       Height = Width;
 
       NumCols = (Width / CellWidth) - 1;
@@ -337,7 +344,7 @@ namespace Alliance
         (Height / 2f) - ((NumRows * CellHeight) / 2f));
 
       X = 0;
-      Y = (GraphicsDevice.Viewport.Height / 2f) - (Height / 2f);
+      Y = (GraphicsDevice.BackBuffer.Height / 2f) - (Height / 2f);
     }
 
     #endregion
@@ -352,9 +359,6 @@ namespace Alliance
 
     private void AddInvaders()
     {
-      // update the HudComponent
-      HudComponent.AllowSkipping = !invaderMothership.SentAllInvaders;
-
       // if we sent all the invaders, and there are no more invaders here, then we won!
       if (invaderMothership.SentAllInvaders && mInvaders.Count == 0)
       {
@@ -831,11 +835,11 @@ namespace Alliance
           // add a new item
           ListBoxItem item = new ListBoxItem(piece);
           item.ImageIndex = (i++);
-          item.ImageColor = Color.Gray;
+          item.ImageColor = GuiColor.Gray;
           lstPieces.Items.Add(item);
 
           // add the piece image
-          lstPieces.ImageList.Add(piece.GetDisplayImage());
+          lstPieces.ImageList.Add(new GuiImage { Data = piece.GetDisplayImage() });
         }
       }
     }
@@ -1315,6 +1319,273 @@ namespace Alliance
     }
 
     #endregion
+
+    #endregion
+
+    #region GUI Interfaces
+
+    private static VertexPositionColor CreateVertex(Vector2 v, Color c)
+    {
+      return new VertexPositionColor(new Vector3(v.X, v.Y, 0), c);
+    }
+
+    private static VertexPositionColor CreateVertex(float x, float y, Color c)
+    {
+      return new VertexPositionColor(new Vector3(x, y, 0), c);
+    }
+
+    private SpriteFont GetFont(GuiFont font)
+    {
+      font = font ?? new GuiFont();
+      var f = font.Data as SpriteFont;
+      if (f == null)
+      {
+        f = Program.Resources.Fonts.First().Value;
+      }
+      return f;
+    }
+
+    GuiInputState IGuiInputManager.GetState()
+    {
+      bool pressed =
+        input.CurrentMouseState.LeftButton.Down ||
+        input.CurrentMouseState.MiddleButton.Down ||
+        input.CurrentMouseState.RightButton.Down;
+
+      return new GuiInputState
+      {
+        Point = new GuiPoint(input.CurrentMouseState.X * GraphicsDevice.Viewport.Width, input.CurrentMouseState.Y * GraphicsDevice.Viewport.Height),
+        Pressed = pressed,
+        Released = !pressed,
+      };
+    }
+
+    void IGuiRenderer.BeginDraw()
+    {
+      basicEffect.Projection = Matrix.OrthoOffCenterRH(0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0, 0, 1);
+    }
+
+    void IGuiRenderer.EndDraw()
+    {
+
+    }
+
+    void IGuiRenderer.FillRectangle(GuiColor color, float x, float y, float width, float height)
+    {
+      Color c = new Color(color.R, color.G, color.B, color.A);
+      basicEffect.CurrentTechnique.Passes[0].Apply();
+      primitiveBatch.Begin();
+      primitiveBatch.DrawQuad(
+        CreateVertex(x, y, c),
+        CreateVertex(x + width - 1, y, c),
+        CreateVertex(x + width - 1, y + height - 1, c),
+        CreateVertex(x, y + height - 1, c));
+      primitiveBatch.End();
+    }
+
+    void IGuiRenderer.DrawLine(GuiColor color, float x1, float y1, float x2, float y2)
+    {
+      Color c = new Color(color.R, color.G, color.B, color.A);
+      basicEffect.CurrentTechnique.Passes[0].Apply();
+      primitiveBatch.Begin();
+      primitiveBatch.DrawLine(CreateVertex(x1 - 1, y1, c), CreateVertex(x2, y2, c));
+      primitiveBatch.End();
+    }
+
+    void IGuiRenderer.DrawRectangle(GuiColor color, float x, float y, float width, float height)
+    {
+      Color c = new Color(color.R, color.G, color.B, color.A);
+
+      var verts = new[]
+      {
+        CreateVertex(x - 1, y, c),
+        CreateVertex(x + width, y, c),
+        CreateVertex(x + width, y + height, c),
+        CreateVertex(x, y + height, c)
+      };
+
+      basicEffect.CurrentTechnique.Passes[0].Apply();
+      primitiveBatch.Begin();
+      primitiveBatch.DrawIndexed(PrimitiveType.LineList,
+        new short[]{ 
+          0, 1,
+          1, 2,
+          2, 3,
+          3, 0}, verts);
+      primitiveBatch.End();
+    }
+
+    void IGuiRenderer.DrawString(GuiFont font, string text, float x, float y, GuiColor color)
+    {
+      var f = GetFont(font);
+
+      Color c = new Color(color.R, color.G, color.B, color.A);
+      using (mSpriteBatch.Batch())
+      {
+        mSpriteBatch.DrawString(f, text, new Vector2(x, y), c);
+      }
+    }
+
+    void IGuiRenderer.DrawString(GuiFont font, string text, float x, float y, float width, float height, GuiColor color, GuiTextAlignment alignment)
+    {
+      var f = GetFont(font);
+      var size = f.MeasureString(text);
+
+      Color c = new Color(color.R, color.G, color.B, color.A);
+      using (mSpriteBatch.Batch())
+      {
+        mSpriteBatch.DrawString(f, text, CalculatePosition(size, x, y, width, height, alignment), c);
+      }
+    }
+
+    private Vector2 CalculatePosition(Vector2 size, float x, float y, float width, float height, GuiTextAlignment alignment)
+    {
+      Vector2 pos = new Vector2(x, y);
+
+      float top = y;
+      float middle = (y + (height / 2)) - (size.Y / 2);
+      float bottom = (y + height) - size.Y;
+
+      float left = x;
+      float center = (x + (width / 2)) - (size.X / 2);
+      float right = (x + width) - size.X;
+
+      switch (alignment)
+      {
+        case GuiTextAlignment.BottomCenter:
+          pos.X = center;
+          pos.Y = bottom;
+          break;
+        case GuiTextAlignment.BottomLeft:
+          pos.X = left;
+          pos.Y = bottom;
+          break;
+        case GuiTextAlignment.BottomRight:
+          pos.X = right;
+          pos.Y = bottom;
+          break;
+
+        case GuiTextAlignment.MiddleCenter:
+          pos.X = center;
+          pos.Y = middle;
+          break;
+        case GuiTextAlignment.MiddleLeft:
+          pos.X = left;
+          pos.Y = middle;
+          break;
+        case GuiTextAlignment.MiddleRight:
+          pos.X = right;
+          pos.Y = middle;
+          break;
+
+        case GuiTextAlignment.TopCenter:
+          pos.X = center;
+          pos.Y = top;
+          break;
+        case GuiTextAlignment.TopLeft:
+          pos.X = left;
+          pos.Y = top;
+          break;
+        case GuiTextAlignment.TopRight:
+          pos.X = right;
+          pos.Y = top;
+          break;
+      }
+
+      return pos;
+    }
+
+    void IGuiRenderer.DrawImage(GuiImage image, float x, float y, float width, float height, GuiColor color)
+    {
+      Color c = new Color(color.R, color.G, color.B, color.A);
+      using (mSpriteBatch.Batch())
+      {
+        var tex = image.Data as Texture2D;
+        var pt = new Vector2(x + (width / 2), y + (height / 2));
+        pt.X -= (tex.Width * 0.5f);
+        pt.Y -= (tex.Height * 0.5f);
+        mSpriteBatch.Draw(tex, pt, c);
+      }
+    }
+
+    GuiSize IGuiRenderer.MeasureString(GuiFont font, string text)
+    {
+      var f = GetFont(font);
+      var size = f.MeasureString(text);
+      return new GuiSize(size.X, size.Y);
+    }
+
+    string IGuiRenderer.CropText(GuiFont font, string text, GuiSize textSize, float width, int offset)
+    {
+      if (width < (offset + textSize.Width))
+      {
+        float totalWidth = offset;
+        float cWidth = textSize.Width / text.Length;
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < text.Length; ++i)
+        {
+          totalWidth += cWidth;
+          if (totalWidth > width)
+          {
+            break;
+          }
+          sb.Append(text[i]);
+        }
+        return sb.ToString();
+      }
+      return text;
+    }
+
+    void IGuiRenderer.FillTriangle(GuiColor color, float x, float y, float width, float height, GuiDirection direction)
+    {
+      Color c = new Color(color.R, color.G, color.B, color.A);
+      Vector2[] pts = new Vector2[3];
+
+      switch (direction)
+      {
+        case GuiDirection.Down:
+          pts[0] = new Vector2(x + (width / 2), y + height);
+          pts[1] = new Vector2(x, y);
+          pts[2] = new Vector2(x + width, y);
+          break;
+        case GuiDirection.Left:
+          pts[0] = new Vector2(x, y + (height / 2));
+          pts[1] = new Vector2(x + width, y);
+          pts[2] = new Vector2(x + width, y + width);
+          break;
+        case GuiDirection.Right:
+          pts[0] = new Vector2(x + width, y + (height / 2));
+          pts[1] = new Vector2(x, y + height);
+          pts[2] = new Vector2(x, y);
+          break;
+        case GuiDirection.Up:
+          pts[0] = new Vector2(x + (width / 2), y);
+          pts[1] = new Vector2(x + width, y + height);
+          pts[2] = new Vector2(x, y + height);
+          break;
+      }
+
+      basicEffect.CurrentTechnique.Passes[0].Apply();
+      primitiveBatch.Begin();
+      primitiveBatch.Draw(PrimitiveType.TriangleList, new[]
+      {
+        CreateVertex(pts[0], c),
+        CreateVertex(pts[1], c),
+        CreateVertex(pts[2], c),
+      });
+      primitiveBatch.End();
+    }
+
+    int IGuiSurface.Height
+    {
+      get { return (int)GraphicsDevice.Viewport.Height; }
+    }
+
+    int IGuiSurface.Width
+    {
+      get { return (int)GraphicsDevice.Viewport.Width; }
+    }
 
     #endregion
   }

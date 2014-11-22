@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SharpDX;
+using SharpDX.Toolkit;
+using SharpDX.Toolkit.Graphics;
 
 namespace Alliance
 {
@@ -358,8 +361,8 @@ namespace Alliance
 
     protected virtual void DrawWeaponBase(DrawParams dparams, BoxF bounds, BoxF inside)
     {
-      Texture2D wbase = AllianceGame.Images["towerBase"].Texture;
-      Vector2 scale = MathematicsHelper.ComputeScale(new SizeF(wbase.Width, wbase.Height), bounds.Size);
+      Texture2D wbase = Program.Resources.Images["towerBase"].Texture;
+      Vector2 scale = MathHelper.ComputeScale(new SizeF(wbase.Width, wbase.Height), bounds.Size);
 
       Color color = ColorHelper.NewAlpha(Color.Gray, .5f);
       SpriteBatch spriteBatch = dparams.SpriteBatch;
@@ -386,7 +389,7 @@ namespace Alliance
       SizeF imgSize = new SizeF(wtower.Width, wtower.Height);
       SizeF actSize = new SizeF(bounds.Width - Pad, inside.Height);
 
-      Vector2 scale = MathematicsHelper.ComputeScale(imgSize, actSize);
+      Vector2 scale = MathHelper.ComputeScale(imgSize, actSize);
       Vector2 imgCenter = imgSize.ToVector2() * .5f;
       Vector2 myCenter = actSize.ToVector2() * .5f;
 
@@ -426,7 +429,7 @@ namespace Alliance
         //  dparams.Graphics.FillRectangle(x, y, dimension, dimension, Color.Black);
         //}
 
-        SpriteFont font = AllianceGame.Fonts["Georgia"];
+        SpriteFont font = Program.Resources.Fonts["Georgia"];
         string text = Level.ToString();
         Vector2 pos = new Vector2(bounds.Left + spacing, bounds.Bottom - (font.LineSpacing + spacing));
         dparams.SpriteBatch.DrawString(font, text, pos, Color.Black);

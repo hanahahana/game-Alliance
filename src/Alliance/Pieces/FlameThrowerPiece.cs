@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using SharpDX.Toolkit;
 
 namespace Alliance
 {
@@ -43,7 +44,7 @@ namespace Alliance
       if (Level == MaxLevel)
       {
         Orientation = Environment.TickCount / 1000f;
-        Orientation = MathematicsHelper.WrapAngle(Orientation);
+        Orientation = MathHelper.WrapAngle(Orientation);
       }
     }
 

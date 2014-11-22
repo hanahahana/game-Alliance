@@ -1,4 +1,6 @@
 using System;
+using SharpDX;
+using SharpDX.Toolkit.Graphics;
 
 namespace Alliance
 {
@@ -97,7 +99,7 @@ namespace Alliance
     /// <returns></returns>
     public virtual Texture2D GetImage()
     {
-      return AllianceGame.Images[ImageKey].Texture;
+      return Program.Resources.Images[ImageKey].Texture;
     }
 
     /// <summary>
@@ -115,7 +117,7 @@ namespace Alliance
     /// <returns></returns>
     protected virtual Vector2[] GetImageHull()
     {
-      return AllianceGame.Images[ImageKey].Hull;
+      return Program.Resources.Images[ImageKey].Hull;
     }
 
     /// <summary>
@@ -155,9 +157,7 @@ namespace Alliance
       Matrix transform = CreateTransform(data);
 
       // return the center transformated
-      Vector2 result;
-      Vector2.Transform(ref center, ref transform, out result);
-      return result;
+      return AllianceUtilities.Transform(center, transform);
     }
 
     /// <summary>
@@ -169,7 +169,7 @@ namespace Alliance
     {
       Texture2D image = GetImage();
       SizeF imgSize = new SizeF(image.Width, image.Height);
-      Vector2 scale = MathematicsHelper.ComputeScale(imgSize, Size);
+      Vector2 scale = MathHelper.ComputeScale(imgSize, Size);
       return new TextureDrawData(image, imgSize, Position + offset, Origin, scale);
     }
 
@@ -182,10 +182,10 @@ namespace Alliance
     {
       // create the matrix for transforming the center
       Matrix transform =
-        Matrix.CreateTranslation(-data.Origin.X, -data.Origin.Y, 0) *
-        Matrix.CreateRotationZ(Orientation) *
-        Matrix.CreateScale(data.Scale.X, data.Scale.Y, 1f) *
-        Matrix.CreateTranslation(data.Position.X, data.Position.Y, 0);
+        Matrix.Translation(-data.Origin.X, -data.Origin.Y, 0) *
+        Matrix.RotationZ(Orientation) *
+        Matrix.Scaling(data.Scale.X, data.Scale.Y, 1f) *
+        Matrix.Translation(data.Position.X, data.Position.Y, 0);
 
       // return the transform
       return transform;

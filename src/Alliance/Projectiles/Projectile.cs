@@ -1,4 +1,7 @@
 using System;
+using SharpDX;
+using SharpDX.Toolkit;
+using SharpDX.Toolkit.Graphics;
 
 namespace Alliance
 {

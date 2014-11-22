@@ -1,5 +1,8 @@
 using System;
 using System.Text;
+using SharpDX;
+using SharpDX.Toolkit;
+using SharpDX.Toolkit.Graphics;
 
 namespace Alliance
 {
@@ -75,12 +78,12 @@ namespace Alliance
 
     public override Texture2D GetDisplayImage()
     {
-      return AllianceGame.Images[ImageKey][0].Texture;
+      return Program.Resources.Images[ImageKey][0].Texture;
     }
 
     protected override Vector2[] GetImageHull()
     {
-      return AllianceGame.Images[ImageKey][0].Hull;
+      return Program.Resources.Images[ImageKey][0].Hull;
     }
 
     protected override void UpgradeProjectileVariables(float factor)
@@ -200,7 +203,7 @@ namespace Alliance
       SizeF imgSize = new SizeF(FrameSize.Width, FrameSize.Height);
       SizeF actSize = new SizeF(bounds.Width, bounds.Height);
 
-      Vector2 scale = MathematicsHelper.ComputeScale(imgSize, actSize);
+      Vector2 scale = MathHelper.ComputeScale(imgSize, actSize);
       Vector2 origin = imgSize.ToVector2() * .5f;
       Vector2 center = actSize.ToVector2() * .5f;
 

@@ -1,5 +1,7 @@
 using System;
 using System.Text;
+using SharpDX;
+using SharpDX.Toolkit.Graphics;
 
 namespace Alliance
 {
@@ -62,7 +64,7 @@ namespace Alliance
       Texture2D speedbump = GetImage();
       SizeF speedbumpSize = new SizeF(speedbump.Width, speedbump.Height);
 
-      Vector2 scale = MathematicsHelper.ComputeScale(speedbumpSize, bounds.Size);
+      Vector2 scale = MathHelper.ComputeScale(speedbumpSize, bounds.Size);
       Color color = Color.White;
 
       SpriteBatch spriteBatch = dparams.SpriteBatch;

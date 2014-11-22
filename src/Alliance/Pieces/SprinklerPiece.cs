@@ -1,5 +1,7 @@
 using System;
 using System.Text;
+using SharpDX;
+using SharpDX.Toolkit;
 
 namespace Alliance
 {
@@ -55,7 +57,7 @@ namespace Alliance
 
       // spin around in a circle
       Orientation += ((float)gameTime.ElapsedGameTime.TotalSeconds * RadiansPerSecond);
-      Orientation = MathematicsHelper.WrapAngle(Orientation);
+      Orientation = MathHelper.WrapAngle(Orientation);
     }
 
     protected override void UpgradeProjectileVariables(float factor)
@@ -99,11 +101,11 @@ namespace Alliance
       Tuple<BoxF, BoxF> outin = GetOutsideInsideBounds(offset);
       BoxF bounds = outin.First;
 
-      Texture2D wtower = GetImage();
+      var wtower = GetImage();
       SizeF imgSize = new SizeF(wtower.Width, wtower.Height);
       SizeF actSize = new SizeF(bounds.Width, bounds.Height);
 
-      Vector2 scale = MathematicsHelper.ComputeScale(imgSize, actSize);
+      Vector2 scale = MathHelper.ComputeScale(imgSize, actSize);
       Vector2 origin = imgSize.ToVector2() * .5f;
       Vector2 center = actSize.ToVector2() * .5f;
 

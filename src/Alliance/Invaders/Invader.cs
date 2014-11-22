@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SharpDX;
+using SharpDX.Toolkit;
+using SharpDX.Toolkit.Graphics;
 
 namespace Alliance
 {
@@ -162,7 +165,7 @@ namespace Alliance
       ImageKey = BaseImageKeys[key][Flying ? 1 : 0];
 
       // randomize the animation settings
-      mIndex = RandomHelper.Next() % AllianceGame.Images[ImageKey].NumberFrames;
+      mIndex = RandomHelper.Next() % Program.Resources.Images[ImageKey].NumberFrames;
       mTotalElapsedSeconds = RandomHelper.Next(10) * SecondsPerFrame;
     }
 
@@ -327,7 +330,7 @@ namespace Alliance
         if (mTotalElapsedSeconds >= factor)
         {
           mTotalElapsedSeconds -= factor;
-          mIndex = (mIndex + 1) % (AllianceGame.Images[ImageKey].NumberFrames);
+          mIndex = (mIndex + 1) % (Program.Resources.Images[ImageKey].NumberFrames);
         }
       }
 
@@ -340,12 +343,12 @@ namespace Alliance
 
     public override Texture2D GetImage()
     {
-      return AllianceGame.Images[ImageKey][mIndex].Texture;
+      return Program.Resources.Images[ImageKey][mIndex].Texture;
     }
 
     protected override Vector2[] GetImageHull()
     {
-      return AllianceGame.Images[ImageKey][mIndex].Hull;
+      return Program.Resources.Images[ImageKey][mIndex].Hull;
     }
 
     protected override TextureDrawData GetTextureDrawData(Vector2 offset)
@@ -404,7 +407,7 @@ namespace Alliance
       //}
 
       // draw the level
-      SpriteFont verdana = AllianceGame.Fonts["Georgia"];
+      SpriteFont verdana = Program.Resources.Fonts["Georgia"];
       string text = Level.ToString();
       Vector2 pos = new Vector2(bar.X, bar.Y - (verdana.MeasureString(text).Y + 5f));
       spriteBatch.DrawString(verdana,

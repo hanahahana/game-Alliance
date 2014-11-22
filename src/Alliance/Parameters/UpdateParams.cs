@@ -1,3 +1,5 @@
+using SharpDX;
+using SharpDX.Toolkit;
 namespace Alliance
 {
   /// <summary>

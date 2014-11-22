@@ -16,7 +16,7 @@ namespace Alliance
     public Dictionary<string, FramedImage> Images { get; private set; }
     public Dictionary<string, SpriteFont> Fonts { get; private set; }
     public Dictionary<string, Texture2D> Textures { get; private set; }
-    //public static GridComponent CurrentGrid { get; private set; }
+    public GridComponent CurrentGrid { get; set; }
 
     public ResourceCache(AllianceGame owner)
     {

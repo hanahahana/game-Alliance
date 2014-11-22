@@ -69,13 +69,32 @@
   <ItemGroup>
     <Compile Include="AllianceGame.cs" />
     <Compile Include="Components\GridComponent.cs" />
-    <Compile Include="Components\HudComponent.cs" />
+    <Compile Include="Components\BaseComponent.cs" />
     <Compile Include="Components\MessageComponent.cs" />
-    <Compile Include="Components\ScreenComponent.cs" />
+    <Compile Include="Framework\AlgorithmConstants.cs" />
+    <Compile Include="Framework\AllianceUtilities.cs" />
+    <Compile Include="Framework\AStar.cs" />
+    <Compile Include="Framework\BeizerMaker.cs" />
+    <Compile Include="Framework\Box.cs" />
+    <Compile Include="Framework\BoxF.cs" />
     <Compile Include="Data\GameOptions.cs" />
-    <Compile Include="Data\MenuEntry.cs" />
     <Compile Include="Data\SaveData.cs" />
-    <Compile Include="Data\SaveFile.cs" />
+    <Compile Include="Framework\CollectionHelper.cs" />
+    <Compile Include="Framework\ColorHelper.cs" />
+    <Compile Include="Framework\Dijkstra.cs" />
+    <Compile Include="Framework\DijkstraNode.cs" />
+    <Compile Include="Framework\GraphicsBase.cs" />
+    <Compile Include="Framework\ITextDisplay.cs" />
+    <Compile Include="Framework\MathematicsHelper.cs" />
+    <Compile Include="Framework\Polygon.cs" />
+    <Compile Include="Framework\PrimitiveBatchGraphics.cs" />
+    <Compile Include="Framework\RandomHelper.cs" />
+    <Compile Include="Framework\Range.cs" />
+    <Compile Include="Framework\Ratcliff.cs" />
+    <Compile Include="Framework\RectangleCorners.cs" />
+    <Compile Include="Framework\ReflectionHelper.cs" />
+    <Compile Include="Framework\Size.cs" />
+    <Compile Include="Framework\SizeF.cs" />
     <Compile Include="Data\Sprite.cs" />
     <Compile Include="Data\TextureDrawData.cs" />
     <Compile Include="Enums\Element.cs" />
@@ -93,6 +112,11 @@
     <Compile Include="Extensions\ColorExtensions.cs" />
     <Compile Include="Extensions\Extensions.cs" />
     <Compile Include="Extensions\TextureExtensions.cs" />
+    <Compile Include="Framework\ArithmeticHelper.cs" />
+    <Compile Include="Framework\AStarNode.cs" />
+    <Compile Include="Framework\Index.cs" />
+    <Compile Include="Framework\Sample.cs" />
+    <Compile Include="Framework\Tuple.cs" />
     <Compile Include="Input\InputState.cs" />
     <Compile Include="Invaders\Invader.cs" />
     <Compile Include="Invaders\InvaderLevelUpInfo.cs" />
@@ -136,17 +160,7 @@
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
     <Compile Include="Animation\FramedImage.cs" />
-    <Compile Include="Screens\GameplayScreen.cs" />
-    <Compile Include="Screens\GameScreen.cs" />
-    <Compile Include="Screens\LoadingScreen.cs" />
-    <Compile Include="Screens\MainMenuScreen.cs" />
-    <Compile Include="Screens\MenuScreen.cs" />
-    <Compile Include="Screens\MessageBoxScreen.cs" />
-    <Compile Include="Screens\OptionsMenuScreen.cs" />
-    <Compile Include="Screens\PauseMenuScreen.cs" />
-    <Compile Include="Screens\SaveDataScreen.cs" />
-    <Compile Include="Screens\StoryScreen.cs" />
-    <Compile Include="Screens\WizardScreen.cs" />
+    <Compile Include="Framework\SharpDXGraphics.cs" />
   </ItemGroup>
   <ItemGroup>
     <ToolkitFont Include="Content\Fonts\Arial.xml">
@@ -197,7 +211,12 @@
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\GuiSystem\src\GuiSystem\GuiSystem.csproj">
+      <Project>{e63264b3-5e43-45ed-8e3b-6adb49e229fb}</Project>
+      <Name>GuiSystem</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <ToolkitTexture Include="Content\Gui\arrow.png" />
     <ToolkitTexture Include="Content\Gui\Down.png" />

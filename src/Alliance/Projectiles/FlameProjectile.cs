@@ -1,4 +1,7 @@
 using System;
+using SharpDX;
+using SharpDX.Toolkit;
+using SharpDX.Toolkit.Graphics;
 
 namespace Alliance
 {
@@ -37,7 +40,7 @@ namespace Alliance
     {
       Texture2D image = GetImage();
       SizeF imgSize = new SizeF(image.Width, image.Height);
-      Vector2 scale = MathematicsHelper.ComputeScale(imgSize, Size);
+      Vector2 scale = MathHelper.ComputeScale(imgSize, Size);
       return new TextureDrawData(image, imgSize, Position + offset, Origin, scale);
     }
 

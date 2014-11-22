@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using SharpDX;
 
 namespace Alliance
 {
@@ -70,7 +71,7 @@ namespace Alliance
       BoxF inside = outin.Second;
 
       TextureDrawData data = base.GetTextureDrawData(offset);
-      Vector2 scale = MathematicsHelper.ComputeScale(data.TextureSize, bounds.Size);
+      Vector2 scale = MathHelper.ComputeScale(data.TextureSize, bounds.Size);
       return new TextureDrawData(data.Texture, data.TextureSize, bounds.Location, Vector2.Zero, scale);
     }
   }

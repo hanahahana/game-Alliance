@@ -1,4 +1,7 @@
 using System;
+using SharpDX;
+using SharpDX.Toolkit;
+using SharpDX.Toolkit.Graphics;
 
 namespace Alliance
 {
@@ -56,7 +59,7 @@ namespace Alliance
       SizeF projectileSize = new SizeF(projectile.Width, projectile.Height);
 
       Vector2 origin = projectileSize.ToVector2() * .5f;
-      Vector2 scale = MathematicsHelper.ComputeScale(projectileSize, Size);
+      Vector2 scale = MathHelper.ComputeScale(projectileSize, Size);
 
       Vector2 position = mOwnerBounds.Location;
       position += ((mOwnerBounds.Size.ToVector2() * .5f));

@@ -1,13 +1,15 @@
 using System.Collections.Generic;
 using System.Threading;
+using SharpDX;
 using SharpDX.Toolkit;
+using SharpDX.Toolkit.Graphics;
 
 namespace Alliance
 {
   /// <summary>
   /// 
   /// </summary>
-  public sealed class MessageComponent : GameSystem
+  public sealed class MessageComponent : BaseComponent
   {
     public const float DefaultFadeTimeMs = 2500f;
     public const float MessageMargin = 5;
@@ -139,6 +141,7 @@ namespace Alliance
     private MessageComponent(Game game)
       : base(game)
     {
+
     }
 
     public static MessageComponent CreateInstance(Game game)
@@ -159,7 +162,7 @@ namespace Alliance
     {
       if (mDefaultFont == null)
       {
-        mDefaultFont = AllianceGame.Fonts["TimesNewRoman"];
+        mDefaultFont = Program.Resources.Fonts["Rockwell"];
       }
 
       if (mSpriteBatch == null)
@@ -169,7 +172,7 @@ namespace Alliance
 
       if (mGraphics == null)
       {
-        mGraphics = new PrimitiveGraphics(mSpriteBatch);
+        mGraphics = new PrimitiveBatchGraphics(mSpriteBatch.GraphicsDevice);
       }
     }
 
@@ -187,18 +190,16 @@ namespace Alliance
           --i;
         }
       }
-      base.Update(gameTime);
     }
 
     public override void Draw(GameTime gameTime)
     {
       DrawParams data = new DrawParams(gameTime, Vector2.Zero, GridFillMode.Solid, mSpriteBatch, mGraphics);
-      mSpriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.Deferred, SaveStateMode.SaveState);
+      mSpriteBatch.Begin(SpriteSortMode.Deferred, GraphicsDevice.BlendStates.AlphaBlend);
 
       mMessages.ForEach(msg => msg.Draw(data));
 
       mSpriteBatch.End();
-      base.Draw(gameTime);
     }
 
     public static void AddMessage(string text, float aliveTimeMs, bool useFadeEffects)
