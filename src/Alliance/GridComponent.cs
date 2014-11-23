@@ -80,7 +80,7 @@ namespace Alliance
 
     public void Initialize()
     {
-      mGui = new GuiManager(guiSurface);
+      mGui = new GuiManager(guiSurface, FontProvider.DefaultFont);
       Player.InitializePlayer(500000, 50);
 
       InitializeVariables();
@@ -132,6 +132,9 @@ namespace Alliance
 
       // update all projectiles
       UpdateProjectiles(uparams);
+
+      // finally, update the time
+      Player.TimeUntilInvadersArrive -= span;
     }
 
     public void Draw(IGsGraphics graphics)
@@ -173,10 +176,11 @@ namespace Alliance
       lstPieces.DisplayStyle = ListBoxDisplayStyle.ImageAndText;
       mGui.Controls.Add(lstPieces);
 
-      pieceObjects = typeof(Piece)
+      var pieceType = typeof(Piece);
+      pieceObjects = pieceType
         .Assembly
         .GetTypes()
-        .Where(t => !t.IsAbstract && t.IsSubclassOf(t))
+        .Where(t => !t.IsAbstract && t.IsSubclassOf(pieceType))
         .Select(t => (Piece)Activator.CreateInstance(t))
         .ToList();
 
@@ -628,12 +632,12 @@ namespace Alliance
     {
       if (projectile is MissileProjectile)
       {
-        DebriProjectile[] debris = DebriProjectile.Create(projectile, RandomProvider.Next(3, 9));
+        DebriProjectile[] debris = DebriProjectile.Create(projectile, RandomGenerator.Next(3, 9));
         mProjectiles.AddRange(debris);
       }
     }
 
-    private void CheckCollisions(Projectile projectile, Polygon projectilePolygon, UpdateParams uparams)
+    private void CheckCollisions(Projectile projectile, GsPolygon projectilePolygon, UpdateParams uparams)
     {
       // if the projectile parent is null, then don't worry about it
       if (projectile.Parent == null)
@@ -650,7 +654,7 @@ namespace Alliance
           continue;
 
         // get the entity polygon
-        Polygon entityPolygon = invader.GetHull(uparams.Offset);
+        GsPolygon entityPolygon = invader.GetHull(uparams.Offset);
 
         // let the entity and polygon know they were attacked
         if (entityPolygon.IntersectsWith(projectilePolygon))
@@ -686,6 +690,10 @@ namespace Alliance
       {
         lstPieces.SelectedIndex = -1;
         ClearSelection();
+      }
+      if (uparams.Input.EctoplasTransmaterPort)
+      {
+        Player.TimeUntilInvadersArrive = TimeSpan.Zero;
       }
     }
 
@@ -824,7 +832,7 @@ namespace Alliance
           lstPieces.Items.Add(item);
 
           // add the piece image
-          lstPieces.ImageList.Add(new GsImage { Data = piece.GetDisplayImage() });
+          lstPieces.ImageList.Add(piece.GetDisplayImage());
         }
       }
     }
@@ -1161,7 +1169,7 @@ namespace Alliance
         projectile.Update(uparams.Elapsed);
 
         // get the polygon data
-        Polygon polygon = projectile.GetHull(uparams.Offset);
+        GsPolygon polygon = projectile.GetHull(uparams.Offset);
 
         // if the projectile is still alive, check to see if it went out of bounds
         if (projectile.IsAlive)
@@ -1198,7 +1206,7 @@ namespace Alliance
         {
           case GridFillMode.Polygons:
             {
-              Polygon hull = piece.GetHull(dparams.Offset);
+              GsPolygon hull = piece.GetHull(dparams.Offset);
               dparams.Graphics.DrawPolygon(GsColor.Blue, hull.Points);
               break;
             }
@@ -1261,7 +1269,7 @@ namespace Alliance
         {
           case GridFillMode.Polygons:
             {
-              Polygon hull = invader.GetHull(dparams.Offset);
+              GsPolygon hull = invader.GetHull(dparams.Offset);
               dparams.Graphics.DrawPolygon(GsColor.Yellow, hull.Points);
               break;
             }
@@ -1282,7 +1290,7 @@ namespace Alliance
         {
           case GridFillMode.Polygons:
             {
-              Polygon hull = projectile.GetHull(dparams.Offset);
+              GsPolygon hull = projectile.GetHull(dparams.Offset);
               dparams.Graphics.DrawPolygon(GsColor.Red, hull.Points);
               break;
             }

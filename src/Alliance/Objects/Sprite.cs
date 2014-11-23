@@ -14,7 +14,7 @@ namespace Alliance
   public abstract class Sprite
   {
     private GsRectangle previousBounds;
-    private Polygon hullCache;
+    private GsPolygon hullCache;
 
     /// <summary>
     /// Gets or sets the color to draw the sprite.
@@ -99,7 +99,7 @@ namespace Alliance
     /// <summary></summary>
     public virtual GsImage GetImage()
     {
-      return ImageProvider.GetAnimatedImage(ImageKey).Texture;
+      return ImageProvider.GetFramedImage(ImageKey).Image;
     }
 
     /// <summary></summary>
@@ -111,7 +111,7 @@ namespace Alliance
     /// <summary></summary>
     protected virtual GsVector[] GetImageHull()
     {
-      return ImageProvider.GetAnimatedImage(ImageKey).Hull;
+      return ImageProvider.GetFramedImage(ImageKey).Hull;
     }
 
     /// <summary></summary>
@@ -134,10 +134,10 @@ namespace Alliance
     protected virtual GsVector GetCenter(GsVector offset)
     {
       // get the drawing data
-      TextureParams data = GetTextureDrawData(offset);
+      ImageParams data = GetTextureDrawData(offset);
 
       // get the center of the image
-      GsVector center = data.TextureSize.ToVector() / 2f;
+      GsVector center = data.ImageSize.ToVector() / 2f;
 
       // compute the transform
       GsMatrix transform = CreateTransform(data);
@@ -147,16 +147,16 @@ namespace Alliance
     }
 
     /// <summary></summary>
-    protected virtual TextureParams GetTextureDrawData(GsVector offset)
+    protected virtual ImageParams GetTextureDrawData(GsVector offset)
     {
       var image = GetImage();
       var imgSize = ImageProvider.GetSize(image);
       var scale = Calculator.ComputeScale(imgSize, Size);
-      return new TextureParams(image, imgSize, Position + offset, Origin, scale);
+      return new ImageParams(image, imgSize, Position + offset, Origin, scale);
     }
 
     /// <summary></summary>
-    protected virtual GsMatrix CreateTransform(TextureParams data)
+    protected virtual GsMatrix CreateTransform(ImageParams data)
     {
       // create the matrix for transforming the center
       GsMatrix transform =
@@ -170,13 +170,13 @@ namespace Alliance
     }
 
     /// <summary></summary>
-    public Polygon GetHull(GsVector offset)
+    public GsPolygon GetHull(GsVector offset)
     {
       GsVector[] polygon = GetImageHull();
       if (hullCache == null || Bounds != previousBounds)
       {
         GsMatrix transform = CreateTransform(GetTextureDrawData(offset));
-        hullCache = new Polygon(polygon, transform);
+        hullCache = new GsPolygon(polygon, transform);
         previousBounds = Bounds;
       }
       return hullCache;

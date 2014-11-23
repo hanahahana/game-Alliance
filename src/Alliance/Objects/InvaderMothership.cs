@@ -56,8 +56,8 @@ namespace Alliance
       for (int i = 0; i < invaderCount; ++i)
       {
         // determine the boolean properties for the invader
-        bool flying = RandomProvider.NextBool();
-        bool leftRight = RandomProvider.NextBool();
+        bool flying = RandomGenerator.NextBool();
+        bool leftRight = RandomGenerator.NextBool();
 
         // get the start/goal and key
         GridCell start = leftRight ? horizontal.Start : vertical.Start;

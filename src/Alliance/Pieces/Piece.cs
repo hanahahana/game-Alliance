@@ -359,7 +359,7 @@ namespace Alliance
 
     protected virtual void DrawWeaponBase(DrawParams dparams, GsRectangle bounds, GsRectangle inside)
     {
-      var wbase = ImageProvider.GetImage("towerBase");
+      var wbase = ImageProvider.GetFramedImage("towerBase").Image;
       var wbaseSize = ImageProvider.GetSize(wbase);
       var scale = Calculator.ComputeScale(wbaseSize, bounds.Size);
       var color = new GsColor(GsColor.Gray, 128);
@@ -367,7 +367,7 @@ namespace Alliance
       graphics.DrawImage(wbase, color, bounds.Location, scale);
     }
 
-    protected override TextureParams GetTextureDrawData(GsVector offset)
+    protected override ImageParams GetTextureDrawData(GsVector offset)
     {
       OutsideInside outin = GetOutsideInsideBounds(offset);
       var bounds = outin.Outside;
@@ -381,12 +381,12 @@ namespace Alliance
       GsVector imgCenter = imgSize.ToVector() * .5f;
       GsVector myCenter = actSize.ToVector() * .5f;
 
-      return new TextureParams(wtower, imgSize, inside.Location + myCenter, imgCenter, scale);
+      return new ImageParams(wtower, imgSize, inside.Location + myCenter, imgCenter, scale);
     }
 
     protected virtual void DrawWeaponTower(DrawParams dparams, GsVector offset)
     {
-      TextureParams data = GetTextureDrawData(offset);
+      ImageParams data = GetTextureDrawData(offset);
       GsColor color = GsColor.Gray;
       var graphics = dparams.Graphics;
       graphics.DrawImage(data, color, Orientation);

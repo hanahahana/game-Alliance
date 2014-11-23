@@ -10,7 +10,7 @@
     <ProjectGuid>{184A3396-1451-434D-BF9B-6EB633A2065D}</ProjectGuid>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Alliance</RootNamespace>
-    <AssemblyName>Alliance</AssemblyName>
+    <AssemblyName>Alliance.SharpDX</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <!-- Platform Dependent Properties -->
     <OutputType>WinExe</OutputType>
@@ -25,6 +25,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,6 +34,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="SharpDX">
@@ -68,74 +70,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AllianceGame.cs" />
-    <Compile Include="Components\GridComponent.cs" />
-    <Compile Include="Components\BaseComponent.cs" />
-    <Compile Include="Components\MessageComponent.cs" />
-    <Compile Include="Framework\AllianceUtilities.cs" />
-    <Compile Include="Framework\BeizerMaker.cs" />
-    <Compile Include="Framework\Box.cs" />
-    <Compile Include="Framework\BoxF.cs" />
-    <Compile Include="Data\GameOptions.cs" />
-    <Compile Include="Data\SaveData.cs" />
-    <Compile Include="Framework\CollectionHelper.cs" />
-    <Compile Include="Framework\ColorHelper.cs" />
-    <Compile Include="Framework\GraphicsBase.cs" />
-    <Compile Include="Framework\ITextDisplay.cs" />
-    <Compile Include="Framework\MathematicsHelper.cs" />
-    <Compile Include="Framework\Polygon.cs" />
-    <Compile Include="Framework\PrimitiveBatchGraphics.cs" />
-    <Compile Include="Framework\RandomHelper.cs" />
-    <Compile Include="Framework\Range.cs" />
-    <Compile Include="Framework\Ratcliff.cs" />
-    <Compile Include="Framework\RectangleCorners.cs" />
-    <Compile Include="Framework\ReflectionHelper.cs" />
-    <Compile Include="Framework\Size.cs" />
-    <Compile Include="Framework\SizeF.cs" />
-    <Compile Include="Data\Sprite.cs" />
-    <Compile Include="Data\TextureDrawData.cs" />
-    <Compile Include="Extensions\CollectionExtensions.cs" />
-    <Compile Include="Extensions\ColorExtensions.cs" />
     <Compile Include="Extensions\Extensions.cs" />
-    <Compile Include="Extensions\TextureExtensions.cs" />
-    <Compile Include="Framework\ArithmeticHelper.cs" />
-    <Compile Include="Framework\Index.cs" />
-    <Compile Include="Framework\Sample.cs" />
-    <Compile Include="Framework\Tuple.cs" />
+    <Compile Include="Graphics\SharpDXGraphics.cs" />
     <Compile Include="Input\InputState.cs" />
-    <Compile Include="Invaders\Invader.cs" />
-    <Compile Include="Invaders\InvaderLevelUpInfo.cs" />
-    <Compile Include="Library\ChainConvexHull.cs" />
-    <Compile Include="Objects\GridCell.cs" />
-    <Compile Include="Objects\GridCellChunk.cs" />
-    <Compile Include="Objects\InvaderMothership.cs" />
-    <Compile Include="Objects\Player.cs" />
-    <Compile Include="Objects\Selection.cs" />
-    <Compile Include="Parameters\DrawParams.cs" />
-    <Compile Include="Parameters\UpdateParams.cs" />
-    <Compile Include="Pathfinding\AStarNodeAlliance.cs" />
-    <Compile Include="Pathfinding\DijkstraNodeAlliance.cs" />
-    <Compile Include="Pathfinding\DijkstraPathsGrid.cs" />
-    <Compile Include="Pathfinding\DijkstraType.cs" />
-    <Compile Include="Pieces\FlameThrowerPiece.cs" />
-    <Compile Include="Pieces\MachineGunPiece.cs" />
-    <Compile Include="Pieces\MissilePiece.cs" />
-    <Compile Include="Pieces\Piece.cs" />
-    <Compile Include="Pieces\RailgunPiece.cs" />
-    <Compile Include="Pieces\ShockwavePiece.cs" />
-    <Compile Include="Pieces\SpeedBumpPiece.cs" />
-    <Compile Include="Pieces\SprinklerPiece.cs" />
-    <Compile Include="Pieces\TeslaCoilPiece.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="Projectiles\BulletProjectile.cs" />
-    <Compile Include="Projectiles\DebriProjectile.cs" />
-    <Compile Include="Projectiles\FlameProjectile.cs" />
-    <Compile Include="Projectiles\FlamewaveProjectile.cs" />
-    <Compile Include="Projectiles\LightningProjectile.cs" />
-    <Compile Include="Projectiles\MissileProjectile.cs" />
-    <Compile Include="Projectiles\Projectile.cs" />
-    <Compile Include="Projectiles\RailgunProjectile.cs" />
-    <Compile Include="Projectiles\ShockwaveProjectile.cs" />
-    <Compile Include="Projectiles\SprinklerProjectile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\ResourceCache.cs" />
     <Compile Include="Resources\Strings.Designer.cs">
@@ -143,8 +81,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
-    <Compile Include="Animation\FramedImage.cs" />
-    <Compile Include="Framework\SharpDXGraphics.cs" />
   </ItemGroup>
   <ItemGroup>
     <ToolkitFont Include="Content\Fonts\Arial.xml">
@@ -196,9 +132,17 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\GraphicsSystem\src\GraphicsSystem\GraphicsSystem.csproj">
+      <Project>{597b86cf-2998-4ad2-83d5-e50d1b1e1a8e}</Project>
+      <Name>GraphicsSystem</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\GuiSystem\src\GuiSystem\GuiSystem.csproj">
       <Project>{e63264b3-5e43-45ed-8e3b-6adb49e229fb}</Project>
       <Name>GuiSystem</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Alliance\Alliance.csproj">
+      <Project>{ca101cdd-cc5f-4df4-a2b4-9dcb1ea492df}</Project>
+      <Name>Alliance</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

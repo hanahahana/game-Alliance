@@ -12,7 +12,7 @@ namespace Alliance
     private const float SecondsPerFrame = 1.0f / 12.3456789f;
 
     private float mSecondsSinceUpdate = 0;
-    private ImageFlip effects = ImageFlip.None;
+    private GsImageFlip effects = GsImageFlip.None;
 
     public FlameProjectile(Piece parent, double timeToLiveInSeconds)
       : base(parent, timeToLiveInSeconds)
@@ -32,16 +32,16 @@ namespace Alliance
       if (mSecondsSinceUpdate >= SecondsPerFrame)
       {
         mSecondsSinceUpdate -= SecondsPerFrame;
-        effects = (effects == ImageFlip.None ? ImageFlip.Horizontal : ImageFlip.None);
+        effects = (effects == GsImageFlip.None ? GsImageFlip.Horizontal : GsImageFlip.None);
       }
     }
 
-    protected override TextureParams GetTextureDrawData(GsVector offset)
+    protected override ImageParams GetTextureDrawData(GsVector offset)
     {
       var image = GetImage();
       var imgSize = ImageProvider.GetSize(image);
       var scale = Calculator.ComputeScale(imgSize, Size);
-      return new TextureParams(image, imgSize, Position + offset, Origin, scale);
+      return new ImageParams(image, imgSize, Position + offset, Origin, scale);
     }
 
     public override void UpdateByFrameCount(TimeSpan elapsed, int frameCount)
@@ -59,7 +59,7 @@ namespace Alliance
     {
       var graphics = dparams.Graphics;
       var offset = dparams.Offset;
-      TextureParams data = GetTextureDrawData(offset);
+      ImageParams data = GetTextureDrawData(offset);
       graphics.DrawImage(data, Color, Orientation);
     }
   }

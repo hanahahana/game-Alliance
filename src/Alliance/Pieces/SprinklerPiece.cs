@@ -95,7 +95,7 @@ namespace Alliance
       return projectile;
     }
 
-    protected override TextureParams GetTextureDrawData(GsVector offset)
+    protected override ImageParams GetTextureDrawData(GsVector offset)
     {
       var outin = GetOutsideInsideBounds(offset);
       var bounds = outin.Outside;
@@ -108,7 +108,7 @@ namespace Alliance
       GsVector origin = imgSize.ToVector() * .5f;
       GsVector center = actSize.ToVector() * .5f;
 
-      return new TextureParams(wtower, imgSize, bounds.Location + center, origin, scale);
+      return new ImageParams(wtower, imgSize, bounds.Location + center, origin, scale);
     }
   }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using GraphicsSystem;
 using GuiSystem;
 using SharpDX;
 using SharpDX.Toolkit;
@@ -9,23 +10,22 @@ using SharpDX.Toolkit.Input;
 
 namespace Alliance
 {
-  public class AllianceGame : Game
+  public class AllianceGame : Game, IGuiSurface
   {
-    private GraphicsDeviceManager graphics;
-    private List<BaseComponent> components;
-
+    private GraphicsDeviceManager graphicsDeviceManager;
     private GridComponent grid;
-    private MessageComponent messages;
+    private InputState input;
+    private ResourceCache resources;
+    private SharpDXGraphics graphics;
 
+    int IGuiSurface.Height { get { return graphicsDeviceManager.PreferredBackBufferHeight; } }
+    int IGuiSurface.Width { get { return graphicsDeviceManager.PreferredBackBufferWidth; } }
 
     public AllianceGame()
     {
-      graphics = new GraphicsDeviceManager(this);
+      graphicsDeviceManager = new GraphicsDeviceManager(this);
       Content.RootDirectory = "Content";
-
-      components = new List<BaseComponent>();
-      components.Add(new GridComponent(this));
-      components.Add(MessageComponent.CreateInstance(this));
+      input = new InputState(this);
     }
 
     protected override void Initialize()
@@ -33,30 +33,47 @@ namespace Alliance
       IsMouseVisible = true;
       Window.Title = "Alliance";
 
-      graphics.PreferredBackBufferWidth = 800;
-      graphics.PreferredBackBufferHeight = 600;
-      graphics.ApplyChanges();
+      graphicsDeviceManager.PreferredBackBufferWidth = 800;
+      graphicsDeviceManager.PreferredBackBufferHeight = 600;
+      graphicsDeviceManager.ApplyChanges();
 
       base.Initialize();
-      components.ForEach(c => c.Initialize());
     }
 
     protected override void LoadContent()
     {
+      graphics = new SharpDXGraphics(GraphicsDevice);
+      resources = new ResourceCache(this);
+
+      grid = new GridComponent(this);
+      grid.Initialize();
+
       base.LoadContent();
-      components.ForEach(c => c.LoadContent());
     }
 
     protected override void Update(GameTime gameTime)
     {
+      input.Update(gameTime);
+
+      var state = new GuiInputState
+      {
+        Point = input.CursorPosition,
+        Pressed = input.SelectPressed,
+        Released = input.SelectReleased,
+      };
+
+      grid.Update(state, gameTime.ElapsedGameTime);
       base.Update(gameTime);
-      components.ForEach(c => c.Update(gameTime));
     }
 
     protected override void Draw(GameTime gameTime)
     {
       GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer, Color.CornflowerBlue, 1f, 0);
-      components.ForEach(c => c.Draw(gameTime));
+
+      graphics.Begin();
+      grid.Draw(graphics);
+      graphics.End();
+
       base.Draw(gameTime);
     }
   }

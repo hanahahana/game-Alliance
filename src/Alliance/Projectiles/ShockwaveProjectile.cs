@@ -51,7 +51,7 @@ namespace Alliance
       UpdateVariables(time);
     }
 
-    protected override TextureParams GetTextureDrawData(GsVector offset)
+    protected override ImageParams GetTextureDrawData(GsVector offset)
     {
       var projectile = GetImage();
       var projectileSize = ImageProvider.GetSize(projectile);
@@ -63,7 +63,7 @@ namespace Alliance
       position += ((mOwnerBounds.Size.ToVector() * .5f));
 
       // return the data
-      return new TextureParams(projectile, projectileSize, position + offset, origin, scale);
+      return new ImageParams(projectile, projectileSize, position + offset, origin, scale);
     }
   }
 }

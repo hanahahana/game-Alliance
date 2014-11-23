@@ -14,6 +14,7 @@ namespace Alliance
     bool UpgradeRequested { get; }
     bool ClearSelections { get; }
     bool SelectPressed { get; }
+    bool EctoplasTransmaterPort { get; }
     GsVector CursorPosition { get; }
   }
 }

@@ -13,7 +13,7 @@ namespace Alliance
 
     private Invader mTarget;
     private float mSecondsSinceUpdate = 0;
-    private ImageFlip mFlipImage = ImageFlip.None;
+    private GsImageFlip mFlipImage = GsImageFlip.None;
 
     public LightningProjectile(Piece parent, double timeToLiveInSeconds, Invader target)
       : base(parent, timeToLiveInSeconds)
@@ -30,7 +30,7 @@ namespace Alliance
       if (mSecondsSinceUpdate >= SecondsPerFrame)
       {
         mSecondsSinceUpdate -= SecondsPerFrame;
-        mFlipImage = (mFlipImage == ImageFlip.None) ? ImageFlip.Horizontal : ImageFlip.None;
+        mFlipImage = (mFlipImage == GsImageFlip.None) ? GsImageFlip.Horizontal : GsImageFlip.None;
       }
     }
 
@@ -38,7 +38,7 @@ namespace Alliance
     {
       var graphics = dparams.Graphics;
       var offset = dparams.Offset;
-      TextureParams data = GetTextureDrawData(offset);
+      ImageParams data = GetTextureDrawData(offset);
       graphics.DrawImage(data, Color, offset, Orientation, mFlipImage);
     }
   }

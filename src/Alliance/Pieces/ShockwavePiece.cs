@@ -64,15 +64,15 @@ namespace Alliance
       // don't draw the weapon base
     }
 
-    protected override TextureParams GetTextureDrawData(GsVector offset)
+    protected override ImageParams GetTextureDrawData(GsVector offset)
     {
       var outin = GetOutsideInsideBounds(offset);
       var bounds = outin.Outside;
       var inside = outin.Inside;
 
-      TextureParams data = base.GetTextureDrawData(offset);
-      GsVector scale = Calculator.ComputeScale(data.TextureSize, bounds.Size);
-      return new TextureParams(data.Texture, data.TextureSize, bounds.Location, GsVector.Zero, scale);
+      ImageParams data = base.GetTextureDrawData(offset);
+      GsVector scale = Calculator.ComputeScale(data.ImageSize, bounds.Size);
+      return new ImageParams(data.Image, data.ImageSize, bounds.Location, GsVector.Zero, scale);
     }
   }
 }

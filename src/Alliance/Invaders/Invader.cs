@@ -161,8 +161,8 @@ namespace Alliance
       ImageKey = BaseImageKeys[key][Flying ? 1 : 0];
 
       // randomize the animation settings
-      mIndex = RandomProvider.Next() % ImageProvider.GetAnimatedImage(ImageKey).NumberFrames;
-      mTotalElapsedSeconds = RandomProvider.Next(10) * SecondsPerFrame;
+      mIndex = RandomGenerator.Next() % ImageProvider.GetFramedImage(ImageKey).NumberFrames;
+      mTotalElapsedSeconds = RandomGenerator.Next(10) * SecondsPerFrame;
     }
 
     /// <summary>
@@ -181,8 +181,8 @@ namespace Alliance
       float dx = (DijkstraKey == DijkstraType.LeftToRight ? TargetCell.Width * 2f : 0);
       float dy = (DijkstraKey == DijkstraType.TopToBottom ? TargetCell.Height * 2f : 0);
 
-      float mux = RandomProvider.NextSingle();
-      float muy = RandomProvider.NextSingle();
+      float mux = RandomGenerator.NextSingle();
+      float muy = RandomGenerator.NextSingle();
 
       X = TargetCell.X - (dx * GsMath.SmoothStep(1, 5, mux));
       Y = TargetCell.Y - (dy * GsMath.SmoothStep(1, 5, muy));
@@ -328,7 +328,7 @@ namespace Alliance
         if (mTotalElapsedSeconds >= factor)
         {
           mTotalElapsedSeconds -= factor;
-          mIndex = (mIndex + 1) % (ImageProvider.GetAnimatedImage(ImageKey).NumberFrames);
+          mIndex = (mIndex + 1) % (ImageProvider.GetFramedImage(ImageKey).NumberFrames);
         }
       }
 
@@ -341,15 +341,15 @@ namespace Alliance
 
     public override GsImage GetImage()
     {
-      return ImageProvider.GetAnimatedImage(ImageKey)[mIndex].Texture;
+      return ImageProvider.GetFramedImage(ImageKey)[mIndex].Image;
     }
 
     protected override GsVector[] GetImageHull()
     {
-      return ImageProvider.GetAnimatedImage(ImageKey)[mIndex].Hull;
+      return ImageProvider.GetFramedImage(ImageKey)[mIndex].Hull;
     }
 
-    protected override TextureParams GetTextureDrawData(GsVector offset)
+    protected override ImageParams GetTextureDrawData(GsVector offset)
     {
       // get the draw data of the base
       var data = base.GetTextureDrawData(offset);
@@ -358,7 +358,7 @@ namespace Alliance
       GsVector position = Position + offset + (Size.ToVector() * .5f);
 
       // return the updated draw data
-      return new TextureParams(data.Texture, data.TextureSize, position, data.Origin, data.Scale);
+      return new ImageParams(data.Image, data.ImageSize, position, data.Origin, data.Scale);
     }
 
     public void Draw(DrawParams dparams)

@@ -9,7 +9,7 @@ namespace Alliance
 {
   public sealed class FramedImage
   {
-    public GsImage Texture { get; private set; }
+    public GsImage Image { get; private set; }
     public GsVector[] Hull { get; private set; }
     public bool IsAnimated { get; private set; }
     public int NumberFrames { get; private set; }
@@ -43,7 +43,7 @@ namespace Alliance
       Key = key;
       IsAnimated = isAnimated;
       NumberFrames = (cols * rows);
-      Texture = texture;
+      Image = texture;
       Hull = ImageProvider.CreateConvexHull(texture);
       Columns = cols;
       Rows = rows;
@@ -71,7 +71,7 @@ namespace Alliance
             GsColor[] frame = GetFrame(data, rect, frameLength);
 
             // create a new texture
-            var frameImage = ImageProvider.FromColorData(frame);
+            var frameImage = ImageProvider.FromColorData(frame, (int)FrameSize.Width, (int)FrameSize.Height);
 
             // create a new Image frame
             int idx = (int)(x + (y * FrameSize.Width));

@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GraphicsSystem;
 using SharpDX;
 using SharpDX.Toolkit;
 using SharpDX.Toolkit.Input;
 
 namespace Alliance
 {
-  public sealed class InputState
+  public sealed class InputState : IAllianceInputState, IInputProvider
   {
     private readonly KeyboardManager keyboard;
     private readonly MouseManager mouse;
@@ -18,9 +19,10 @@ namespace Alliance
     public MouseState CurrentMouseState;
     public MouseState LastMouseState;
 
-    public Vector2 CursorPosition { get; private set; }
+    public GsVector CursorPosition { get; private set; }
     public bool SelectPressed { get; private set; }
-    public bool SelectReleased { get; private set; }
+    public bool SelectReleased { get { return !SelectPressed; } }
+    public Game Game { get; private set; }
 
     public bool MenuUp
     {
@@ -82,10 +84,17 @@ namespace Alliance
       get { return IsKeyDown(Keys.N); }
     }
 
+    IAllianceInputState IInputProvider.GetState()
+    {
+      return this;
+    }
+
     public InputState(Game game)
     {
+      Game = game;
       keyboard = new KeyboardManager(game);
       mouse = new MouseManager(game);
+      InputProvider.Register(this);
     }
 
     public void Update(GameTime gameTime)
@@ -96,9 +105,12 @@ namespace Alliance
       CurrentKeyboardState = keyboard.GetState();
       CurrentMouseState = mouse.GetState();
 
-      CursorPosition = new Vector2(CurrentMouseState.X, CurrentMouseState.Y);
-      SelectPressed = (CurrentMouseState.LeftButton.Pressed);
-      SelectReleased = (CurrentMouseState.LeftButton.Released);
+      var device = Game.GraphicsDevice;
+      var pt = new GsVector(CurrentMouseState.X, CurrentMouseState.Y);
+      pt *= new GsVector(device.Viewport.Width, device.Viewport.Height);
+
+      CursorPosition = pt;
+      SelectPressed = (CurrentMouseState.LeftButton.Down);
     }
 
     public bool IsAnyKeyPress()
@@ -111,11 +123,11 @@ namespace Alliance
     public bool IsNewMouseClick(Func<MouseState, ButtonState> getState)
     {
       var current = getState(CurrentMouseState);
-      if (!current.Pressed)
+      if (!current.Down)
         return false;
 
       var previous = getState(LastMouseState);
-      return previous.Released;
+      return !previous.Down;
     }
 
     public bool IsNewKeyPress(Keys key)

@@ -27,7 +27,7 @@ namespace Alliance
           edits.Add(StartingChunk);
 
         edits.AddRange(chunksBeingEdited.Keys.ToArray());
-        edits.Sort();
+        edits.Sort((a, b) => a.Location.CompareTo(b.Location));
         return edits;
       }
     }

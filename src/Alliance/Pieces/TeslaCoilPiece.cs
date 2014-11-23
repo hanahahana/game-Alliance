@@ -76,12 +76,12 @@ namespace Alliance
 
     public override GsImage GetDisplayImage()
     {
-      return ImageProvider.GetAnimatedImage(ImageKey)[0].Texture;
+      return ImageProvider.GetFramedImage(ImageKey)[0].Image;
     }
 
     protected override GsVector[] GetImageHull()
     {
-      return ImageProvider.GetAnimatedImage(ImageKey)[0].Hull;
+      return ImageProvider.GetFramedImage(ImageKey)[0].Hull;
     }
 
     protected override void UpgradeProjectileVariables(float factor)
@@ -191,26 +191,26 @@ namespace Alliance
       }
     }
 
-    protected override TextureParams GetTextureDrawData(GsVector offset)
+    protected override ImageParams GetTextureDrawData(GsVector offset)
     {
       var outin = GetOutsideInsideBounds(offset);
       var bounds = outin.Outside;
       var inside = outin.Inside;
 
       var wtower = GetImage();
-      GsSize imgSize = new GsSize(FrameSize.Width, FrameSize.Height);
+      GsSize imgSize = FrameSize;
       GsSize actSize = new GsSize(bounds.Width, bounds.Height);
 
       GsVector scale = Calculator.ComputeScale(imgSize, actSize);
       GsVector origin = imgSize.ToVector() * .5f;
       GsVector center = actSize.ToVector() * .5f;
 
-      return new TextureParams(wtower, imgSize, bounds.Location + center, origin, scale);
+      return new ImageParams(wtower, imgSize, bounds.Location + center, origin, scale);
     }
 
     protected override void DrawWeaponTower(DrawParams dparams, GsVector offset)
     {
-      TextureParams data = GetTextureDrawData(offset);
+      ImageParams data = GetTextureDrawData(offset);
       GsRectangle source = new GsRectangle(
         mIndex * FrameSize.Width, 0,
         FrameSize.Width, FrameSize.Height);
