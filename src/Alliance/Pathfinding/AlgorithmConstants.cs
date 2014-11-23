@@ -7,7 +7,7 @@ namespace Alliance
   /// <summary>
   /// Provides access to the constants used by algorithms under this assembly.
   /// </summary>
-  internal static class AlgorithmConstants
+  public static class PathfindingConstants
   {
     /// <summary>
     /// The estimated cost to move orthogonally. Used by searching algorithms.

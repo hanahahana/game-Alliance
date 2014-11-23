@@ -1,6 +1,5 @@
 using System;
-using SharpDX;
-using SharpDX.Toolkit;
+using GraphicsSystem;
 
 namespace Alliance
 {
@@ -13,13 +12,13 @@ namespace Alliance
     public RailgunProjectile(Piece parent, double timeToLiveInSeconds)
       : base(parent, timeToLiveInSeconds)
     {
-      Color = ColorHelper.Blend(Color.Yellow, Color.Red, .65f);
+      Color = GsMath.Lerp(GsColor.Yellow, GsColor.Red, .65f);
       ImageKey = "pulse";
     }
 
-    public override void UpdateByFrameCount(GameTime gameTime, int frameCount)
+    public override void UpdateByFrameCount(TimeSpan elapsed, int frameCount)
     {
-      float time = (float)(gameTime.ElapsedGameTime.TotalSeconds * ((frameCount + 1.0) * 20.0) * .75);
+      float time = (float)(elapsed.TotalSeconds * ((frameCount + 1.0) * 20.0) * .75);
       Position += (time * VelocityFactor * VelocityFactor);
     }
   }

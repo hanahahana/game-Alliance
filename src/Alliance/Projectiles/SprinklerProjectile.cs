@@ -1,5 +1,5 @@
 using System;
-using SharpDX;
+using GraphicsSystem;
 
 namespace Alliance
 {
@@ -12,8 +12,8 @@ namespace Alliance
     public SprinklerProjectile(Piece parent, double timeToLiveInSeconds)
       : base(parent, timeToLiveInSeconds)
     {
-      Color = ColorHelper.Blend(Color.LightBlue, Color.DarkBlue, .65f);
-      Size = new SizeF(10f, 8f);
+      Color = GsMath.Lerp(GsColor.LightBlue, GsColor.DarkBlue, .65f);
+      Size = new GsSize(10f, 8f);
       ImageKey = "fragment";
     }
   }

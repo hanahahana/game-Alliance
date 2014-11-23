@@ -1,37 +1,35 @@
-﻿using SharpDX;
+﻿using GraphicsSystem;
+
 namespace Alliance
 {
   public class GridCellChunk
   {
-    public float X { get; set; }
-    public float Y { get; set; }
-    public float Width { get; set; }
-    public float Height { get; set; }
-    public bool Valid { get; set; }
+    public float X, Y, Width, Height;
+    public bool Valid;
+
     public GridCell[] Cells { get; set; }
 
-    public Vector2 Location
+    public GsVector Location
     {
-      get { return new Vector2(X, Y); }
+      get { return new GsVector(X, Y); }
       set { X = value.X; Y = value.Y; }
     }
 
-    public SizeF Size
+    public GsSize Size
     {
-      get { return new SizeF(Width, Height); }
+      get { return new GsSize(Width, Height); }
       set { Width = value.Width; Height = value.Height; }
     }
 
-    public BoxF Bounds
+    public GsRectangle Bounds
     {
-      get { return new BoxF(Location, Size); }
+      get { return new GsRectangle(Location, Size); }
       set { Location = value.Location; Size = value.Size; }
     }
 
     public override int GetHashCode()
     {
-      string key = string.Format("{0}-{1}-{2}-{3}", X, Y, Width, Height);
-      return key.GetHashCode();
+      return Calculator.CombineHashCodes(X, Y, Width, Height);
     }
   }
 }

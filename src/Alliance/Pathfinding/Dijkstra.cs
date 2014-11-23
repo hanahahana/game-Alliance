@@ -55,12 +55,6 @@ namespace Alliance
       }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="indices"></param>
-    /// <param name="cells"></param>
-    /// <returns></returns>
     private static IEnumerable<DijkstraNode> GetNeighbors(Index[] indices, DijkstraNode[,] cells)
     {
       int cols = cells.GetLength(0);
@@ -73,28 +67,29 @@ namespace Alliance
       }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="Q"></param>
-    /// <returns></returns>
     private static DijkstraNode ExtractMin(ref List<DijkstraNode> Q)
     {
-      Tuple<DijkstraNode, int> minimum = CollectionHelper.FindMinimum<DijkstraNode>(Q);
-      DijkstraNode retval = minimum.First;
+      int index = 0;
+      DijkstraNode min = Q[0];
+      for (int i = 1; i < Q.Count; ++i)
+      {
+        var curr = Q[i];
 
-      Q.RemoveAt(minimum.Second);
-      return retval;
+        int comparison = curr.CompareTo(min);
+        if (comparison < 0)
+        {
+          min = curr;
+          index = i;
+        }
+      }
+
+      Q.RemoveAt(index);
+      return min;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="v"></param>
-    /// <param name="u"></param>
     private static void Relax(DijkstraNode v, DijkstraNode u)
     {
-      int alt = u.Distance + AlgorithmConstants.OrthogonalCost;
+      int alt = u.Distance + PathfindingConstants.OrthogonalCost;
       if (alt < v.Distance)
       {
         v.Distance = alt;

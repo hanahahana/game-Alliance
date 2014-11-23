@@ -119,16 +119,5 @@ namespace Alliance
         ExperienceNeeded = Level * Level * ExpFactor;
       }
     }
-
-    public static void Load(SaveData data)
-    {
-      Cash = data.Cash;
-      Civilians = data.Civilians;
-      State = data.PlayerState;
-      Level = data.Level;
-      Experience = data.Experience;
-      ExperienceNeeded = data.ExperienceNeeded;
-      TimeUntilInvadersArrive = data.TimeUntilInvadersArrive;
-    }
   }
 }

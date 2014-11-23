@@ -1,6 +1,6 @@
 using System;
 using System.Text;
-using SharpDX.Toolkit;
+using GraphicsSystem;
 
 namespace Alliance
 {
@@ -38,13 +38,13 @@ namespace Alliance
       Specialty = PieceSpecialty.Ground;
     }
 
-    public override void Update(GameTime gameTime)
+    public override void Update(TimeSpan elapsed)
     {
-      base.Update(gameTime);
+      base.Update(elapsed);
       if (Level == MaxLevel)
       {
         Orientation = Environment.TickCount / 1000f;
-        Orientation = MathHelper.WrapAngle(Orientation);
+        Orientation = GsMath.WrapAngle(Orientation);
       }
     }
 
@@ -86,15 +86,15 @@ namespace Alliance
       Projectile projectile = null;
       if (Level == MaxLevel)
       {
-        BoxF bounds = new BoxF(this.Position, this.Size);
+        GsRectangle bounds = new GsRectangle(Position, Size);
         projectile = new FlamewaveProjectile(this, bounds, ProjectileLifeInSeconds);
-        projectile.Size = new SizeF(Width, Height);
+        projectile.Size = new GsSize(Width, Height);
       }
       else
       {
         float extra = Radius / 3f;
         projectile = new FlameProjectile(this, ProjectileLifeInSeconds);
-        projectile.Size = new SizeF(Radius, projectile.Height + extra);
+        projectile.Size = new GsSize(Radius, projectile.Height + extra);
       }
       return projectile;
     }

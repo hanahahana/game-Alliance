@@ -1,0 +1,230 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <!-- Common Properties -->
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{184A3396-1451-434D-BF9B-6EB633A2065D}</ProjectGuid>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Alliance</RootNamespace>
+    <AssemblyName>Alliance</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <!-- Platform Dependent Properties -->
+    <OutputType>WinExe</OutputType>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <NuGetPackageImportStamp>9b4c4638</NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="SharpDX">
+      <HintPath>$(SharpDXPackageBinDir)\SharpDX.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Direct3D11">
+      <HintPath>$(SharpDXPackageBinDir)\SharpDX.Direct3D11.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.DXGI">
+      <HintPath>$(SharpDXPackageBinDir)\SharpDX.DXGI.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Toolkit">
+      <HintPath>$(SharpDXPackageBinDir)\SharpDX.Toolkit.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Toolkit.Game">
+      <HintPath>$(SharpDXPackageBinDir)\SharpDX.Toolkit.Game.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Toolkit.Graphics">
+      <HintPath>$(SharpDXPackageBinDir)\SharpDX.Toolkit.Graphics.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Toolkit.Input">
+      <HintPath>$(SharpDXPackageBinDir)\SharpDX.Toolkit.Input.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AllianceGame.cs" />
+    <Compile Include="Components\GridComponent.cs" />
+    <Compile Include="Components\BaseComponent.cs" />
+    <Compile Include="Components\MessageComponent.cs" />
+    <Compile Include="Framework\AllianceUtilities.cs" />
+    <Compile Include="Framework\BeizerMaker.cs" />
+    <Compile Include="Framework\Box.cs" />
+    <Compile Include="Framework\BoxF.cs" />
+    <Compile Include="Data\GameOptions.cs" />
+    <Compile Include="Data\SaveData.cs" />
+    <Compile Include="Framework\CollectionHelper.cs" />
+    <Compile Include="Framework\ColorHelper.cs" />
+    <Compile Include="Framework\GraphicsBase.cs" />
+    <Compile Include="Framework\ITextDisplay.cs" />
+    <Compile Include="Framework\MathematicsHelper.cs" />
+    <Compile Include="Framework\Polygon.cs" />
+    <Compile Include="Framework\PrimitiveBatchGraphics.cs" />
+    <Compile Include="Framework\RandomHelper.cs" />
+    <Compile Include="Framework\Range.cs" />
+    <Compile Include="Framework\Ratcliff.cs" />
+    <Compile Include="Framework\RectangleCorners.cs" />
+    <Compile Include="Framework\ReflectionHelper.cs" />
+    <Compile Include="Framework\Size.cs" />
+    <Compile Include="Framework\SizeF.cs" />
+    <Compile Include="Data\Sprite.cs" />
+    <Compile Include="Data\TextureDrawData.cs" />
+    <Compile Include="Extensions\CollectionExtensions.cs" />
+    <Compile Include="Extensions\ColorExtensions.cs" />
+    <Compile Include="Extensions\Extensions.cs" />
+    <Compile Include="Extensions\TextureExtensions.cs" />
+    <Compile Include="Framework\ArithmeticHelper.cs" />
+    <Compile Include="Framework\Index.cs" />
+    <Compile Include="Framework\Sample.cs" />
+    <Compile Include="Framework\Tuple.cs" />
+    <Compile Include="Input\InputState.cs" />
+    <Compile Include="Invaders\Invader.cs" />
+    <Compile Include="Invaders\InvaderLevelUpInfo.cs" />
+    <Compile Include="Library\ChainConvexHull.cs" />
+    <Compile Include="Objects\GridCell.cs" />
+    <Compile Include="Objects\GridCellChunk.cs" />
+    <Compile Include="Objects\InvaderMothership.cs" />
+    <Compile Include="Objects\Player.cs" />
+    <Compile Include="Objects\Selection.cs" />
+    <Compile Include="Parameters\DrawParams.cs" />
+    <Compile Include="Parameters\UpdateParams.cs" />
+    <Compile Include="Pathfinding\AStarNodeAlliance.cs" />
+    <Compile Include="Pathfinding\DijkstraNodeAlliance.cs" />
+    <Compile Include="Pathfinding\DijkstraPathsGrid.cs" />
+    <Compile Include="Pathfinding\DijkstraType.cs" />
+    <Compile Include="Pieces\FlameThrowerPiece.cs" />
+    <Compile Include="Pieces\MachineGunPiece.cs" />
+    <Compile Include="Pieces\MissilePiece.cs" />
+    <Compile Include="Pieces\Piece.cs" />
+    <Compile Include="Pieces\RailgunPiece.cs" />
+    <Compile Include="Pieces\ShockwavePiece.cs" />
+    <Compile Include="Pieces\SpeedBumpPiece.cs" />
+    <Compile Include="Pieces\SprinklerPiece.cs" />
+    <Compile Include="Pieces\TeslaCoilPiece.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Projectiles\BulletProjectile.cs" />
+    <Compile Include="Projectiles\DebriProjectile.cs" />
+    <Compile Include="Projectiles\FlameProjectile.cs" />
+    <Compile Include="Projectiles\FlamewaveProjectile.cs" />
+    <Compile Include="Projectiles\LightningProjectile.cs" />
+    <Compile Include="Projectiles\MissileProjectile.cs" />
+    <Compile Include="Projectiles\Projectile.cs" />
+    <Compile Include="Projectiles\RailgunProjectile.cs" />
+    <Compile Include="Projectiles\ShockwaveProjectile.cs" />
+    <Compile Include="Projectiles\SprinklerProjectile.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resources\ResourceCache.cs" />
+    <Compile Include="Resources\Strings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Animation\FramedImage.cs" />
+    <Compile Include="Framework\SharpDXGraphics.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ToolkitFont Include="Content\Fonts\Arial.xml">
+      <SubType>Designer</SubType>
+    </ToolkitFont>
+    <ToolkitFont Include="Content\Fonts\BookmanOldStyle.xml" />
+    <ToolkitFont Include="Content\Fonts\ComicSans.xml" />
+    <ToolkitFont Include="Content\Fonts\Georgia.xml" />
+    <ToolkitFont Include="Content\Fonts\Tahoma.xml" />
+    <ToolkitFont Include="Content\Fonts\Rockwell.xml" />
+    <ToolkitFont Include="Content\Fonts\Verdana.xml" />
+    <Content Include="Content\Gui\courier.xml" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ToolkitTexture Include="Content\Images\Bases\towerBase.png" />
+    <ToolkitTexture Include="Content\Images\Enemies\biker.png" />
+    <ToolkitTexture Include="Content\Images\Enemies\flapper.png" />
+    <ToolkitTexture Include="Content\Images\Enemies\glider.png" />
+    <ToolkitTexture Include="Content\Images\Enemies\walker.png" />
+    <ToolkitTexture Include="Content\Images\Projectiles\bullet.png" />
+    <ToolkitTexture Include="Content\Images\Projectiles\debri.png" />
+    <ToolkitTexture Include="Content\Images\Projectiles\flame.png" />
+    <ToolkitTexture Include="Content\Images\Projectiles\flamewave.png" />
+    <ToolkitTexture Include="Content\Images\Projectiles\fragment.png" />
+    <ToolkitTexture Include="Content\Images\Projectiles\lightning.png" />
+    <ToolkitTexture Include="Content\Images\Projectiles\lockmissile.png" />
+    <ToolkitTexture Include="Content\Images\Projectiles\pulse.png" />
+    <ToolkitTexture Include="Content\Images\Projectiles\rocket.png" />
+    <ToolkitTexture Include="Content\Images\Projectiles\wave.png" />
+    <ToolkitTexture Include="Content\Images\Towers\flamethrower.png" />
+    <ToolkitTexture Include="Content\Images\Towers\machinegun.png" />
+    <ToolkitTexture Include="Content\Images\Towers\missileLauncher.png" />
+    <ToolkitTexture Include="Content\Images\Towers\railgun.png" />
+    <ToolkitTexture Include="Content\Images\Towers\seeker.png" />
+    <ToolkitTexture Include="Content\Images\Towers\shockwaveGenerator.png" />
+    <ToolkitTexture Include="Content\Images\Towers\speedbump.png" />
+    <ToolkitTexture Include="Content\Images\Towers\sprinkler.png" />
+    <ToolkitTexture Include="Content\Images\Towers\teslaCoil.png" />
+    <ToolkitTexture Include="Content\Images\Towers\turret.png" />
+    <ToolkitTexture Include="Content\Textures\background.png" />
+    <ToolkitTexture Include="Content\Textures\blank.png" />
+    <ToolkitTexture Include="Content\Textures\gradient.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\GuiSystem\src\GuiSystem\GuiSystem.csproj">
+      <Project>{e63264b3-5e43-45ed-8e3b-6adb49e229fb}</Project>
+      <Name>GuiSystem</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ToolkitTexture Include="Content\Gui\arrow.png" />
+    <ToolkitTexture Include="Content\Gui\Down.png" />
+    <ToolkitTexture Include="Content\Gui\Left.png" />
+    <ToolkitTexture Include="Content\Gui\Minus.png" />
+    <ToolkitTexture Include="Content\Gui\Plus.png" />
+    <ToolkitTexture Include="Content\Gui\Right.png" />
+    <ToolkitTexture Include="Content\Gui\Up.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\SharpDX.2.6.3\build\SharpDX.targets" Condition="Exists('..\packages\SharpDX.2.6.3\build\SharpDX.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\SharpDX.2.6.3\build\SharpDX.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SharpDX.2.6.3\build\SharpDX.targets'))" />
+    <Error Condition="!Exists('..\packages\SharpDX.Toolkit.2.6.3\build\SharpDX.Toolkit.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SharpDX.Toolkit.2.6.3\build\SharpDX.Toolkit.targets'))" />
+  </Target>
+  <Import Project="..\packages\SharpDX.Toolkit.2.6.3\build\SharpDX.Toolkit.targets" Condition="Exists('..\packages\SharpDX.Toolkit.2.6.3\build\SharpDX.Toolkit.targets')" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

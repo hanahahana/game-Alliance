@@ -1,6 +1,6 @@
 using System;
 using System.Text;
-using SharpDX;
+using GraphicsSystem;
 
 namespace Alliance
 {
@@ -46,10 +46,10 @@ namespace Alliance
 
     protected override Projectile CreateProjectile()
     {
-      BoxF bounds = new BoxF(this.Position, this.Size);
+      GsRectangle bounds = new GsRectangle(Position, Size);
       ShockwaveProjectile projectile = new ShockwaveProjectile(this, bounds, ProjectileLifeInSeconds);
       //projectile.Size = new SizeF(Width * .25f, Height * .25f);
-      projectile.Size = new SizeF(Radius * 2f, Radius * 2f);
+      projectile.Size = new GsSize (Radius * 2f, Radius * 2f);
       return projectile;
     }
 
@@ -59,20 +59,20 @@ namespace Alliance
       return Radius;
     }
 
-    protected override void DrawWeaponBase(DrawParams dparams, BoxF bounds, BoxF inside)
+    protected override void DrawWeaponBase(DrawParams dparams, GsRectangle bounds, GsRectangle inside)
     {
       // don't draw the weapon base
     }
 
-    protected override TextureDrawData GetTextureDrawData(Vector2 offset)
+    protected override TextureParams GetTextureDrawData(GsVector offset)
     {
-      Tuple<BoxF, BoxF> outin = GetOutsideInsideBounds(offset);
-      BoxF bounds = outin.First;
-      BoxF inside = outin.Second;
+      var outin = GetOutsideInsideBounds(offset);
+      var bounds = outin.Outside;
+      var inside = outin.Inside;
 
-      TextureDrawData data = base.GetTextureDrawData(offset);
-      Vector2 scale = MathHelper.ComputeScale(data.TextureSize, bounds.Size);
-      return new TextureDrawData(data.Texture, data.TextureSize, bounds.Location, Vector2.Zero, scale);
+      TextureParams data = base.GetTextureDrawData(offset);
+      GsVector scale = Calculator.ComputeScale(data.TextureSize, bounds.Size);
+      return new TextureParams(data.Texture, data.TextureSize, bounds.Location, GsVector.Zero, scale);
     }
   }
 }

@@ -347,7 +347,7 @@ namespace Alliance
 
     private static float Hueristic(AStarNode current, AStarNode target)
     {
-      return AlgorithmConstants.OrthogonalCost * (Math.Abs(current.X - target.X) + Math.Abs(current.Y - target.Y));
+      return PathfindingConstants.OrthogonalCost * (Math.Abs(current.X - target.X) + Math.Abs(current.Y - target.Y));
     }
   }
 }
