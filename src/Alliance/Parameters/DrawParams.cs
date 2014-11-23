@@ -1,3 +1,6 @@
+using System;
+using GraphicsSystem;
+
 namespace Alliance
 {
   /// <summary>
@@ -5,18 +8,14 @@ namespace Alliance
   /// </summary>
   public class DrawParams
   {
-    public GameTime GameTime { get; private set; }
-    public Vector2 Offset { get; private set; }
+    public GsVector Offset { get; private set; }
     public GridFillMode FillMode { get; private set; }
-    public SpriteBatch SpriteBatch { get; private set; }
-    public GraphicsBase Graphics { get; private set; }
+    public IGsGraphics Graphics { get; private set; }
 
-    public DrawParams(GameTime gameTime, Vector2 offset, GridFillMode gridFillMode, SpriteBatch spriteBatch, GraphicsBase graphics)
+    public DrawParams(GsVector offset, GridFillMode gridFillMode, IGsGraphics graphics)
     {
-      GameTime = gameTime;
       Offset = offset;
       FillMode = gridFillMode;
-      SpriteBatch = spriteBatch;
       Graphics = graphics;
     }
   }

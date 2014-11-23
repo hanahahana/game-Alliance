@@ -1,4 +1,5 @@
 using System;
+using GraphicsSystem;
 
 namespace Alliance
 {
@@ -11,26 +12,26 @@ namespace Alliance
     private const float ScalesPerSecond = 1.5f;
     private const float RotationsPerSecond = 34.567f;
 
-    private BoxF mOwnerBounds;
+    private GsRectangle mOwnerBounds;
 
-    public ShockwaveProjectile(Piece parent, BoxF ownerBounds, double timeToLiveInSeconds)
+    public ShockwaveProjectile(Piece parent, GsRectangle ownerBounds, double timeToLiveInSeconds)
       : base(parent, timeToLiveInSeconds)
     {
       mOwnerBounds = ownerBounds;
-      Color = Color.Gray;
+      Color = GsColor.Gray;
       ImageKey = "wave";
       StayAlive = true;
     }
 
-    public override void Update(GameTime gameTime)
+    public override void Update(TimeSpan elapsed)
     {
       // update the time to live
-      base.UpdateTimeToLive(gameTime);
+      base.UpdateTimeToLive(elapsed);
      
       // if we're still alive, then update out
       if (IsAlive)
       {
-        UpdateVariables((float)gameTime.ElapsedGameTime.TotalSeconds);
+        UpdateVariables((float)elapsed.TotalSeconds);
       }
     }
 
@@ -41,28 +42,28 @@ namespace Alliance
 
       // spin the projectile
       Orientation += elapsedSeconds * RotationsPerSecond;
-      Orientation = MathHelper.WrapAngle(Orientation);
+      Orientation = GsMath.WrapAngle(Orientation);
     }
 
-    public override void UpdateByFrameCount(GameTime gameTime, int frameCount)
+    public override void UpdateByFrameCount(TimeSpan elapsed, int frameCount)
     {
-      float time = (float)(gameTime.ElapsedGameTime.TotalSeconds * (frameCount + 1.0) * 10.0);
+      float time = (float)(elapsed.TotalSeconds * (frameCount + 1.0) * 10.0);
       UpdateVariables(time);
     }
 
-    protected override TextureDrawData GetTextureDrawData(Vector2 offset)
+    protected override ImageParams GetTextureDrawData(GsVector offset)
     {
-      Texture2D projectile = GetImage();
-      SizeF projectileSize = new SizeF(projectile.Width, projectile.Height);
+      var projectile = GetImage();
+      var projectileSize = ImageProvider.GetSize(projectile);
 
-      Vector2 origin = projectileSize.ToVector2() * .5f;
-      Vector2 scale = MathematicsHelper.ComputeScale(projectileSize, Size);
+      var origin = projectileSize.ToVector() * .5f;
+      var scale = Calculator.ComputeScale(projectileSize, Size);
 
-      Vector2 position = mOwnerBounds.Location;
-      position += ((mOwnerBounds.Size.ToVector2() * .5f));
+      var position = mOwnerBounds.Location;
+      position += ((mOwnerBounds.Size.ToVector() * .5f));
 
       // return the data
-      return new TextureDrawData(projectile, projectileSize, position + offset, origin, scale);
+      return new ImageParams(projectile, projectileSize, position + offset, origin, scale);
     }
   }
 }

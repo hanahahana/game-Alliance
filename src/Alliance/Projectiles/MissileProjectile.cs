@@ -14,9 +14,9 @@ namespace Alliance
       ImageKey = "rocket";
     }
 
-    public override void UpdateByFrameCount(GameTime gameTime, int frameCount)
+    public override void UpdateByFrameCount(TimeSpan elapsed, int frameCount)
     {
-      float time = (float)(gameTime.ElapsedGameTime.TotalSeconds * (frameCount * .5));
+      float time = (float)(elapsed.TotalSeconds * (frameCount * .5));
       Position += (time * VelocityFactor * VelocityFactor);
     }
   }

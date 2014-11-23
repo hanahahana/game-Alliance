@@ -1,4 +1,5 @@
 using System;
+using GraphicsSystem;
 
 namespace Alliance
 {
@@ -11,44 +12,34 @@ namespace Alliance
     private const float SecondsPerFrame = 1f / 22.3456789f;
 
     private Invader mTarget;
-    private SpriteEffects effects = SpriteEffects.None;
     private float mSecondsSinceUpdate = 0;
+    private GsImageFlip mFlipImage = GsImageFlip.None;
 
     public LightningProjectile(Piece parent, double timeToLiveInSeconds, Invader target)
       : base(parent, timeToLiveInSeconds)
     {
       mTarget = target;
-      Size = new SizeF(48f, 12f);
+      Size = new GsSize(48f, 12f);
       ImageKey = "lightning";
     }
 
-    public override void Update(GameTime gameTime)
+    public override void Update(TimeSpan elapsed)
     {
-      base.Update(gameTime);
-      mSecondsSinceUpdate += (float)gameTime.ElapsedGameTime.TotalSeconds;
+      base.Update(elapsed);
+      mSecondsSinceUpdate += (float)elapsed.TotalSeconds;
       if (mSecondsSinceUpdate >= SecondsPerFrame)
       {
         mSecondsSinceUpdate -= SecondsPerFrame;
-        effects = (effects == SpriteEffects.None ? SpriteEffects.FlipHorizontally : SpriteEffects.None);
+        mFlipImage = (mFlipImage == GsImageFlip.None) ? GsImageFlip.Horizontal : GsImageFlip.None;
       }
     }
 
     public override void Draw(DrawParams dparams)
     {
-      SpriteBatch spriteBatch = dparams.SpriteBatch;
-      Vector2 offset = dparams.Offset;
-
-      TextureDrawData data = GetTextureDrawData(offset);
-      spriteBatch.Draw(
-          data.Texture,
-          data.Position,
-          null,
-          Color,
-          Orientation,
-          data.Origin,
-          data.Scale,
-          effects,
-          0);
+      var graphics = dparams.Graphics;
+      var offset = dparams.Offset;
+      ImageParams data = GetTextureDrawData(offset);
+      graphics.DrawImage(data, Color, offset, Orientation, mFlipImage);
     }
   }
 }

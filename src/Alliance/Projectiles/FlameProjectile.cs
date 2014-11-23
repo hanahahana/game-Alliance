@@ -1,4 +1,5 @@
 using System;
+using GraphicsSystem;
 
 namespace Alliance
 {
@@ -11,39 +12,41 @@ namespace Alliance
     private const float SecondsPerFrame = 1.0f / 12.3456789f;
 
     private float mSecondsSinceUpdate = 0;
-    private SpriteEffects effects = SpriteEffects.None;
+    private GsImageFlip effects = GsImageFlip.None;
 
     public FlameProjectile(Piece parent, double timeToLiveInSeconds)
       : base(parent, timeToLiveInSeconds)
     {
-      Size = new SizeF(20f, 80f);
+      Size = new GsSize(20f, 80f);
       ImageKey = "flame";
-      Origin = new Vector2(0, GetImage().Height / 2);
+
+      var size = ImageProvider.GetSize(GetImage());
+      Origin = new GsVector(0, size.Height / 2);
     }
 
-    public override void Update(GameTime gameTime)
+    public override void Update(TimeSpan elapsed)
     {
-      this.UpdateTimeToLive(gameTime);
+      this.UpdateTimeToLive(elapsed);
 
-      mSecondsSinceUpdate += (float)gameTime.ElapsedGameTime.TotalSeconds;
+      mSecondsSinceUpdate += (float)elapsed.TotalSeconds;
       if (mSecondsSinceUpdate >= SecondsPerFrame)
       {
         mSecondsSinceUpdate -= SecondsPerFrame;
-        effects = (effects == SpriteEffects.None ? SpriteEffects.FlipHorizontally : SpriteEffects.None);
+        effects = (effects == GsImageFlip.None ? GsImageFlip.Horizontal : GsImageFlip.None);
       }
     }
 
-    protected override TextureDrawData GetTextureDrawData(Vector2 offset)
+    protected override ImageParams GetTextureDrawData(GsVector offset)
     {
-      Texture2D image = GetImage();
-      SizeF imgSize = new SizeF(image.Width, image.Height);
-      Vector2 scale = MathematicsHelper.ComputeScale(imgSize, Size);
-      return new TextureDrawData(image, imgSize, Position + offset, Origin, scale);
+      var image = GetImage();
+      var imgSize = ImageProvider.GetSize(image);
+      var scale = Calculator.ComputeScale(imgSize, Size);
+      return new ImageParams(image, imgSize, Position + offset, Origin, scale);
     }
 
-    public override void UpdateByFrameCount(GameTime gameTime, int frameCount)
+    public override void UpdateByFrameCount(TimeSpan elapsed, int frameCount)
     {
-      float time = (float)(gameTime.ElapsedGameTime.TotalSeconds * ((frameCount + 1.0) * 20.0));
+      float time = (float)(elapsed.TotalSeconds * ((frameCount + 1.0) * 20.0));
       Position += (time * VelocityFactor * VelocityFactor);
     }
 
@@ -54,20 +57,10 @@ namespace Alliance
 
     public override void Draw(DrawParams dparams)
     {
-      SpriteBatch spriteBatch = dparams.SpriteBatch;
-      Vector2 offset = dparams.Offset;
-
-      TextureDrawData data = GetTextureDrawData(offset);
-      spriteBatch.Draw(
-          data.Texture,
-          data.Position,
-          null,
-          Color,
-          Orientation,
-          data.Origin,
-          data.Scale,
-          effects,
-          0f);
+      var graphics = dparams.Graphics;
+      var offset = dparams.Offset;
+      ImageParams data = GetTextureDrawData(offset);
+      graphics.DrawImage(data, Color, Orientation);
     }
   }
 }

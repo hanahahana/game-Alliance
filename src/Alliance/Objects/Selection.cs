@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using GraphicsSystem;
 
 namespace Alliance
 {
@@ -8,14 +9,14 @@ namespace Alliance
   /// </summary>
   public class Selection
   {
-    private static readonly Color ValidSelectionColor = ColorHelper.NewAlpha(Color.Green, .5f);
-    private static readonly Color InvalidSelectionColor = ColorHelper.NewAlpha(Color.Red, .5f);
+    private static readonly GsColor ValidSelectionColor = new GsColor(GsColor.Green, 128);
+    private static readonly GsColor InvalidSelectionColor = new GsColor(GsColor.Red, 128);
 
     private Dictionary<GridCellChunk, byte> chunksBeingEdited = new Dictionary<GridCellChunk, byte>();
 
     public GridCellChunk Chunk { get; set; }
     public GridCellChunk StartingChunk { get; set; }
-    public BoxF Bounds { get; set; }
+    public GsRectangle Bounds { get; set; }
 
     public IEnumerable<GridCellChunk> Edits 
     {
@@ -26,7 +27,7 @@ namespace Alliance
           edits.Add(StartingChunk);
 
         edits.AddRange(chunksBeingEdited.Keys.ToArray());
-        edits.Sort((a, b) => AllianceUtilities.CompareVector2(a.Location, b.Location));
+        edits.Sort((a, b) => a.Location.CompareTo(b.Location));
         return edits;
       }
     }
@@ -35,20 +36,20 @@ namespace Alliance
     {
       if (Chunk != null)
       {
-        Color color = Chunk.Valid ? Color.Green : Color.Red;
-        BoxF bounds = new BoxF(Chunk.Location + dparams.Offset, Chunk.Size);
+        GsColor color = Chunk.Valid ? GsColor.Green : GsColor.Red;
+        GsRectangle bounds = new GsRectangle(Chunk.Location + dparams.Offset, Chunk.Size);
 
-        dparams.Graphics.FillRectangle(bounds, ColorHelper.NewAlpha(color, 100));
-        dparams.Graphics.DrawRectangle(bounds, color);
+        dparams.Graphics.FillRectangle(new GsColor(color, 100), bounds);
+        dparams.Graphics.DrawRectangle(color, bounds);
 
         // draw the chunks being edited
         foreach (GridCellChunk item in chunksBeingEdited.Keys)
         {
-          Color itemClr = item.Valid ? Color.Green : Color.Red;
-          BoxF itemBounds = new BoxF(item.Location + dparams.Offset, item.Size);
+          GsColor itemClr = item.Valid ? GsColor.Green : GsColor.Red;
+          GsRectangle itemBounds = new GsRectangle(item.Location + dparams.Offset, item.Size);
 
-          dparams.Graphics.FillRectangle(itemBounds, ColorHelper.NewAlpha(itemClr, 100));
-          dparams.Graphics.DrawRectangle(itemBounds, itemClr);
+          dparams.Graphics.FillRectangle(new GsColor(itemClr, 100), itemBounds);
+          dparams.Graphics.DrawRectangle(itemClr, itemBounds);
         }
       }
     }

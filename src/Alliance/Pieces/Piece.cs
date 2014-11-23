@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using GraphicsSystem;
 
 namespace Alliance
 {
@@ -59,7 +60,7 @@ namespace Alliance
     public bool IsBlocking { get; protected set; }
     public bool FaceTarget { get; protected set; }
     public bool CanFireProjectiles { get; protected set; }
-    public BoxF GridBounds { get; protected set; }
+    public GsRectangle GridBounds { get; protected set; }
     public Element Element { get; protected set; }
     public PieceSpecialty Specialty { get; protected set; }
 
@@ -117,25 +118,25 @@ namespace Alliance
         if (FaceTarget)
         {
           // if we're supposed to be facing the target, then set the velocity and orientation
-          Velocity = AllianceUtilities.ComputeDirection(this, Target);
-          Orientation = AllianceUtilities.ComputeOrientation(Orientation, Velocity, TurnSpeed);
+          Velocity = Calculator.ComputeDirection(this, Target);
+          Orientation = Calculator.ComputeOrientation(Orientation, Velocity, TurnSpeed);
         }
         else
         {
           // set the velocity of the projectile based on the current orientation
-          Velocity = AllianceUtilities.ComputeProjectileDirection(Orientation);
+          Velocity = Calculator.ComputeProjectileDirection(Orientation);
         }
       }
     }
 
-    protected void FireProjectile(GameTime gameTime)
+    protected void FireProjectile(TimeSpan elapsed)
     {
       if (Target != null)
       {
-        BoxF inside = new BoxF(X + Pad, Y + Pad, Width - TwoPad, Height - TwoPad);
-        SizeF actSize = new SizeF(Width - Pad, inside.Height);
+        GsRectangle inside = new GsRectangle(X + Pad, Y + Pad, Width - TwoPad, Height - TwoPad);
+        GsSize actSize = new GsSize(Width - Pad, inside.Height);
 
-        Vector2 myCenter = actSize.ToVector2() * .5f;
+        GsVector myCenter = actSize.ToVector() * .5f;
         for (int i = 0; i < NumberProjectilesToFire; ++i)
         {
           Projectile projectile = CreateProjectile();
@@ -143,7 +144,7 @@ namespace Alliance
           projectile.Position = inside.Location + myCenter;
           projectile.Orientation = Orientation;
           projectile.Attack = Attack;
-          projectile.UpdateByFrameCount(gameTime, i * NumberProjectilesToFire);
+          projectile.UpdateByFrameCount(elapsed, i * NumberProjectilesToFire);
           mQueuedProjectiles.Add(projectile);
         }
       }
@@ -156,7 +157,7 @@ namespace Alliance
         (!target.Flying && Specialty == PieceSpecialty.Ground);
     }
 
-    protected bool InvalidTarget(float distance, float radiusSquared, Invader target, BoxF targetBounds)
+    protected bool InvalidTarget(float distance, float radiusSquared, Invader target, GsRectangle targetBounds)
     {
       // if the target isn't our specialty
       bool notOurSpecialty = !InvaderMatchesSpecialty(target);
@@ -179,7 +180,7 @@ namespace Alliance
         return true;
 
       // if the target is moving too fast, then return true
-      bool targetMovingTooFast = AllianceUtilities.ComputeDirection(this, target) == Vector2.Zero;
+      bool targetMovingTooFast = Calculator.ComputeDirection(this, target) == GsVector.Zero;
       if (targetMovingTooFast)
         return true;
 
@@ -242,12 +243,12 @@ namespace Alliance
       NumberProjectilesToFire += (Level / 4);
     }
 
-    public virtual void Update(GameTime gameTime)
+    public virtual void Update(TimeSpan elapsed)
     {
       // if we have a target, make sure it's still alive
       if (Target != null)
       {
-        mTimeChasingTarget += gameTime.ElapsedGameTime;
+        mTimeChasingTarget += elapsed;
       }
 
       // if we're not idle, then clear the projectiles
@@ -266,17 +267,17 @@ namespace Alliance
       // if we're selling or upgrading
       if (State == PieceState.Selling || State == PieceState.Upgrading)
       {
-        UpdateSellingUpgrading(gameTime);
+        UpdateSellingUpgrading(elapsed);
       }
 
       // if we're just idle
       if (State == PieceState.Idle)
       {
-        UpdateIdle(gameTime);
+        UpdateIdle(elapsed);
       }
     }
 
-    protected void UpdateIdle(GameTime gameTime)
+    protected void UpdateIdle(TimeSpan elapsed)
     {
       // face the target
       TurnToFaceTarget();
@@ -285,19 +286,19 @@ namespace Alliance
       if (CanFireProjectiles)
       {
         // update the projectiles per second
-        mElapsedProjectileSeconds += (float)(ProjectilesPerSecond * gameTime.ElapsedGameTime.TotalSeconds);
+        mElapsedProjectileSeconds += (float)(ProjectilesPerSecond * elapsed.TotalSeconds);
         if (mElapsedProjectileSeconds >= 1.0f)
         {
           // decrement the value
           mElapsedProjectileSeconds -= 1.0f;
 
           // fire a projectile
-          FireProjectile(gameTime);
+          FireProjectile(elapsed);
         }
       }
     }
 
-    protected void UpdateSellingUpgrading(GameTime gameTime)
+    protected void UpdateSellingUpgrading(TimeSpan elapsed)
     {
       if (Player.State == PlayerState.Designing)
       {
@@ -307,7 +308,7 @@ namespace Alliance
       else
       {
         // update the current progress
-        ProgressValue += (float)(ProgressPerSecond * gameTime.ElapsedGameTime.TotalSeconds);
+        ProgressValue += (float)(ProgressPerSecond * elapsed.TotalSeconds);
       }
 
       // if we've exceeded the max progress
@@ -332,9 +333,9 @@ namespace Alliance
 
     public void Draw(DrawParams dparams)
     {
-      Tuple<BoxF, BoxF> outin = GetOutsideInsideBounds(dparams.Offset);
-      BoxF bounds = outin.First;
-      BoxF inside = outin.Second;
+      OutsideInside outin = GetOutsideInsideBounds(dparams.Offset);
+      var bounds = outin.Outside;
+      var inside = outin.Inside;
 
       DrawBackground(dparams, bounds, inside);
       if (State == PieceState.Idle)
@@ -349,69 +350,49 @@ namespace Alliance
       }
     }
 
-    protected virtual void DrawBackground(DrawParams dparams, BoxF bounds, BoxF inside)
+    protected virtual void DrawBackground(DrawParams dparams, GsRectangle bounds, GsRectangle inside)
     {
-      Color bgColor = (Level == MaxLevel ? ColorHelper.Blend(Color.Beige, Color.SkyBlue, .5f) : Color.Beige);
-      Color color = Selected ? Color.DarkGreen : bgColor;
-      dparams.Graphics.FillRectangle(bounds, color);
+      GsColor bgColor = (Level == MaxLevel ? GsMath.SmoothStep(GsColor.Beige, GsColor.SkyBlue, .5f) : GsColor.Beige);
+      GsColor color = Selected ? GsColor.DarkGreen : bgColor;
+      dparams.Graphics.FillRectangle(color, bounds);
     }
 
-    protected virtual void DrawWeaponBase(DrawParams dparams, BoxF bounds, BoxF inside)
+    protected virtual void DrawWeaponBase(DrawParams dparams, GsRectangle bounds, GsRectangle inside)
     {
-      Texture2D wbase = AllianceGame.Images["towerBase"].Texture;
-      Vector2 scale = MathematicsHelper.ComputeScale(new SizeF(wbase.Width, wbase.Height), bounds.Size);
-
-      Color color = ColorHelper.NewAlpha(Color.Gray, .5f);
-      SpriteBatch spriteBatch = dparams.SpriteBatch;
-
-      spriteBatch.Draw(
-        wbase,
-        bounds.Location,
-        null,
-        color,
-        0f,
-        Vector2.Zero,
-        scale,
-        SpriteEffects.None,
-        0f);
+      var wbase = ImageProvider.GetFramedImage("towerBase").Image;
+      var wbaseSize = ImageProvider.GetSize(wbase);
+      var scale = Calculator.ComputeScale(wbaseSize, bounds.Size);
+      var color = new GsColor(GsColor.Gray, 128);
+      var graphics = dparams.Graphics;
+      graphics.DrawImage(wbase, color, bounds.Location, scale);
     }
 
-    protected override TextureDrawData GetTextureDrawData(Vector2 offset)
+    protected override ImageParams GetTextureDrawData(GsVector offset)
     {
-      Tuple<BoxF, BoxF> outin = GetOutsideInsideBounds(offset);
-      BoxF bounds = outin.First;
-      BoxF inside = outin.Second;
+      OutsideInside outin = GetOutsideInsideBounds(offset);
+      var bounds = outin.Outside;
+      var inside = outin.Inside;
 
-      Texture2D wtower = GetImage();
-      SizeF imgSize = new SizeF(wtower.Width, wtower.Height);
-      SizeF actSize = new SizeF(bounds.Width - Pad, inside.Height);
+      var wtower = GetImage();
+      GsSize imgSize = ImageProvider.GetSize(wtower);
+      GsSize actSize = new GsSize(bounds.Width - Pad, inside.Height);
 
-      Vector2 scale = MathematicsHelper.ComputeScale(imgSize, actSize);
-      Vector2 imgCenter = imgSize.ToVector2() * .5f;
-      Vector2 myCenter = actSize.ToVector2() * .5f;
+      GsVector scale = Calculator.ComputeScale(imgSize, actSize);
+      GsVector imgCenter = imgSize.ToVector() * .5f;
+      GsVector myCenter = actSize.ToVector() * .5f;
 
-      return new TextureDrawData(wtower, imgSize, inside.Location + myCenter, imgCenter, scale);
+      return new ImageParams(wtower, imgSize, inside.Location + myCenter, imgCenter, scale);
     }
 
-    protected virtual void DrawWeaponTower(DrawParams dparams, Vector2 offset)
+    protected virtual void DrawWeaponTower(DrawParams dparams, GsVector offset)
     {
-      TextureDrawData data = GetTextureDrawData(offset);
-      Color color = Color.Gray;
-
-      SpriteBatch spriteBatch = dparams.SpriteBatch;
-      spriteBatch.Draw(
-        data.Texture,
-        data.Position,
-        null,
-        color,
-        Orientation,
-        data.Origin,
-        data.Scale,
-        SpriteEffects.None,
-        0f);
+      ImageParams data = GetTextureDrawData(offset);
+      GsColor color = GsColor.Gray;
+      var graphics = dparams.Graphics;
+      graphics.DrawImage(data, color, Orientation);
     }
 
-    protected virtual void DrawCurrentLevel(DrawParams dparams, BoxF bounds, BoxF inside)
+    protected virtual void DrawCurrentLevel(DrawParams dparams, GsRectangle bounds, GsRectangle inside)
     {
       if (Level < MaxLevel)
       {
@@ -421,19 +402,18 @@ namespace Alliance
         float x = bounds.X + spacing;
         float y = bounds.Bottom - (spacing + dimension);
 
-        //for (int i = 0; i < Level; ++i, x += (spacing + dimension))
-        //{
-        //  dparams.Graphics.FillRectangle(x, y, dimension, dimension, Color.Black);
-        //}
+        GsFont font = FontProvider.PieceLevelFont;
+        var lineSpacing = FontProvider.GetLineSpacing(font);
 
-        SpriteFont font = AllianceGame.Fonts["Georgia"];
         string text = Level.ToString();
-        Vector2 pos = new Vector2(bounds.Left + spacing, bounds.Bottom - (font.LineSpacing + spacing));
-        dparams.SpriteBatch.DrawString(font, text, pos, Color.Black);
+        GsVector pos = new GsVector(bounds.Left + spacing, bounds.Bottom - (lineSpacing + spacing));
+
+        var graphics = dparams.Graphics;
+        graphics.DrawString(font, text, pos, GsColor.Black);
       }
     }
 
-    protected void DrawProgressState(DrawParams dparams, BoxF bounds, BoxF inside)
+    protected void DrawProgressState(DrawParams dparams, GsRectangle bounds, GsRectangle inside)
     {
       float width = inside.Width;
       float height = (float)Math.Round(inside.Height / 3f);
@@ -441,21 +421,21 @@ namespace Alliance
       float x = inside.X + ((inside.Width / 2f) - (width / 2f));
       float y = inside.Y + ((inside.Height / 2f) - (height / 2f));
 
-      float progressWidth = width * ArithmeticHelper.CalculatePercent(ProgressValue, 0, MaxProgress);
+      float progressWidth = width * Calculator.CalculatePercent(ProgressValue, 0, MaxProgress);
       float factor = ProgressValue / (MaxProgress);
 
-      Color barFill = ColorHelper.Blend(Color.Red, Color.DarkGreen, factor);
-      Color barBder = Color.Black;
+      GsColor barFill = GsMath.Lerp(GsColor.Red, GsColor.DarkGreen, factor);
+      GsColor barBder = GsColor.Black;
 
-      dparams.Graphics.FillRectangle(x, y, progressWidth, height, barFill);
-      dparams.Graphics.DrawRectangle(x, y, width, height, barBder);
+      dparams.Graphics.FillRectangle(barFill, x, y, progressWidth, height);
+      dparams.Graphics.DrawRectangle(barBder, x, y, width, height);
     }
 
-    protected Tuple<BoxF, BoxF> GetOutsideInsideBounds(Vector2 offset)
+    protected OutsideInside GetOutsideInsideBounds(GsVector offset)
     {
-      BoxF bounds = new BoxF(X + offset.X, Y + offset.Y, Width, Height);
-      BoxF inside = new BoxF(bounds.X + Pad, bounds.Y + Pad, bounds.Width - TwoPad, bounds.Height - TwoPad);
-      return new Tuple<BoxF, BoxF>(bounds, inside);
+      GsRectangle bounds = new GsRectangle(X + offset.X, Y + offset.Y, Width, Height);
+      GsRectangle inside = new GsRectangle(bounds.X + Pad, bounds.Y + Pad, bounds.Width - TwoPad, bounds.Height - TwoPad);
+      return new OutsideInside { Inside = inside, Outside = bounds };
     }
 
     public override string ToString()
@@ -472,7 +452,7 @@ namespace Alliance
       return mPriceAtLevels.Sum();
     }
 
-    public Piece BuildFromChunk(BoxF gridBounds, GridCellChunk editedChunk)
+    public Piece BuildFromChunk(GsRectangle gridBounds, GridCellChunk editedChunk)
     {
       GridCell[] cells = editedChunk.Cells.ToList().ToArray();
       Piece piece = CreatePiece(cells);
@@ -538,25 +518,25 @@ namespace Alliance
       }
     }
 
-    public void ChooseTarget(IEnumerable<Invader> invaders, Vector2 offset)
+    public void ChooseTarget(IEnumerable<Invader> invaders, GsVector offset)
     {
       Invader bestInvader = null;
       float bestFuzzyValue = 0.0f;
       float radiusSquared = Radius * Radius;
-      BoxF pieceBounds = BoxF.Offset(Bounds, offset);
+      GsRectangle pieceBounds = GsRectangle.Offset(Bounds, offset);
 
       foreach (Invader invader in invaders)
       {
         // calculate the position. In the future, we should get this directly from the invader
-        Vector2 position = invader.Position + offset + (invader.Size.ToVector2() * .5f);
-        Vector2 origin = invader.Origin;
-        SizeF size = invader.Size;
+        GsVector position = invader.Position + offset + (invader.Size.ToVector() * .5f);
+        GsVector origin = invader.Origin;
+        GsSize size = invader.Size;
 
         // calculate the bounds
-        BoxF invaderBounds = new BoxF(position - (origin * .5f), size);
+        GsRectangle invaderBounds = new GsRectangle(position - (origin * .5f), size);
 
         // determine the distance
-        float distance = Vector2.DistanceSquared(pieceBounds.Center, invaderBounds.Center);
+        float distance = GsVector.DistanceSquared(pieceBounds.Center, invaderBounds.Center);
         if (InvalidTarget(distance, radiusSquared, invader, invaderBounds))
           continue;
 
@@ -615,7 +595,7 @@ namespace Alliance
       // will increase as the amount of time we have spent chasing this mouse
       // increases. The value must be clamped to enforce the 0 to 1 rule.
       float fuzzyTime = (float)((time - MinTime).TotalSeconds / (MaxTime - MinTime).TotalSeconds);
-      return MathHelper.Clamp(fuzzyTime, 0, 1);
+      return GsMath.Clamp(fuzzyTime, 0, 1);
     }
 
     #region ITextProvider Members

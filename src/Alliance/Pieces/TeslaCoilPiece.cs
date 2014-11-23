@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using GraphicsSystem;
 
 namespace Alliance
 {
@@ -16,8 +17,8 @@ namespace Alliance
     private const float SecondsPerFrame = 1f / 5.3456789f;
     private const float SecondsToStayOpen = 1f / 2.5f;
 
-    private readonly Size FrameSize;
-    private readonly Color LightningColor;
+    private readonly GsSize FrameSize;
+    private readonly GsColor LightningColor;
 
     private int mIndex;
     private float mAggregateTimeSinceUpdate;
@@ -50,14 +51,14 @@ namespace Alliance
       mIndex = 0;
       mAggregateTimeSinceUpdate = 0;
       mTeslaState = TeslaState.Idle;
-      Color = Color.White;
+      Color = GsColor.White;
 
       // get the image
-      Texture2D image = GetImage();
-      FrameSize = new Size(image.Width / (NumberIndexFrames + 1), image.Height);
-      LightningColor = ColorHelper.Blend(
-        new Color[] { Color.Purple, Color.DarkBlue, Color.Red },
-        new float[] { .5f, .75f });
+      var image = GetImage();
+      var imageSize = ImageProvider.GetSize(image);
+      FrameSize = new GsSize(imageSize.Width / (NumberIndexFrames + 1), imageSize.Height);
+      LightningColor = GsMath.Lerp(GsColor.Purple, GsColor.DarkBlue, .5f);
+      LightningColor = GsMath.Lerp(LightningColor, GsColor.Red, .75f);
     }
 
     protected override Piece CreatePiece(GridCell[] cells)
@@ -73,14 +74,14 @@ namespace Alliance
       return projectile;
     }
 
-    public override Texture2D GetDisplayImage()
+    public override GsImage GetDisplayImage()
     {
-      return AllianceGame.Images[ImageKey][0].Texture;
+      return ImageProvider.GetFramedImage(ImageKey)[0].Image;
     }
 
-    protected override Vector2[] GetImageHull()
+    protected override GsVector[] GetImageHull()
     {
-      return AllianceGame.Images[ImageKey][0].Hull;
+      return ImageProvider.GetFramedImage(ImageKey)[0].Hull;
     }
 
     protected override void UpgradeProjectileVariables(float factor)
@@ -92,15 +93,15 @@ namespace Alliance
       ++NumberProjectilesToFire;
     }
 
-    public override void Update(GameTime gameTime)
+    public override void Update(TimeSpan elapsed)
     {
       // let the base update
-      base.Update(gameTime);
+      base.Update(elapsed);
 
       // if we're idle, then we COULD be firing
       if (State == PieceState.Idle)
       {
-        UpdateTeslaState(gameTime);
+        UpdateTeslaState(elapsed);
       }
       else
       {
@@ -109,40 +110,40 @@ namespace Alliance
       }
 
       float factor = ((float)mIndex) / ((float)NumberIndexFrames);
-      Color = ColorHelper.Blend(Color.Beige, LightningColor, factor);
+      Color = GsMath.Lerp(GsColor.Beige, LightningColor, factor);
     }
 
-    private void UpdateTeslaState(GameTime gameTime)
+    private void UpdateTeslaState(TimeSpan elapsed)
     {
       switch (mTeslaState)
       {
         case TeslaState.Idle:
           {
-            UpdateTeslaIdleState(gameTime);
+            UpdateTeslaIdleState(elapsed);
             break;
           }
         case TeslaState.Charging:
           {
-            UpdateTeslaChargingState(gameTime);
+            UpdateTeslaChargingState(elapsed);
             break;
           }
         case TeslaState.Firing:
           {
-            UpdateTeslaFiringState(gameTime);
+            UpdateTeslaFiringState(elapsed);
             break;
           }
         case TeslaState.Discharging:
           {
-            UpdateTeslaDischaringState(gameTime);
+            UpdateTeslaDischaringState(elapsed);
             break;
           }
       }
     }
 
-    private void UpdateTeslaDischaringState(GameTime gameTime)
+    private void UpdateTeslaDischaringState(TimeSpan elapsed)
     {
       // here, we backtrack until we get to the beginning
-      mAggregateTimeSinceUpdate += (float)gameTime.ElapsedGameTime.TotalSeconds;
+      mAggregateTimeSinceUpdate += (float)elapsed.TotalSeconds;
       if (mAggregateTimeSinceUpdate >= SecondsPerFrame)
       {
         mAggregateTimeSinceUpdate -= SecondsPerFrame;
@@ -155,10 +156,10 @@ namespace Alliance
       }
     }
 
-    private void UpdateTeslaFiringState(GameTime gameTime)
+    private void UpdateTeslaFiringState(TimeSpan elapsed)
     {
       // we stay open for a certain amount of time before discharging.
-      mAggregateTimeSinceUpdate += (float)gameTime.ElapsedGameTime.TotalSeconds;
+      mAggregateTimeSinceUpdate += (float)elapsed.TotalSeconds;
       if (mAggregateTimeSinceUpdate >= SecondsToStayOpen)
       {
         mAggregateTimeSinceUpdate -= SecondsToStayOpen;
@@ -166,9 +167,9 @@ namespace Alliance
       }
     }
 
-    private void UpdateTeslaChargingState(GameTime gameTime)
+    private void UpdateTeslaChargingState(TimeSpan elapsed)
     {
-      mAggregateTimeSinceUpdate += (float)gameTime.ElapsedGameTime.TotalSeconds;
+      mAggregateTimeSinceUpdate += (float)elapsed.TotalSeconds;
       if (mAggregateTimeSinceUpdate >= SecondsPerFrame)
       {
         mAggregateTimeSinceUpdate -= SecondsPerFrame;
@@ -176,13 +177,13 @@ namespace Alliance
 
         if (mIndex == NumberIndexFrames)
         {
-          FireProjectile(gameTime);
+          FireProjectile(elapsed);
           mTeslaState = TeslaState.Firing;
         }
       }
     }
 
-    private void UpdateTeslaIdleState(GameTime gameTime)
+    private void UpdateTeslaIdleState(TimeSpan elapsed)
     {
       if (Target != null)
       {
@@ -190,41 +191,31 @@ namespace Alliance
       }
     }
 
-    protected override TextureDrawData GetTextureDrawData(Vector2 offset)
+    protected override ImageParams GetTextureDrawData(GsVector offset)
     {
-      Tuple<BoxF, BoxF> outin = GetOutsideInsideBounds(offset);
-      BoxF bounds = outin.First;
-      BoxF inside = outin.Second;
+      var outin = GetOutsideInsideBounds(offset);
+      var bounds = outin.Outside;
+      var inside = outin.Inside;
 
-      Texture2D wtower = GetImage();
-      SizeF imgSize = new SizeF(FrameSize.Width, FrameSize.Height);
-      SizeF actSize = new SizeF(bounds.Width, bounds.Height);
+      var wtower = GetImage();
+      GsSize imgSize = FrameSize;
+      GsSize actSize = new GsSize(bounds.Width, bounds.Height);
 
-      Vector2 scale = MathematicsHelper.ComputeScale(imgSize, actSize);
-      Vector2 origin = imgSize.ToVector2() * .5f;
-      Vector2 center = actSize.ToVector2() * .5f;
+      GsVector scale = Calculator.ComputeScale(imgSize, actSize);
+      GsVector origin = imgSize.ToVector() * .5f;
+      GsVector center = actSize.ToVector() * .5f;
 
-      return new TextureDrawData(wtower, imgSize, bounds.Location + center, origin, scale);
+      return new ImageParams(wtower, imgSize, bounds.Location + center, origin, scale);
     }
 
-    protected override void DrawWeaponTower(DrawParams dparams, Vector2 offset)
+    protected override void DrawWeaponTower(DrawParams dparams, GsVector offset)
     {
-      TextureDrawData data = GetTextureDrawData(offset);
-      Rectangle source = new Rectangle(
+      ImageParams data = GetTextureDrawData(offset);
+      GsRectangle source = new GsRectangle(
         mIndex * FrameSize.Width, 0,
         FrameSize.Width, FrameSize.Height);
-
-      SpriteBatch spriteBatch = dparams.SpriteBatch;
-      spriteBatch.Draw(
-        data.Texture,
-        data.Position,
-        source,
-        Color,
-        0,
-        data.Origin,
-        data.Scale,
-        SpriteEffects.None,
-        0f);
+      var graphics = dparams.Graphics;
+      graphics.DrawImage(data, Color, source);
     }
   }
 }

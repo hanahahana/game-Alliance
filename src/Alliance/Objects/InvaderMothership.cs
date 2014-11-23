@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using Destination = System.Tuple<Alliance.GridCell,Alliance.GridCell>;
-
 namespace Alliance
 {
   [Serializable]
@@ -38,7 +36,7 @@ namespace Alliance
       }
     }
 
-    public IEnumerable<Invader> GenerateWave(Destination horizontal, Destination vertical, IEnumerable<Piece> pieces, GridCell[,] grid)
+    public IEnumerable<Invader> GenerateWave(GridDestination horizontal, GridDestination vertical, IEnumerable<Piece> pieces, GridCell[,] grid)
     {
       // create a list to store the invaders created
       List<Invader> retval = new List<Invader>();
@@ -58,12 +56,12 @@ namespace Alliance
       for (int i = 0; i < invaderCount; ++i)
       {
         // determine the boolean properties for the invader
-        bool flying = RandomHelper.NextBool();
-        bool leftRight = RandomHelper.NextBool();
+        bool flying = RandomGenerator.NextBool();
+        bool leftRight = RandomGenerator.NextBool();
 
         // get the start/goal and key
-        GridCell start = leftRight ? horizontal.First : vertical.First;
-        GridCell goal = leftRight ? horizontal.Second : vertical.Second;
+        GridCell start = leftRight ? horizontal.Start : vertical.Start;
+        GridCell goal = leftRight ? horizontal.End : vertical.End;
         DijkstraType key = leftRight ? DijkstraType.LeftToRight : DijkstraType.TopToBottom;
 
         // create a base invader. This invader will have a 50% chance of flying.

@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using GraphicsSystem;
 
 namespace Alliance
 {
@@ -50,35 +51,25 @@ namespace Alliance
       return null;
     }
 
-    protected override void DrawBackground(DrawParams dparams, BoxF bounds, BoxF inside)
+    protected override void DrawBackground(DrawParams dparams, GsRectangle bounds, GsRectangle inside)
     {
-      Color color = Selected ? Color.DarkGreen : Color.Beige;
-      dparams.Graphics.FillRectangle(bounds, color);
+      GsColor color = Selected ? GsColor.DarkGreen : GsColor.Beige;
+      dparams.Graphics.FillRectangle(color, bounds);
     }
 
-    protected override void DrawWeaponBase(DrawParams dparams, BoxF bounds, BoxF inside)
+    protected override void DrawWeaponBase(DrawParams dparams, GsRectangle bounds, GsRectangle inside)
     {
       // draw a speed bump!
-      Texture2D speedbump = GetImage();
-      SizeF speedbumpSize = new SizeF(speedbump.Width, speedbump.Height);
+      var speedbump = GetImage();
+      var speedbumpSize = ImageProvider.GetSize(speedbump);
 
-      Vector2 scale = MathematicsHelper.ComputeScale(speedbumpSize, bounds.Size);
-      Color color = Color.White;
-
-      SpriteBatch spriteBatch = dparams.SpriteBatch;
-      spriteBatch.Draw(
-        speedbump,
-        bounds.Location,
-        null,
-        color,
-        0f,
-        Vector2.Zero,
-        scale,
-        SpriteEffects.None,
-        0f);
+      var scale = Calculator.ComputeScale(speedbumpSize, bounds.Size);
+      GsColor color = GsColor.White;
+      var graphics = dparams.Graphics;
+      graphics.DrawImage(speedbump, color, bounds.Location, scale);
     }
 
-    protected override void DrawWeaponTower(DrawParams dparams, Vector2 offset)
+    protected override void DrawWeaponTower(DrawParams dparams, GsVector offset)
     {
       // don't draw a weapon tower
     }

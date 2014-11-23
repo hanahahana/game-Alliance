@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using GraphicsSystem;
 
 namespace Alliance
 {
@@ -19,7 +20,7 @@ namespace Alliance
     private const float MaxPieSlices = 16f;
 
     private const float RadiansPerSecond = 5.5f;
-    private const float TotalSeconds = MathHelper.TwoPi / RadiansPerSecond;
+    private const float TotalSeconds = GsMath.TwoPi / RadiansPerSecond;
 
     private float mPiePieces;
 
@@ -48,14 +49,14 @@ namespace Alliance
       Specialty = PieceSpecialty.Both;
     }
 
-    public override void Update(GameTime gameTime)
+    public override void Update(TimeSpan elapsed)
     {
       // let the base do it's thing
-      base.Update(gameTime);
+      base.Update(elapsed);
 
       // spin around in a circle
-      Orientation += ((float)gameTime.ElapsedGameTime.TotalSeconds * RadiansPerSecond);
-      Orientation = MathematicsHelper.WrapAngle(Orientation);
+      Orientation += ((float)elapsed.TotalSeconds * RadiansPerSecond);
+      Orientation = GsMath.WrapAngle(Orientation);
     }
 
     protected override void UpgradeProjectileVariables(float factor)
@@ -63,8 +64,8 @@ namespace Alliance
       base.UpgradeProjectileVariables(factor);
       float mu = (float)Level / (float)MaxLevel;
 
-      ProjectileSpeed = MathHelper.Lerp(MinVelocity, MaxVelocity, mu);
-      mPiePieces = MathHelper.Lerp(MinPieSlices, MaxPieSlices, mu);
+      ProjectileSpeed = GsMath.Lerp(MinVelocity, MaxVelocity, mu);
+      mPiePieces = GsMath.Lerp(MinPieSlices, MaxPieSlices, mu);
 
       NumberProjectilesToFire = 1;
       ProjectilesPerSecond = TotalSeconds * mPiePieces;
@@ -94,20 +95,20 @@ namespace Alliance
       return projectile;
     }
 
-    protected override TextureDrawData GetTextureDrawData(Vector2 offset)
+    protected override ImageParams GetTextureDrawData(GsVector offset)
     {
-      Tuple<BoxF, BoxF> outin = GetOutsideInsideBounds(offset);
-      BoxF bounds = outin.First;
+      var outin = GetOutsideInsideBounds(offset);
+      var bounds = outin.Outside;
 
-      Texture2D wtower = GetImage();
-      SizeF imgSize = new SizeF(wtower.Width, wtower.Height);
-      SizeF actSize = new SizeF(bounds.Width, bounds.Height);
+      var wtower = GetImage();
+      var imgSize = ImageProvider.GetSize(wtower);
+      var actSize = new GsSize(bounds.Width, bounds.Height);
 
-      Vector2 scale = MathematicsHelper.ComputeScale(imgSize, actSize);
-      Vector2 origin = imgSize.ToVector2() * .5f;
-      Vector2 center = actSize.ToVector2() * .5f;
+      GsVector scale = Calculator.ComputeScale(imgSize, actSize);
+      GsVector origin = imgSize.ToVector() * .5f;
+      GsVector center = actSize.ToVector() * .5f;
 
-      return new TextureDrawData(wtower, imgSize, bounds.Location + center, origin, scale);
+      return new ImageParams(wtower, imgSize, bounds.Location + center, origin, scale);
     }
   }
 }

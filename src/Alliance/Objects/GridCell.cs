@@ -1,4 +1,5 @@
 using System;
+using GraphicsSystem;
 
 namespace Alliance
 {
@@ -30,21 +31,21 @@ namespace Alliance
     public bool IsThroughway { get; private set; }
     public Piece Piece { get; private set; }
 
-    public Vector2 Location
+    public GsVector Location
     {
-      get { return new Vector2(X, Y); }
+      get { return new GsVector(X, Y); }
       set { X = value.X; Y = value.Y; }
     }
 
-    public SizeF Size
+    public GsSize Size
     {
-      get { return new SizeF(Width, Height); }
+      get { return new GsSize(Width, Height); }
       set { Width = value.Width; Height = value.Height; }
     }
 
-    public BoxF Bounds
+    public GsRectangle Bounds
     {
-      get { return new BoxF(Location, Size); }
+      get { return new GsRectangle(Location, Size); }
       set { Location = value.Location; Size = value.Size; }
     }
 
@@ -63,7 +64,7 @@ namespace Alliance
       Column = column;
       Row = row;
       Key = string.Format("Row:{0}, Column:{1}", Row, Column);
-      Bounds = BoxF.Empty;
+      Bounds = GsRectangle.Empty;
       IsOuter = isOuter;
       IsThroughway = isThroughway;
       mDijkstraData = new DijkstraNodeAlliance[2];
@@ -83,7 +84,7 @@ namespace Alliance
 
     public override string ToString()
     {
-      return string.Format("{0}", new Point(Column, Row));
+      return string.Format("{{Column={0},Row={1}}}", Column, Row);
     }
 
     public void RemovePiece()
@@ -106,7 +107,7 @@ namespace Alliance
 
     public int CompareTo(GridCell other)
     {
-      return AllianceUtilities.CompareVector2(Location, other.Location);
+      return Location.CompareTo(other.Location);
     }
   }
 }
