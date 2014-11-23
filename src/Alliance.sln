@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphicsSystem", "..\..\Gra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alliance", "Alliance\Alliance.csproj", "{CA101CDD-CC5F-4DF4-A2B4-9DCB1EA492DF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alliance.OpenTK", "Alliance.OpenTK\Alliance.OpenTK.csproj", "{C60A12C8-1FF0-4F6C-B51C-37013B5327A2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{CA101CDD-CC5F-4DF4-A2B4-9DCB1EA492DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA101CDD-CC5F-4DF4-A2B4-9DCB1EA492DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA101CDD-CC5F-4DF4-A2B4-9DCB1EA492DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C60A12C8-1FF0-4F6C-B51C-37013B5327A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C60A12C8-1FF0-4F6C-B51C-37013B5327A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C60A12C8-1FF0-4F6C-B51C-37013B5327A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C60A12C8-1FF0-4F6C-B51C-37013B5327A2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
