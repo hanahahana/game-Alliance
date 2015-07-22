@@ -37,6 +37,14 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="GraphicsSystem, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\GraphicsSystem.1.0.0.0\lib\net45\GraphicsSystem.dll</HintPath>
+    </Reference>
+    <Reference Include="GuiSystem, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\GuiSystem.1.0.0.0\lib\net45\GuiSystem.dll</HintPath>
+    </Reference>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <HintPath>..\packages\OpenTK.1.1.1589.5942\lib\NET40\OpenTK.dll</HintPath>
     </Reference>
@@ -70,14 +78,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\GraphicsSystem\src\GraphicsSystem\GraphicsSystem.csproj">
-      <Project>{597b86cf-2998-4ad2-83d5-e50d1b1e1a8e}</Project>
-      <Name>GraphicsSystem</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\GuiSystem\src\GuiSystem\GuiSystem.csproj">
-      <Project>{e63264b3-5e43-45ed-8e3b-6adb49e229fb}</Project>
-      <Name>GuiSystem</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Alliance\Alliance.csproj">
       <Project>{ca101cdd-cc5f-4df4-a2b4-9dcb1ea492df}</Project>
       <Name>Alliance</Name>

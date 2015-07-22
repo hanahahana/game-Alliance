@@ -32,6 +32,14 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="GraphicsSystem, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\GraphicsSystem.1.0.0.0\lib\net45\GraphicsSystem.dll</HintPath>
+    </Reference>
+    <Reference Include="GuiSystem, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\GuiSystem.1.0.0.0\lib\net45\GuiSystem.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -112,16 +120,8 @@
     <Compile Include="Tools\RandomGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\GraphicsSystem\src\GraphicsSystem\GraphicsSystem.csproj">
-      <Project>{597b86cf-2998-4ad2-83d5-e50d1b1e1a8e}</Project>
-      <Name>GraphicsSystem</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\GuiSystem\src\GuiSystem\GuiSystem.csproj">
-      <Project>{e63264b3-5e43-45ed-8e3b-6adb49e229fb}</Project>
-      <Name>GuiSystem</Name>
-    </ProjectReference>
+    <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
