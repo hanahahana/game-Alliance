@@ -20,6 +20,7 @@ namespace Alliance
     private GraphicsDevice device;
     private SpriteBatch spriteBatch;
 
+    private Messages messages;
     private GridComponent grid;
     private InputProvider input;
 
@@ -36,6 +37,9 @@ namespace Alliance
 
       grid = new GridComponent(this);
       Components.Add(grid);
+
+      messages = new Messages(this);
+      Components.Add(messages);
 
       input = new InputProvider(this);
       input.UpdateOrder = 0;

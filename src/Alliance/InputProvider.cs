@@ -11,10 +11,10 @@ namespace Alliance
     private MouseState previousMouse;
     private KeyboardState previousKeys;
 
-    private bool mAddClick;
-    public bool AddClick
+    private bool mSelectClick;
+    public bool SelectClick
     {
-      get { return mAddClick; }
+      get { return mSelectClick; }
     }
 
     private bool mSellRequested;
@@ -46,7 +46,7 @@ namespace Alliance
       MouseState currentMouse = Mouse.GetState();
       KeyboardState currentKeys = Keyboard.GetState();
 
-      mAddClick = (currentMouse.LeftButton == ButtonState.Released && previousMouse.LeftButton == ButtonState.Pressed);
+      mSelectClick = (currentMouse.LeftButton == ButtonState.Released && previousMouse.LeftButton == ButtonState.Pressed);
       mCursorPosition = new Vector2(currentMouse.X, currentMouse.Y);
       mSellRequested = IsKeyPress(currentKeys, Keys.S);
       mUpgradeRequested = IsKeyPress(currentKeys, Keys.U);

@@ -27,6 +27,11 @@ namespace Alliance.Pieces
       get { return ShockwaveName; }
     }
 
+    public override PieceGrouping Grouping
+    {
+      get { return PieceGrouping.Four; }
+    }
+
     protected override Piece CreatePiece(Cell[] cells)
     {
       ShockwavePiece piece = new ShockwavePiece();

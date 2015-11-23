@@ -205,7 +205,7 @@ namespace Alliance.Entities
     {
       if (mState != EntityState.Alive) return;
 
-      Texture2D texture = AllianceGame.Textures["tank"];
+      Texture2D texture = AllianceGame.Textures["mouse"];
       Vector2 scale = new Vector2(Width / texture.Width, Height / texture.Height);
       Vector2 center = new Vector2(texture.Width / 2f, texture.Height / 2f);
       Vector2 cellCenter = new Vector2(Width / 2f, Height / 2f);

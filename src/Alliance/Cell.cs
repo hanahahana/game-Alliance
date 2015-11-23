@@ -18,6 +18,19 @@ namespace Alliance
   public class Cell : IComparable<Cell>
   {
     private BoxF mBounds;
+    private int mRow;
+    private int mColumn;
+    private string mKey;
+    private CellType mType;
+    private bool mIsPath;
+    private bool mIsOuter;
+    private bool mIsThroughway;
+    private int mDistance;
+    private Cell mParent;
+    private Piece mPiece;
+    private Cell[] mAdjacentCells;
+    private int mAdjacentCellsIdx;
+
     public BoxF Bounds
     {
       get { return mBounds; }
@@ -48,69 +61,62 @@ namespace Alliance
       set { mBounds.Height = value; }
     }
 
-    private int mRow;
     public int Row
     {
       get { return mRow; }
     }
 
-    private int mColumn;
     public int Column
     {
       get { return mColumn; }
     }
 
-    private string mKey;
     public string Key
     {
       get { return mKey; }
     }
 
-    private CellType mType;
     public CellType Type
     {
       get { return mType; }
-      set { mType = value; }
     }
 
-    private bool mIsPath;
     public bool IsPath
     {
       get { return mIsPath; }
       set { mIsPath = value; }
     }
 
-    private bool mIsOuter;
     public bool IsOuter
     {
       get { return mIsOuter; }
     }
 
-    private bool mIsThroughway;
     public bool IsThroughway
     {
       get { return mIsThroughway; }
     }
 
-    private int mDistance;
+    public Cell[] AdjacentCells
+    {
+      get { return mAdjacentCells; }
+    }
+
     public int Distance
     {
       get { return mDistance; }
       set { mDistance = value; }
     }
 
-    private Cell mParent;
     public Cell Parent
     {
       get { return mParent; }
       set { mParent = value; }
     }
 
-    private Piece mPiece;
     public Piece Piece
     {
       get { return mPiece; }
-      set { mPiece = value; }
     }
 
     public Cell(int column, int row, bool isOuter, bool isThroughway)
@@ -121,6 +127,8 @@ namespace Alliance
       mBounds = BoxF.Empty;
       mIsOuter = isOuter;
       mIsThroughway = isThroughway;
+      mAdjacentCells = new Cell[4];
+      mAdjacentCellsIdx = 0;
     }
 
     public override bool Equals(object obj)
@@ -149,9 +157,14 @@ namespace Alliance
 
     public void RemovePiece()
     {
-      mPiece.Remove(this);
       mType = CellType.Empty;
       mPiece = null;
+    }
+
+    public void SetPiece(Piece piece)
+    {
+      mType = CellType.Blocked;
+      mPiece = piece;
     }
 
     #region IComparable<Node> Members
@@ -168,6 +181,11 @@ namespace Alliance
       bool empty = (mType == CellType.Empty);
       AStarNode node = new AStarNode(X, Y, Width, Height, mColumn, mRow, empty && (!mIsOuter || mIsThroughway));
       return node;
+    }
+
+    public void Add(Cell adjacent)
+    {
+      mAdjacentCells[mAdjacentCellsIdx++] = adjacent;
     }
   }
 }
