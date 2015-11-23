@@ -24,10 +24,10 @@ namespace Alliance.Entities
   [Flags()]
   public enum EntityAttributes
   {
-    None,
-    SpeedBumpNoAffect,
-    Selected,
-    Follow,
+    None = 0,
+    SpeedBumpNoAffect = 2,
+    Selected = 4,
+    FireResistant = 6,
   };
 
   public abstract class Entity : ITextDisplay
@@ -263,7 +263,7 @@ namespace Alliance.Entities
       float retval = mMPS;
       if (mCurrentCell != null)
       {
-        if (mCurrentCell.Piece is SpeedBumpPiece && (Attributes & EntityAttributes.SpeedBumpNoAffect) == 0)
+        if (mCurrentCell.Piece is SpeedBumpPiece && (Attributes != EntityAttributes.SpeedBumpNoAffect))
         {
           // we go 1/4 as fast when over a speed bump
           retval *= .25f;
@@ -373,6 +373,16 @@ namespace Alliance.Entities
       return AllianceGame.TextureData["tank"];
     }
 
+    public virtual void OnAttackedByProjectile(Projectile projectile)
+    {
+      bool fireresistant = Attributes == EntityAttributes.FireResistant;
+      bool flameprojectile = projectile is FlameProjectile || projectile is FlamewaveProjectile;
+      if (!(fireresistant && flameprojectile))
+      {
+        CurrentLife -= projectile.Attack;
+      }
+    }
+
     public virtual DrawData GetDrawData(Vector2 offset)
     {
       Texture2D texture = GetEntityImage();
@@ -447,8 +457,8 @@ namespace Alliance.Entities
       DrawData data = GetDrawData(offset);
 
       // determine the color
-      Color color = (Attributes & EntityAttributes.SpeedBumpNoAffect) == 0 ? Color.White : Color.Red;
-      color = (Attributes & EntityAttributes.Selected) == 0 ? color : Color.LightGreen;
+      Color color = (Attributes != EntityAttributes.SpeedBumpNoAffect) ? Color.White : Color.Red;
+      color = (Attributes != EntityAttributes.FireResistant) ? color : Color.Black;
 
       //draw the entity itself
       spriteBatch.Draw(

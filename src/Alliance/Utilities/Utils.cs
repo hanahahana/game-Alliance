@@ -402,5 +402,14 @@ namespace Alliance.Utilities
         (sign < 0) ? minMax : value,
         (sign < 0) ? value : minMax);
     }
+
+    public static float Distance(Vector2 a, Vector2 b)
+    {
+      float dx = b.X - a.X;
+      float dy = b.Y - a.Y;
+
+      float sumOfSquares = (dx * dx) + (dy * dy);
+      return (float)Math.Sqrt(sumOfSquares);
+    }
   }
 }

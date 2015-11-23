@@ -132,6 +132,9 @@ namespace Alliance
       Textures.Add("shockwaveGenerator", LoadImage("Towers\\shockwaveGenerator"));
       Textures.Add("speedbump", LoadImage("Towers\\speedbump"));
       Textures.Add("sprinkler", LoadImage("Towers\\sprinkler"));
+      Textures.Add("teslaCoil", LoadImage("Towers\\teslaCoil"));
+      Textures.Add("machinegun", LoadImage("Towers\\machinegun"));
+      Textures.Add("flamethrower", LoadImage("Towers\\flamethrower"));
 
       // load the projectiles
       Textures.Add("rocket", LoadImage("Projectiles\\rocket"));
@@ -140,6 +143,9 @@ namespace Alliance
       Textures.Add("pulse", LoadImage("Projectiles\\pulse"));
       Textures.Add("debri", LoadImage("Projectiles\\debri"));
       Textures.Add("fragment", LoadImage("Projectiles\\fragment"));
+      Textures.Add("lightning", LoadImage("Projectiles\\lightning"));
+      Textures.Add("flame", LoadImage("Projectiles\\flame"));
+      Textures.Add("flamewave", LoadImage("Projectiles\\flamewave"));
     }
 
     private Texture2D LoadImage(string name)

@@ -142,6 +142,11 @@ namespace Alliance.Projectiles
       // do nothing here
     }
 
+    public virtual void OnCollidedWithEntity(Entity entity)
+    {
+      IsAlive = false;
+    }
+
     public virtual DrawData GetDrawData(Vector2 offset)
     {
       // get the projectile image and size

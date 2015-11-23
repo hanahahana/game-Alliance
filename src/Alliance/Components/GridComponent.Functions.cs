@@ -71,7 +71,7 @@ namespace Alliance.Components
       lstPieces.X = (int)(X + Width + ListDelta);
       lstPieces.Y = (int)(Y + MiddleOffset.Height);
       lstPieces.Width = (GraphicsDevice.Viewport.Width - (lstPieces.X + ListDelta));
-      lstPieces.Height = (int)(lstPieces.Width * .70f);
+      lstPieces.Height = (int)(lstPieces.Width * .80f);
       lstPieces.HideSelection = false;
 
       List<Piece> pieces = Utils.RetrieveAllSublcassesOf<Piece>();
@@ -455,8 +455,12 @@ namespace Alliance.Components
             {
               // get the most recent entity and attack it!
               Entity entity = cell.GetMostRecentRegisteredEntity();
-              projectile.IsAlive = false;
-              entity.CurrentLife -= projectile.Attack;
+
+              // let the projectile know it collided
+              projectile.OnCollidedWithEntity(entity);
+
+              // let the entity know it was attacked
+              entity.OnAttackedByProjectile(projectile);
 
               // if this entity is dead, then remove it from the cell
               if (entity.CurrentLife <= 0)
@@ -696,7 +700,7 @@ namespace Alliance.Components
 
     private void UpdateProjectiles(UpdateParams uparams)
     {
-      BoxF viewport = new BoxF(X, Y, Width, Height);
+      BoxF viewport = new BoxF(X - CellWidth, Y - CellHeight, Width + CellWidth, Height + CellHeight);
       for (int i = mProjectiles.Count - 1; i > -1; --i)
       {
         Projectile projectile = mProjectiles[i];

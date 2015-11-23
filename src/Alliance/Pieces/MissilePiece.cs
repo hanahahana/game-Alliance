@@ -25,8 +25,7 @@ namespace Alliance.Pieces
     public MissilePiece()
     {
       StringBuilder sb = new StringBuilder();
-      sb.Append("Slams multiple missiles into the enemy. They explode on contact and affect the surrounding pieces.");
-      sb.AppendLine(" Missiles are best with flying enemies.");
+      sb.Append("Slams multiple missiles into the enemy! They explode on contact and create debri.");
       mDescription = sb.ToString();
 
       mRadius = 80;

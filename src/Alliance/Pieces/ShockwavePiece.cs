@@ -60,7 +60,7 @@ namespace Alliance.Pieces
     public override float Radius
     {
       get { return mRadius; }
-      protected set { mRadius = value; }
+      protected set { ; }
     }
 
     public override float Attack

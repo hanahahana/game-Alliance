@@ -77,8 +77,11 @@ namespace Alliance.Pieces
       // if we have a target and we're supposed to be facing the target
       if (mTarget != null && FaceTarget)
       {
-        float dx = mTarget.X - X;
-        float dy = mTarget.Y - Y;
+        Vector2 targetCenter = mTarget.Position + (mTarget.Size.ToVector2() * .5f);
+        Vector2 myCenter = Position + (Size.ToVector2() * .5f);
+
+        float dx = targetCenter.X - myCenter.X;
+        float dy = targetCenter.Y - myCenter.Y;
 
         float desiredAngle = (float)Math.Atan2(dy, dx);
         float difference = Utils.WrapAngle(desiredAngle - mOrientation);
@@ -88,7 +91,7 @@ namespace Alliance.Pieces
       }
     }
 
-    private void FireProjectile()
+    protected void FireProjectile()
     {
       if (mTarget != null)
       {
@@ -122,22 +125,22 @@ namespace Alliance.Pieces
       Clear();
     }
 
-    private int UpgradePrice(float factor)
+    protected int UpgradePrice(float factor)
     {
       return (int)Math.Round(Price * factor);
     }
 
-    private float UpgradeAttack(float factor)
+    protected float UpgradeAttack(float factor)
     {
       return (float)Math.Round(Attack * factor);
     }
 
-    private float ComputeUpgradeFactor()
+    protected float ComputeUpgradeFactor()
     {
       return 1f + ((float)UpgradePercent / 100f);
     }
 
-    private float UpgradeRadius(float factor)
+    protected float UpgradeRadius(float factor)
     {
       return (Radius * factor);
     }

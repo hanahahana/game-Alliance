@@ -24,7 +24,7 @@ namespace Alliance.Pieces
     {
       StringBuilder sb = new StringBuilder();
       sb.Append("Slows the enemy down by threatening to destroy their transportation.");
-      sb.AppendLine(" Careful, some enemies can roll right over them without feeling anything! (for now they're red).");
+      sb.AppendLine(" Careful, some enemies can roll right over them!");
       mDescription = sb.ToString();
       mPrice = 5;
       mLevel = Piece.MaxLevel;

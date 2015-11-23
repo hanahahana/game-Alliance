@@ -77,6 +77,8 @@
     <Compile Include="ITextDisplay.cs" />
     <Compile Include="Components\InputProvider.cs" />
     <Compile Include="Components\MessageComponent.cs" />
+    <Compile Include="Pieces\FlameThrowerPiece.cs" />
+    <Compile Include="Pieces\MachineGunPiece.cs" />
     <Compile Include="Pieces\MissilePiece.cs" />
     <Compile Include="Pieces\Piece.cs" />
     <Compile Include="Pieces\Piece.Functions.cs" />
@@ -87,7 +89,12 @@
     <Compile Include="Pieces\SprinklerPiece.cs" />
     <Compile Include="Helpers\Player.cs" />
     <Compile Include="Components\PlayerHudComponent.cs" />
+    <Compile Include="Pieces\TeslaCoilPiece.cs" />
+    <Compile Include="Projectiles\BulletProjectile.cs" />
     <Compile Include="Projectiles\DebriProjectile.cs" />
+    <Compile Include="Projectiles\FlameProjectile.cs" />
+    <Compile Include="Projectiles\FlamewaveProjectile.cs" />
+    <Compile Include="Projectiles\LightningProjectile.cs" />
     <Compile Include="Projectiles\MissileProjectile.cs" />
     <Compile Include="Projectiles\Projectile.cs" />
     <Compile Include="Projectiles\RailgunProjectile.cs" />

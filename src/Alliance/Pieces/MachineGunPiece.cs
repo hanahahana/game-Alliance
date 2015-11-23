@@ -11,10 +11,10 @@ using Alliance.Helpers;
 
 namespace Alliance.Pieces
 {
-  public class RailgunPiece : Piece
+  public class MachineGunPiece : Piece
   {
-    private const string RailgunName = "Rail Gun";
-    private const string UltimateRailgunName = "Annihilator";
+    private const string MachineGunName = "Machine Gun";
+    private const string UltimateMachineGunName = "Destroyer";
 
     private string mDescription;
     private float mRadius;
@@ -22,19 +22,21 @@ namespace Alliance.Pieces
     private int mPrice;
     private int mUpgradePercent;
 
-    public RailgunPiece()
+    public MachineGunPiece()
     {
       StringBuilder sb = new StringBuilder();
-      sb.AppendLine("Fires an electrical pulse at the enemy. This can shoot very far, and is extremely powerful, but isn't very fast.");
+      sb.Append("Fires a constant stream of bullets at the enemy. These are very very weak, but very very fast.");
       mDescription = sb.ToString();
 
-      mRadius = 180;
-      mAttack = 2500f;
-      mProjectilesPerSecond = .25f;
-      mNumberProjectilesToFire = 3;
-      mProjectileLifeInSeconds = 5.5f;
-      mUpgradePercent = 15;
-      mPrice = 250;
+      mRadius = 100;
+      mAttack = 20;
+
+      mNumberProjectilesToFire = 2;
+      mUpgradePercent = 20;
+      mPrice = 10;
+
+      mProjectilesPerSecond = 15;
+      mProjectileLifeInSeconds = 3.4567f;
     }
 
     public override string Description
@@ -44,12 +46,12 @@ namespace Alliance.Pieces
 
     public override string Name
     {
-      get { return RailgunName; }
+      get { return MachineGunName; }
     }
 
     public override string UltimateName
     {
-      get { return UltimateRailgunName; }
+      get { return UltimateMachineGunName; }
     }
 
     public override PieceGrouping Grouping
@@ -80,21 +82,40 @@ namespace Alliance.Pieces
       get { return mUpgradePercent; }
     }
 
+    protected override void FinalizeUpgrade()
+    {
+      base.FinalizeUpgrade();
+      if (mLevel == MaxLevel - 1)
+      {
+        mUpgradePercent = 20000;
+      }
+
+      if (mLevel == MaxLevel)
+      {
+        mRadius = 250;
+      }
+    }
+
+    protected override void UpgradeProjectileVariables(float factor)
+    {
+      // don't upgrade the projectile variables
+    }
+
     protected override Piece CreatePiece(Cell[] cells)
     {
-      RailgunPiece piece = new RailgunPiece();
+      MachineGunPiece piece = new MachineGunPiece();
       return piece;
     }
 
     protected override Projectile CreateProjectile()
     {
-      RailgunProjectile projectile = new RailgunProjectile(ProjectileLifeSeconds);
+      BulletProjectile projectile = new BulletProjectile(mProjectileLifeInSeconds);
       return projectile;
     }
 
     protected override Texture2D GetTowerImage()
     {
-      return AllianceGame.Textures["railgun"];
+      return AllianceGame.Textures["machinegun"];
     }
   }
 }

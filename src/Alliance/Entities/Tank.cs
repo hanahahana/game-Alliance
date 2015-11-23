@@ -38,6 +38,8 @@ namespace Alliance.Entities
     {
       // set the attributes
       mAttributes = RandomHelper.NextRareBool() ? EntityAttributes.SpeedBumpNoAffect : EntityAttributes.None;
+      if (mAttributes == EntityAttributes.None)
+        mAttributes = RandomHelper.NextRareBool() ? EntityAttributes.FireResistant : mAttributes;
 
       // determine the level
       mLevel = RandomHelper.Next(MaxEntityLevel) + 1;
