@@ -6,92 +6,42 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using Alliance.Data;
-using Alliance.Projectiles;
 using Alliance.Utilities;
-using Alliance.Helpers;
+using Alliance.Entities;
+using Alliance.Projectiles;
+using Alliance.Parameters;
+using Alliance.Objects;
 
 namespace Alliance.Pieces
 {
   public class SpeedBumpPiece : Piece
   {
     private const string SpeedBumpName = "Speed Bump";
-    private string mDescription;
-    private float mRadius;
-    private float mAttack;
-    private int mPrice;
 
     public SpeedBumpPiece()
     {
+      // setup the description
       StringBuilder sb = new StringBuilder();
       sb.Append("Slows the enemy down by threatening to destroy their transportation.");
       sb.AppendLine(" Careful, some enemies can roll right over them!");
+
+      // set the properties of the piece
       mDescription = sb.ToString();
       mPrice = 5;
       mLevel = Piece.MaxLevel;
       mRadius = 20;
       mAttack = .5f;
       mPriceAtLevels[Piece.MaxLevel - 1] = mPrice;
+      mUpgradePercent = 0;
+      mFaceTarget = false;
+      mIsBlocking = false;
+      mCanFireProjectiles = false;
+      mName = SpeedBumpName;
+      mUltimateName = SpeedBumpName;
+      mGrouping = PieceGrouping.One;
     }
 
-    public override bool IsBlocking
-    {
-      get { return false; }
-    }
-
-    public override string Description
-    {
-      get { return mDescription; }
-    }
-
-    public override string Name
-    {
-      get { return SpeedBumpName; }
-    }
-
-    public override string UltimateName
-    {
-      get { return SpeedBumpName; }
-    }
-
-    public override PieceGrouping Grouping
-    {
-      get { return PieceGrouping.One; }
-    }
-
-    public override float Radius
-    {
-      get { return mRadius; }
-      protected set { mRadius = value; }
-    }
-
-    public override float Attack
-    {
-      get { return mAttack; }
-      protected set { mAttack = value; }
-    }
-
-    public override int Price
-    {
-      get { return mPrice; }
-      protected set { mPrice = value; }
-    }
-
-    public override int UpgradePercent
-    {
-      get { return 0; }
-    }
-
-    public override bool FaceTarget
-    {
-      get { return false; }
-    }
-
-    protected override bool CanFireProjectiles
-    {
-      get { return false; }
-    }
-
-    protected override Piece CreatePiece(Cell[] cells)
+    protected override Piece CreatePiece(GridCell[] cells)
     {
       SpeedBumpPiece piece = new SpeedBumpPiece();
       return piece;

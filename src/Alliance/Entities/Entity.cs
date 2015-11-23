@@ -10,7 +10,7 @@ using Alliance.Utilities;
 using Alliance.Pieces;
 using Alliance.Projectiles;
 using Alliance.Parameters;
-using Alliance.Helpers;
+using Alliance.Objects;
 
 namespace Alliance.Entities
 {
@@ -61,9 +61,9 @@ namespace Alliance.Entities
         new Vector2(MaxEntityLevel, MaxMovementPerSecond) 
       });
 
-    protected Cell mTargetCell;
-    protected Cell mCurrentCell;
-    protected Cell mGoalCell;
+    protected GridCell mTargetCell;
+    protected GridCell mCurrentCell;
+    protected GridCell mGoalCell;
     protected BoxF mBounds;
     protected float mOrientation;
     protected EntityState mState;
@@ -78,12 +78,12 @@ namespace Alliance.Entities
     public abstract EntityAttributes Attributes { get; set; }
     public abstract int Cash { get; }
 
-    public Cell TargetCell
+    public GridCell TargetCell
     {
       get { return mTargetCell; }
     }
 
-    public Cell CurrentCell
+    public GridCell CurrentCell
     {
       get { return mCurrentCell; }
     }
@@ -162,7 +162,7 @@ namespace Alliance.Entities
       get { return mID; }
     }
 
-    public Entity(Cell startCell, Cell goalCell, DijkstraType dijkstraKey)
+    public Entity(GridCell startCell, GridCell goalCell, DijkstraType dijkstraKey)
     {
       mTargetCell = startCell;
       mGoalCell = goalCell;
@@ -201,7 +201,7 @@ namespace Alliance.Entities
     private bool PieceIsOnCurrentCell(Piece piece)
     {
       bool retval = false;
-      foreach (Cell cell in piece.Cells)
+      foreach (GridCell cell in piece.Cells)
       {
         if (cell.Equals(mCurrentCell) || cell.Equals(mTargetCell))
         {
@@ -513,7 +513,6 @@ namespace Alliance.Entities
       text.AppendLine(string.Format("Speed: {0}", MPS));
       text.AppendLine(string.Format("Level: {0}", mLevel));
       text.AppendLine(string.Format("Status: {0}", mState));
-      text.AppendLine(string.Format("{0}", Position));
       return text.ToString();
     }
 

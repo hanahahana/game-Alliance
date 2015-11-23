@@ -7,8 +7,10 @@ using Microsoft.Xna.Framework.Graphics;
 
 using Alliance.Data;
 using Alliance.Utilities;
+using Alliance.Entities;
 using Alliance.Projectiles;
-using Alliance.Helpers;
+using Alliance.Parameters;
+using Alliance.Objects;
 
 namespace Alliance.Pieces
 {
@@ -17,75 +19,26 @@ namespace Alliance.Pieces
     private const string ShockwaveName = "Shockwave";
     private const string UltimateShockwaveName = "Earthquake";
 
-    private string mDescription;
-    private float mRadius;
-    private float mAttack;
-    private int mPrice;
-    private int mUpgradePercent;
-
     public ShockwavePiece()
     {
+      // setup the description
       StringBuilder sb = new StringBuilder();
       sb.AppendLine("Creates a shockwave to send at the enemy! The shockwave grows as time passes.");
-      mDescription = sb.ToString();
 
+      // set the properties of the piece
+      mDescription = sb.ToString();
       mRadius = 50;
       mAttack = 10000f;
       mProjectilesPerSecond = .25f;
       mNumberProjectilesToFire = 3;
       mUpgradePercent = 15;
       mPrice = 540;
+      mFaceTarget = false;
+      mName = ShockwaveName;
+      mUltimateName = UltimateShockwaveName;
     }
 
-    public override string Description
-    {
-      get { return mDescription; }
-    }
-
-    public override string Name
-    {
-      get { return ShockwaveName; }
-    }
-
-    public override string UltimateName
-    {
-      get { return UltimateShockwaveName; }
-    }
-
-    public override PieceGrouping Grouping
-    {
-      get { return PieceGrouping.Two; }
-    }
-
-    public override float Radius
-    {
-      get { return mRadius; }
-      protected set { ; }
-    }
-
-    public override float Attack
-    {
-      get { return mAttack; }
-      protected set { mAttack = value; }
-    }
-
-    public override int Price
-    {
-      get { return mPrice; }
-      protected set { mPrice = value; }
-    }
-
-    public override int UpgradePercent
-    {
-      get { return mUpgradePercent; }
-    }
-
-    public override bool FaceTarget
-    {
-      get { return false; }
-    }
-
-    protected override Piece CreatePiece(Cell[] cells)
+    protected override Piece CreatePiece(GridCell[] cells)
     {
       ShockwavePiece piece = new ShockwavePiece();
       return piece;

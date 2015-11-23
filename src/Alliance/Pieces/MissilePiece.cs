@@ -5,9 +5,12 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-using Alliance.Projectiles;
 using Alliance.Data;
-using Alliance.Helpers;
+using Alliance.Utilities;
+using Alliance.Entities;
+using Alliance.Projectiles;
+using Alliance.Parameters;
+using Alliance.Objects;
 
 namespace Alliance.Pieces
 {
@@ -16,70 +19,24 @@ namespace Alliance.Pieces
     private const string MissileName = "Missile";
     private const string UltimateMissileName = "Missile Blaster";
 
-    private string mDescription;
-    private float mRadius;
-    private float mAttack;
-    private int mPrice;
-    private int mUpgradePercent;
-
     public MissilePiece()
     {
+      // setup the description
       StringBuilder sb = new StringBuilder();
       sb.Append("Slams multiple missiles into the enemy! They explode on contact and create debri.");
-      mDescription = sb.ToString();
 
+      // set the properties of the piece
+      mDescription = sb.ToString();
       mRadius = 80;
       mAttack = 50f;
-
       mNumberProjectilesToFire = 2;
       mUpgradePercent = 15;
       mPrice = 15;
+      mName = MissileName;
+      mUltimateName = UltimateMissileName;
     }
 
-    public override string Description
-    {
-      get { return mDescription; }
-    }
-
-    public override string Name
-    {
-      get { return MissileName; }
-    }
-
-    public override string UltimateName
-    {
-      get { return UltimateMissileName; }
-    }
-
-    public override PieceGrouping Grouping
-    {
-      get { return PieceGrouping.Two; }
-    }
-
-    public override float Radius
-    {
-      get { return mRadius; }
-      protected set { mRadius = value; }
-    }
-
-    public override float Attack
-    {
-      get { return mAttack; }
-      protected set { mAttack = value; }
-    }
-
-    public override int Price
-    {
-      get { return mPrice; }
-      protected set { mPrice = value; }
-    }
-
-    public override int UpgradePercent
-    {
-      get { return mUpgradePercent; }
-    }
-
-    protected override Piece CreatePiece(Cell[] cells)
+    protected override Piece CreatePiece(GridCell[] cells)
     {
       MissilePiece piece = new MissilePiece();
       return piece;
@@ -87,7 +44,7 @@ namespace Alliance.Pieces
 
     protected override Projectile CreateProjectile()
     {
-      MissileProjectile projectile = new MissileProjectile(base.ProjectileLifeSeconds);
+      MissileProjectile projectile = new MissileProjectile(ProjectileLifeInSeconds);
       return projectile;
     }
 

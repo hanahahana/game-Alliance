@@ -21,6 +21,7 @@ namespace Alliance
     private GraphicsDeviceManager graphics;
     private GraphicsDevice device;
     private SpriteBatch spriteBatch;
+    private ResourceContentManager contentManager;
 
     private MessageComponent messages;
     private GridComponent grid;
@@ -30,13 +31,12 @@ namespace Alliance
     public static Dictionary<string, Texture2D> Textures = null;
     public static Dictionary<string, Color[,]> TextureData = null;
     public static Dictionary<string, SpriteFont> Fonts = null;
-    public static SoundBank Sounds = null;
-
-    private AudioEngine audioEngine;
-    private WaveBank waveBank;
 
     public AllianceGame()
     {
+      contentManager = new ResourceContentManager(Services, ContentResources.ResourceManager);
+      contentManager.RootDirectory = "Resources";
+
       graphics = new GraphicsDeviceManager(this);
       Content.RootDirectory = "Content";
 
@@ -91,20 +91,8 @@ namespace Alliance
       device = GraphicsDevice;
       spriteBatch = new SpriteBatch(device);
 
-      audioEngine = new AudioEngine("Content\\Sounds\\SoundsProj.xgs");
-      waveBank = new WaveBank(audioEngine, "Content\\Sounds\\Wave Bank.xwb");
-      Sounds = new SoundBank(audioEngine, "Content\\Sounds\\Sound Bank.xsb");
-
       // run through the components
       base.LoadContent();
-    }
-
-    private void LoadFonts()
-    {
-      Fonts["ComicSans"] = LoadFont("ComicSans");
-      Fonts["Tahoma"] = LoadFont("Tahoma");
-      Fonts["Verdana"] = LoadFont("Verdana");
-      Fonts["Georgia"] = LoadFont("Georgia");
     }
 
     private void LoadImageData()
@@ -116,46 +104,54 @@ namespace Alliance
       }
     }
 
+    private void LoadFonts()
+    {
+      Fonts["ComicSans"] = LoadFont("ComicSans");
+      Fonts["Tahoma"] = LoadFont("Tahoma");
+      Fonts["Verdana"] = LoadFont("Verdana");
+      Fonts["Georgia"] = LoadFont("Georgia");
+    }
+
     private void LoadImages()
     {
       // load the bases
-      Textures.Add("towerBase", LoadImage("Bases\\towerBase"));
+      Textures.Add("towerBase", LoadImage("towerBase"));
 
       // load the enemies
-      Textures.Add("tank", LoadImage("Enemies\\tank"));
-      Textures.Add("mouse", LoadImage("Enemies\\mouse"));
+      Textures.Add("tank", LoadImage("tank"));
+      Textures.Add("mouse", LoadImage("mouse"));
 
       // load the towers
-      Textures.Add("railgun", LoadImage("Towers\\railgun"));
-      Textures.Add("turret", LoadImage("Towers\\turret"));
-      Textures.Add("missileLauncher", LoadImage("Towers\\missileLauncher"));
-      Textures.Add("shockwaveGenerator", LoadImage("Towers\\shockwaveGenerator"));
-      Textures.Add("speedbump", LoadImage("Towers\\speedbump"));
-      Textures.Add("sprinkler", LoadImage("Towers\\sprinkler"));
-      Textures.Add("teslaCoil", LoadImage("Towers\\teslaCoil"));
-      Textures.Add("machinegun", LoadImage("Towers\\machinegun"));
-      Textures.Add("flamethrower", LoadImage("Towers\\flamethrower"));
+      Textures.Add("railgun", LoadImage("railgun"));
+      Textures.Add("turret", LoadImage("turret"));
+      Textures.Add("missileLauncher", LoadImage("missileLauncher"));
+      Textures.Add("shockwaveGenerator", LoadImage("shockwaveGenerator"));
+      Textures.Add("speedbump", LoadImage("speedbump"));
+      Textures.Add("sprinkler", LoadImage("sprinkler"));
+      Textures.Add("teslaCoil", LoadImage("teslaCoil"));
+      Textures.Add("machinegun", LoadImage("machinegun"));
+      Textures.Add("flamethrower", LoadImage("flamethrower"));
 
       // load the projectiles
-      Textures.Add("rocket", LoadImage("Projectiles\\rocket"));
-      Textures.Add("bullet", LoadImage("Projectiles\\bullet"));
-      Textures.Add("wave", LoadImage("Projectiles\\wave"));
-      Textures.Add("pulse", LoadImage("Projectiles\\pulse"));
-      Textures.Add("debri", LoadImage("Projectiles\\debri"));
-      Textures.Add("fragment", LoadImage("Projectiles\\fragment"));
-      Textures.Add("lightning", LoadImage("Projectiles\\lightning"));
-      Textures.Add("flame", LoadImage("Projectiles\\flame"));
-      Textures.Add("flamewave", LoadImage("Projectiles\\flamewave"));
+      Textures.Add("rocket", LoadImage("rocket"));
+      Textures.Add("bullet", LoadImage("bullet"));
+      Textures.Add("wave", LoadImage("wave"));
+      Textures.Add("pulse", LoadImage("pulse"));
+      Textures.Add("debri", LoadImage("debri"));
+      Textures.Add("fragment", LoadImage("fragment"));
+      Textures.Add("lightning", LoadImage("lightning"));
+      Textures.Add("flame", LoadImage("flame"));
+      Textures.Add("flamewave", LoadImage("flamewave"));
     }
 
     private Texture2D LoadImage(string name)
     {
-      return Content.Load<Texture2D>(string.Format("Images\\{0}", name));
+      return contentManager.Load<Texture2D>(string.Format("{0}", name));
     }
 
     private SpriteFont LoadFont(string name)
     {
-      return Content.Load<SpriteFont>(string.Format("Fonts\\{0}", name));
+      return contentManager.Load<SpriteFont>(string.Format("{0}", name));
     }
 
     /// <summary>
@@ -174,7 +170,6 @@ namespace Alliance
     /// <param name="gameTime">Provides a snapshot of timing values.</param>
     protected override void Update(GameTime gameTime)
     {
-      audioEngine.Update();
       base.Update(gameTime);
     }
 

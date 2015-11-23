@@ -5,90 +5,44 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-using Alliance.Utilities;
 using Alliance.Data;
+using Alliance.Utilities;
+using Alliance.Entities;
 using Alliance.Projectiles;
-using Alliance.Helpers;
+using Alliance.Parameters;
+using Alliance.Objects;
 
 namespace Alliance.Pieces
 {
   public class SprinklerPiece : Piece
   {
-    const float RadiansPerSecond = 5.5f;
-    const float TotalSeconds = MathHelper.TwoPi / RadiansPerSecond;
-
     private const string SprinklerName = "Sprinkler";
     private const string UltimateSprinklerName = "Sprayer";
 
-    private string mDescription;
-    private float mRadius;
-    private float mAttack;
-    private int mPrice;
-    private int mUpgradePercent;
+    private const float RadiansPerSecond = 5.5f;
+    private const float TotalSeconds = MathHelper.TwoPi / RadiansPerSecond;
+
     private float mPiePieces;
-
-    public override string Description
-    {
-      get { return mDescription; }
-    }
-
-    public override string Name
-    {
-      get { return SprinklerName; }
-    }
-
-    public override string UltimateName
-    {
-      get { return UltimateSprinklerName; }
-    }
-
-    public override PieceGrouping Grouping
-    {
-      get { return PieceGrouping.One; }
-    }
-
-    public override float Radius
-    {
-      get { return mRadius; }
-      protected set { mRadius = value; }
-    }
-
-    public override float Attack
-    {
-      get { return mAttack; }
-      protected set { mAttack = value; }
-    }
-
-    public override int Price
-    {
-      get { return mPrice; }
-      protected set { mPrice = value; }
-    }
-
-    public override int UpgradePercent
-    {
-      get { return mUpgradePercent; }
-    }
-
-    public override bool FaceTarget
-    {
-      get { return false; }
-    }
 
     public SprinklerPiece()
     {
+      // setup the description
       StringBuilder sb = new StringBuilder();
       sb.AppendLine("Sprinkles projectiles around. This tower doesn't aim, just shoots. Good for closing up loose holes in paths.");
-      mDescription = sb.ToString();
 
+      // set the properties of the piece
+      mDescription = sb.ToString();
       mRadius = 20;
       mAttack = 25;
-
       mPiePieces = 2;
       mProjectilesPerSecond = TotalSeconds * mPiePieces;
       mNumberProjectilesToFire = 1;
       mUpgradePercent = 15;
       mPrice = 100;
+      mFaceTarget = false;
+      mName = SprinklerName;
+      mUltimateName = UltimateSprinklerName;
+      mGrouping = PieceGrouping.One;
     }
 
     public override void Update(GameTime gameTime)
@@ -127,7 +81,7 @@ namespace Alliance.Pieces
       }
     }
 
-    protected override Piece CreatePiece(Cell[] cells)
+    protected override Piece CreatePiece(GridCell[] cells)
     {
       SprinklerPiece piece = new SprinklerPiece();
       return piece;

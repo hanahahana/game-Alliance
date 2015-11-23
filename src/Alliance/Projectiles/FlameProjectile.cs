@@ -18,7 +18,7 @@ namespace Alliance.Projectiles
     public FlameProjectile(double timeToLiveInSeconds)
       : base(timeToLiveInSeconds)
     {
-      Size = new SizeF(50f, 40f);
+      Size = new SizeF(40f, 40f);
     }
 
     public override void Update(GameTime gameTime)
@@ -35,7 +35,7 @@ namespace Alliance.Projectiles
 
     public override void UpdateByFrameCount(int frameCount)
     {
-      Position += ((frameCount + 1) * Velocity * MovementPerSecond * 12);
+      Position += ((frameCount + 1) * Velocity * MovementPerSecond * 20f);
     }
 
     protected override Texture2D GetProjectileImage()

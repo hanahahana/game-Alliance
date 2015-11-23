@@ -10,7 +10,7 @@ using Alliance.Utilities;
 using Alliance.Entities;
 using Alliance.Projectiles;
 using Alliance.Parameters;
-using Alliance.Helpers;
+using Alliance.Objects;
 
 namespace Alliance.Pieces
 {
@@ -21,15 +21,16 @@ namespace Alliance.Pieces
     public const float ProgressPerSecond = 50f;
     public const float Delta = 5f;
     public const float Delta2 = Delta * 2;
-    public const float DefaultProjectilesPerSecond = 2.5f;
-    public const float DefaultProjectileVelocity = .5f;
-    public const float DefaultProjectileLifeInSeconds = 1f;
-    public const float DefaultTurnSpeed = .2f;
-    public const int DefaultNumberProjectilesToFire = 1;
+
+    protected const float DefaultProjectilesPerSecond = 2.5f;
+    protected const float DefaultProjectileVelocity = .5f;
+    protected const float DefaultProjectileLifeInSeconds = 1f;
+    protected const float DefaultTurnSpeed = 1.5f;
+    protected const int DefaultNumberProjectilesToFire = 1;
 
     protected int[] mPriceAtLevels = new int[MaxLevel + 1];
     protected Vector2 mPosition;
-    protected Cell[] mCells;
+    protected GridCell[] mCells;
     protected SizeF mSize;
     protected bool mSelected;
     protected PieceState mState;
@@ -39,32 +40,40 @@ namespace Alliance.Pieces
     protected float mOrientation;
     protected float mElapsedProjectileSeconds;
     protected List<Projectile> mQueuedProjectiles = new List<Projectile>(50);
+
+    protected string mDescription = string.Empty;
+    protected float mRadius = 15f;
+    protected float mAttack = 15f;
+    protected int mPrice = 15;
+    protected int mUpgradePercent = 15;
+    protected bool mFaceTarget = true;
+    protected bool mIsBlocking = true;
+    protected bool mCanFireProjectiles = true;
+    protected float mTurnSpeed = DefaultTurnSpeed;
+    protected string mName = string.Empty;
+    protected string mUltimateName = string.Empty;
+    protected PieceGrouping mGrouping = PieceGrouping.Two;
     protected float mProjectilesPerSecond = DefaultProjectilesPerSecond;
     protected float mProjectileVelocity = DefaultProjectileVelocity;
     protected float mProjectileLifeInSeconds = DefaultProjectileLifeInSeconds;
     protected int mNumberProjectilesToFire = DefaultNumberProjectilesToFire;
 
-    public abstract string Description { get; }
-    public abstract string Name { get; }
-    public abstract string UltimateName { get; }
-    public abstract PieceGrouping Grouping { get; }
-    public abstract float Radius { get; protected set; }
-    public abstract float Attack { get; protected set; }
-    public abstract int Price { get; protected set; }
-    public abstract int UpgradePercent { get; }
-
-    public virtual bool IsBlocking { get { return true; } }
-    public virtual bool FaceTarget { get { return true; } }
-
+    public virtual string Description { get { return mDescription; } }
+    public virtual string Name { get { return mName; } }
+    public virtual string UltimateName { get { return mUltimateName; } }
+    public virtual PieceGrouping Grouping { get { return mGrouping; } }
+    public virtual float Radius { get { return mRadius; } }
+    public virtual float Attack { get { return mAttack; } }
+    public virtual int Price { get { return mPrice; } }
+    public virtual int UpgradePercent { get { return mUpgradePercent; } }
+    public virtual bool IsBlocking { get { return mIsBlocking; } }
+    public virtual bool FaceTarget { get { return mFaceTarget; } }
     public virtual float ProjectilesPerSecond { get { return mProjectilesPerSecond; } }
     public virtual float ProjectileVelocity { get { return mProjectileVelocity; } }
-    public virtual float ProjectileLifeSeconds { get { return mProjectileLifeInSeconds; } }
+    public virtual float ProjectileLifeInSeconds { get { return mProjectileLifeInSeconds; } }
     public virtual int NumberProjectilesToFire { get { return mNumberProjectilesToFire; } }
 
-    protected virtual float TurnSpeed { get { return DefaultTurnSpeed; } }
-    protected virtual bool CanFireProjectiles { get { return true; } }
-
-    protected abstract Piece CreatePiece(Cell[] cells);
+    protected abstract Piece CreatePiece(GridCell[] cells);
 
     protected void SavePriceInfo()
     {
@@ -86,7 +95,7 @@ namespace Alliance.Pieces
         float desiredAngle = (float)Math.Atan2(dy, dx);
         float difference = Utils.WrapAngle(desiredAngle - mOrientation);
 
-        difference = MathHelper.Clamp(difference, -TurnSpeed, TurnSpeed);
+        difference = MathHelper.Clamp(difference, -mTurnSpeed, mTurnSpeed);
         mOrientation = Utils.WrapAngle(mOrientation + difference);
       }
     }
@@ -114,7 +123,7 @@ namespace Alliance.Pieces
 
     protected virtual Projectile CreateProjectile()
     {
-      Projectile projectile = new Projectile(ProjectileLifeSeconds);
+      Projectile projectile = new Projectile(ProjectileLifeInSeconds);
       return projectile;
     }
 
@@ -154,9 +163,9 @@ namespace Alliance.Pieces
       float factor = ComputeUpgradeFactor();
 
       // upgrade the attack, price and the radius
-      Attack = UpgradeAttack(factor);
-      Radius = UpgradeRadius(factor);
-      Price = UpgradePrice(factor);
+      mAttack = UpgradeAttack(factor);
+      mRadius = UpgradeRadius(factor);
+      mPrice = UpgradePrice(factor);
 
       // set the price
       SavePriceInfo();
@@ -212,7 +221,7 @@ namespace Alliance.Pieces
       TurnToFaceTarget();
 
       // if we can fire projectiles
-      if (CanFireProjectiles)
+      if (mCanFireProjectiles)
       {
         // update the projectiles per second
         mElapsedProjectileSeconds += (float)(ProjectilesPerSecond * gameTime.ElapsedGameTime.TotalSeconds);

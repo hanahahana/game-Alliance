@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.Xna.Framework.Graphics;
-using Alliance.Helpers;
-using Alliance.Projectiles;
-using Alliance.Data;
+
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+
+using Alliance.Data;
 using Alliance.Utilities;
+using Alliance.Entities;
+using Alliance.Projectiles;
+using Alliance.Parameters;
+using Alliance.Objects;
 
 namespace Alliance.Pieces
 {
@@ -15,76 +19,24 @@ namespace Alliance.Pieces
     private const string FlameThrowerPieceName = "Flame Thrower";
     private const string UltimateFlameThrowerPieceName = "Flamewave";
 
-    private string mDescription;
-    private float mRadius;
-    private float mAttack;
-    private int mPrice;
-    private int mUpgradePercent;
-    private bool mFaceTarget = true;
-
     public FlameThrowerPiece()
     {
+      // setup the description
       StringBuilder sb = new StringBuilder();
       sb.Append("Ignites gasoline to produce a constant flame. Careful, some enemies can't be burned.");
-      mDescription = sb.ToString();
 
+      // set the properties of the piece
+      mDescription = sb.ToString();
       mRadius = 70;
       mAttack = 9000000;
-
       mNumberProjectilesToFire = 1;
       mUpgradePercent = 20;
       mPrice = 10;
-
       mProjectilesPerSecond = 20;
-      mProjectileLifeInSeconds = .0876f;
-    }
-
-    public override string Description
-    {
-      get { return mDescription; }
-    }
-
-    public override string Name
-    {
-      get { return FlameThrowerPieceName; }
-    }
-
-    public override string UltimateName
-    {
-      get { return UltimateFlameThrowerPieceName; }
-    }
-
-    public override PieceGrouping Grouping
-    {
-      get { return PieceGrouping.Four; }
-    }
-
-    public override float Radius
-    {
-      get { return mRadius; }
-      protected set { ; }
-    }
-
-    public override float Attack
-    {
-      get { return mAttack; }
-      protected set { mAttack = value; }
-    }
-
-    public override bool FaceTarget
-    {
-      get { return mFaceTarget; }
-    }
-
-    public override int Price
-    {
-      get { return mPrice; }
-      protected set { mPrice = value; }
-    }
-
-    public override int UpgradePercent
-    {
-      get { return mUpgradePercent; }
+      mProjectileLifeInSeconds = .1876f;
+      mName = FlameThrowerPieceName;
+      mUltimateName = UltimateFlameThrowerPieceName;
+      mGrouping = PieceGrouping.Four;
     }
 
     protected override Texture2D GetTowerImage()
@@ -110,12 +62,12 @@ namespace Alliance.Pieces
         mOrientation = 0;
         mFaceTarget = false;
 
-        mNumberProjectilesToFire = 3;
-        mProjectileLifeInSeconds = DefaultProjectileLifeInSeconds * 2;
+        mNumberProjectilesToFire = 1;
+        mProjectileLifeInSeconds = DefaultProjectileLifeInSeconds * 5;
         mRadius = 100;
 
         mProjectilesPerSecond = 10;
-        mProjectileLifeInSeconds = .1676f;
+        mProjectileLifeInSeconds = 9.1676f;
 
         StringBuilder sb = new StringBuilder();
         sb.AppendLine("Rotates to gain energy and releases a VERY powerful flame wave. Careful, some enemies can't be burned.");
@@ -125,10 +77,10 @@ namespace Alliance.Pieces
 
     protected override void UpgradeProjectileVariables(float factor)
     {
-      
+      // don't uprade the variables
     }
 
-    protected override Piece CreatePiece(Cell[] cells)
+    protected override Piece CreatePiece(GridCell[] cells)
     {
       FlameThrowerPiece piece = new FlameThrowerPiece();
       return piece;

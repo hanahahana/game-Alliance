@@ -24,7 +24,7 @@ using Alliance.Pieces;
 using Alliance.Entities;
 using Alliance.Projectiles;
 using Alliance.Parameters;
-using Alliance.Helpers;
+using Alliance.Objects;
 
 namespace Alliance.Components
 {
@@ -35,15 +35,15 @@ namespace Alliance.Components
     private const int HalfThroughWay = 6;
     private const int OrthogonalCost = 12;
 
-    private Cell[,] Cells;
+    private GridCell[,] Cells;
     private int NumRows;
     private int NumCols;
     private int Width;
     private int Height;
-    private Cell HorzGoalCell;
-    private Cell VertGoalCell;
-    private Cell HorzStartCell;
-    private Cell VertStartCell;
+    private GridCell HorzGoalCell;
+    private GridCell VertGoalCell;
+    private GridCell HorzStartCell;
+    private GridCell VertStartCell;
     private SizeF MiddleOffset;
     private SpriteBatch mSpriteBatch;
     private Vector2 mPosition;
@@ -131,6 +131,8 @@ namespace Alliance.Components
       base.Update(gameTime);
     }
 
+    List<BoxF> boxes = new List<BoxF>();
+
     public override void Draw(GameTime gameTime)
     {
       DrawParams dparams = new DrawParams(gameTime, (Vector2)MiddleOffset + mPosition, mSpriteBatch);
@@ -140,6 +142,12 @@ namespace Alliance.Components
       DrawPieces(dparams);
       DrawInvaders(dparams);
       DrawProjectiles(dparams);
+
+      for (int i = boxes.Count - 1; i > -1; --i)
+      {
+        Shapes.DrawRectangle(mSpriteBatch, boxes[i], Color.Black);
+        boxes.RemoveAt(i);
+      }
 
       mSpriteBatch.End();
 
@@ -154,14 +162,14 @@ namespace Alliance.Components
       SolveGrid(VertGoalCell, DijkstraType.Vertical);
     }
 
-    private void SolveGrid(Cell goalCell, DijkstraType dijkstraType)
+    private void SolveGrid(GridCell goalCell, DijkstraType dijkstraType)
     {
-      List<Cell> Q = new List<Cell>(Cells.Length);
+      List<GridCell> Q = new List<GridCell>(Cells.Length);
       for (int c = 0; c < NumCols; ++c)
       {
         for (int r = 0; r < NumRows; ++r)
         {
-          Cell v = Cells[c, r];
+          GridCell v = Cells[c, r];
           if (!IsIllegal(v))
           {
             v[dijkstraType].Reset();
@@ -176,10 +184,10 @@ namespace Alliance.Components
       while (Q.Count > 0)
       {
         // extra the minimum value
-        Cell u = ExtractMin(dijkstraType, ref Q);
+        GridCell u = ExtractMin(dijkstraType, ref Q);
 
         // relax each of the neighbors
-        foreach (Cell v in u.AdjacentCells)
+        foreach (GridCell v in u.AdjacentCells)
         {
           if (v == null || IsIllegal(v)) continue;
           Relax(dijkstraType, v, u);
@@ -187,7 +195,7 @@ namespace Alliance.Components
       }
     }
 
-    private Cell ExtractMin(DijkstraType dijkstraType, ref List<Cell> Q)
+    private GridCell ExtractMin(DijkstraType dijkstraType, ref List<GridCell> Q)
     {
       int min = int.MaxValue;
       int idx = 0;
@@ -201,13 +209,13 @@ namespace Alliance.Components
         }
       }
 
-      Cell retval = Q[idx];
+      GridCell retval = Q[idx];
       Q.RemoveAt(idx);
 
       return retval;
     }
 
-    private void Relax(DijkstraType dijkstraType, Cell v, Cell u)
+    private void Relax(DijkstraType dijkstraType, GridCell v, GridCell u)
     {
       int alt = u[dijkstraType].Distance + OrthogonalCost;
       if (alt < v[dijkstraType].Distance)
@@ -217,9 +225,9 @@ namespace Alliance.Components
       }
     }
 
-    private bool IsIllegal(Cell node)
+    private bool IsIllegal(GridCell node)
     {
-      return node.Type != CellType.Empty || (!node.IsThroughway && node.IsOuter);
+      return node.Type != GridCellType.Empty || (!node.IsThroughway && node.IsOuter);
     }
     #endregion
   }

@@ -19,9 +19,9 @@ namespace Alliance.Projectiles
     protected BoxF mBounds;
     protected Vector2 mVelocity;
     protected float mOrientation;
+    protected Color mColor;
     protected bool mIsAlive;
     protected double mTimeToLive;
-    protected Color mColor;
     protected float mAttack;
 
     public BoxF Bounds

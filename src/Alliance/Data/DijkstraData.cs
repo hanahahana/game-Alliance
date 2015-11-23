@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-using Alliance.Helpers;
+using Alliance.Objects;
 
 namespace Alliance.Data
 {
   public class DijkstraData
   {
     private int mDistance = int.MaxValue;
-    private Cell mParent = null;
+    private GridCell mParent = null;
 
     public int Distance
     {
@@ -17,7 +17,7 @@ namespace Alliance.Data
       set { mDistance = value; }
     }
 
-    public Cell Parent
+    public GridCell Parent
     {
       get { return mParent; }
       set { mParent = value; }

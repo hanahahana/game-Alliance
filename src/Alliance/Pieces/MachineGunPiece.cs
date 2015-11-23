@@ -5,9 +5,12 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-using Alliance.Projectiles;
 using Alliance.Data;
-using Alliance.Helpers;
+using Alliance.Utilities;
+using Alliance.Entities;
+using Alliance.Projectiles;
+using Alliance.Parameters;
+using Alliance.Objects;
 
 namespace Alliance.Pieces
 {
@@ -16,70 +19,23 @@ namespace Alliance.Pieces
     private const string MachineGunName = "Machine Gun";
     private const string UltimateMachineGunName = "Destroyer";
 
-    private string mDescription;
-    private float mRadius;
-    private float mAttack;
-    private int mPrice;
-    private int mUpgradePercent;
-
     public MachineGunPiece()
     {
+      // setup the description
       StringBuilder sb = new StringBuilder();
       sb.Append("Fires a constant stream of bullets at the enemy. These are very very weak, but very very fast.");
-      mDescription = sb.ToString();
 
+      // set the properties of the piece
+      mDescription = sb.ToString();
       mRadius = 100;
       mAttack = 20;
-
       mNumberProjectilesToFire = 2;
       mUpgradePercent = 20;
       mPrice = 10;
-
       mProjectilesPerSecond = 15;
       mProjectileLifeInSeconds = 3.4567f;
-    }
-
-    public override string Description
-    {
-      get { return mDescription; }
-    }
-
-    public override string Name
-    {
-      get { return MachineGunName; }
-    }
-
-    public override string UltimateName
-    {
-      get { return UltimateMachineGunName; }
-    }
-
-    public override PieceGrouping Grouping
-    {
-      get { return PieceGrouping.Two; }
-    }
-
-    public override float Radius
-    {
-      get { return mRadius; }
-      protected set { mRadius = value; }
-    }
-
-    public override float Attack
-    {
-      get { return mAttack; }
-      protected set { mAttack = value; }
-    }
-
-    public override int Price
-    {
-      get { return mPrice; }
-      protected set { mPrice = value; }
-    }
-
-    public override int UpgradePercent
-    {
-      get { return mUpgradePercent; }
+      mName = MachineGunName;
+      mUltimateName = UltimateMachineGunName;
     }
 
     protected override void FinalizeUpgrade()
@@ -101,7 +57,7 @@ namespace Alliance.Pieces
       // don't upgrade the projectile variables
     }
 
-    protected override Piece CreatePiece(Cell[] cells)
+    protected override Piece CreatePiece(GridCell[] cells)
     {
       MachineGunPiece piece = new MachineGunPiece();
       return piece;

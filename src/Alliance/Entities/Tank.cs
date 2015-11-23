@@ -7,7 +7,7 @@ using MLA.Utilities.Helpers;
 using Microsoft.Xna.Framework;
 
 using Alliance.Utilities;
-using Alliance.Helpers;
+using Alliance.Objects;
 
 namespace Alliance.Entities
 {
@@ -33,7 +33,7 @@ namespace Alliance.Entities
       get { return mCash; }
     }
 
-    public Tank(Cell startCell, Cell goalCell, DijkstraType dijkstraType)
+    public Tank(GridCell startCell, GridCell goalCell, DijkstraType dijkstraType)
       : base(startCell, goalCell, dijkstraType)
     {
       // set the attributes

@@ -24,7 +24,7 @@ using Alliance.Pieces;
 using Alliance.Entities;
 using Alliance.Projectiles;
 using Alliance.Parameters;
-using Alliance.Helpers;
+using Alliance.Objects;
 
 namespace Alliance.Components
 {
@@ -121,7 +121,7 @@ namespace Alliance.Components
       int midRowUp = midRow - HalfThroughWay;
       int midRowDown = midRow + HalfThroughWay;
 
-      Cells = new Cell[NumCols, NumRows];
+      Cells = new GridCell[NumCols, NumRows];
       for (int c = 0; c < NumCols; ++c)
       {
         for (int r = 0; r < NumRows; ++r)
@@ -129,7 +129,7 @@ namespace Alliance.Components
           bool isOuter = (c == 0 || r == 0 || c == (NumCols - 1) || r == (NumRows - 1));
           bool isThroughway = isOuter && (Utils.InRange(c, midColLeft, midColRight) || Utils.InRange(r, midRowUp, midRowDown));
 
-          Cell cell = new Cell(c, r, isOuter, isThroughway);
+          GridCell cell = new GridCell(c, r, isOuter, isThroughway);
           cell.Bounds = new BoxF(c * CellWidth, r * CellHeight, CellWidth, CellHeight);
           Cells[c, r] = cell;
         }
@@ -147,7 +147,7 @@ namespace Alliance.Components
       {
         for (int r = 0; r < NumRows; ++r)
         {
-          Cell node = Cells[c, r];
+          GridCell node = Cells[c, r];
           foreach (Point pt in Orthogonals)
           {
             int aC = node.Column + pt.X;
@@ -155,7 +155,7 @@ namespace Alliance.Components
 
             if ((-1 < aC && aC < NumCols) && (-1 < aR && aR < NumRows))
             {
-              Cell adjacent = Cells[aC, aR];
+              GridCell adjacent = Cells[aC, aR];
               node.Add(adjacent);
             }
           }
@@ -197,8 +197,8 @@ namespace Alliance.Components
         int count = RandomHelper.Next(3, 7);
         for (int i = 0; i < count; ++i)
         {
-          Cell start = HorzStartCell;
-          Cell goal = HorzGoalCell;
+          GridCell start = HorzStartCell;
+          GridCell goal = HorzGoalCell;
 
           DijkstraType key = DijkstraType.Horizontal;
           if (RandomHelper.NextBool())
@@ -348,14 +348,14 @@ namespace Alliance.Components
       mSelectedPiece.Selected = !mSelectedPiece.Selected;
     }
 
-    private Cell[] GetCellsWithCenterContainedIn(BoxF cursorBox, Vector2 offset)
+    private GridCell[] GetCellsWithCenterContainedIn(BoxF cursorBox, Vector2 offset)
     {
-      List<Cell> cells = new List<Cell>(100);
+      List<GridCell> cells = new List<GridCell>(100);
       for (int c = 0; c < NumCols; ++c)
       {
         for (int r = 0; r < NumRows; ++r)
         {
-          Cell cell = Cells[c, r];
+          GridCell cell = Cells[c, r];
           Vector2 center = cell.Bounds.Location + offset;
           center.X += (cell.Width / 2f);
           center.Y += (cell.Height / 2f);
@@ -438,11 +438,15 @@ namespace Alliance.Components
     {
       // get the bounding box of the projectile
       BoxF bounds = projectile.GetBoundingBox(uparams.Offset);
+
+      // get the projectile image data
+      projectile.GetProjectileImageData();
+
       for (int c = 0; c < NumCols; ++c)
       {
         for (int r = 0; r < NumRows; ++r)
         {
-          Cell cell = Cells[c, r];
+          GridCell cell = Cells[c, r];
           if (cell.RegisteredEntitiesCount > 0)
           {
             // get the cell bounds and offset it by the ...offset
@@ -569,7 +573,7 @@ namespace Alliance.Components
 
         // create a list to hold how many cells will be needed
         int capacity = cellsNeeded * cellsNeeded;
-        List<Cell> group = new List<Cell>(capacity);
+        List<GridCell> group = new List<GridCell>(capacity);
 
         // if we only need one cell
         if (cellsNeeded == 1)
@@ -592,7 +596,7 @@ namespace Alliance.Components
             uparams.Input.CursorPosition.Y - (height / 2),
             width,
             height);
-          Cell[] cells = GetCellsWithCenterContainedIn(cursorBox, uparams.Offset);
+          GridCell[] cells = GetCellsWithCenterContainedIn(cursorBox, uparams.Offset);
           group.AddRange(cells);
         }
 
@@ -749,18 +753,18 @@ namespace Alliance.Components
       {
         for (int r = 0; r < NumRows; ++r)
         {
-          Cell node = Cells[c, r];
-          BoxF bounds = new BoxF(node.X + offset.X, node.Y + offset.Y, node.Width, node.Height);
+          GridCell cell = Cells[c, r];
+          BoxF bounds = new BoxF(cell.X + offset.X, cell.Y + offset.Y, cell.Width, cell.Height);
 
-          if (node.IsOuter && !node.IsThroughway)
+          if (cell.IsOuter && !cell.IsThroughway)
           {
             Shapes.FillRectangle(spriteBatch, bounds, Color.White);
           }
 
-          if ((node.Attributes & DebugAttributes.OccupiedByProjectile) != 0)
+          if ((cell.Attributes & DebugAttributes.OccupiedByProjectile) != 0)
           {
             Shapes.FillRectangle(spriteBatch, bounds, Color.Red);
-            node.Attributes = DebugAttributes.None;
+            cell.Attributes = DebugAttributes.None;
           }
         }
       }

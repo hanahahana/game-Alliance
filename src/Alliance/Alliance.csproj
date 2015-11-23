@@ -64,6 +64,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ContentResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ContentResources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Data\Box.cs" />
     <Compile Include="Data\BoxF.cs" />
     <Compile Include="Data\SizeF.cs" />
@@ -72,7 +77,7 @@
     <Compile Include="Entities\Entity.cs" />
     <Compile Include="Entities\Tank.cs" />
     <Compile Include="Components\GridComponent.cs" />
-    <Compile Include="Helpers\Cell.cs" />
+    <Compile Include="Objects\GridCell.cs" />
     <Compile Include="Components\GridComponent.Functions.cs" />
     <Compile Include="ITextDisplay.cs" />
     <Compile Include="Components\InputProvider.cs" />
@@ -87,7 +92,7 @@
     <Compile Include="Pieces\SpeedBumpPiece.cs" />
     <Compile Include="Data\DrawData.cs" />
     <Compile Include="Pieces\SprinklerPiece.cs" />
-    <Compile Include="Helpers\Player.cs" />
+    <Compile Include="Objects\Player.cs" />
     <Compile Include="Components\PlayerHudComponent.cs" />
     <Compile Include="Pieces\TeslaCoilPiece.cs" />
     <Compile Include="Projectiles\BulletProjectile.cs" />
@@ -104,7 +109,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="AllianceGame.cs" />
     <Compile Include="Data\Size.cs" />
-    <Compile Include="Helpers\SelectionPiece.cs" />
+    <Compile Include="Objects\SelectionPiece.cs" />
     <Compile Include="Parameters\UpdateParams.cs" />
     <Compile Include="Utilities\ShapeBatch.cs" />
     <Compile Include="Utilities\Utils.cs" />
@@ -115,10 +120,41 @@
     <Content Include="GameThumbnail.png" />
   </ItemGroup>
   <ItemGroup>
-    <NestedContentProject Include="..\..\Content\Content.contentproj">
-      <Project>6d759c4c-a390-4d7e-aceb-7bef5682804d</Project>
-      <Visible>False</Visible>
-    </NestedContentProject>
+    <EmbeddedResource Include="ContentResources.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ContentResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Fonts\ComicSans.xnb" />
+    <None Include="Resources\Fonts\Georgia.xnb" />
+    <None Include="Resources\Fonts\Tahoma.xnb" />
+    <None Include="Resources\Fonts\Verdana.xnb" />
+    <None Include="Resources\Images\Bases\towerBase.xnb" />
+    <None Include="Resources\Images\Enemies\mouse.xnb" />
+    <None Include="Resources\Images\Enemies\tank.xnb" />
+    <None Include="Resources\Images\Projectiles\bullet.xnb" />
+    <None Include="Resources\Images\Projectiles\debri.xnb" />
+    <None Include="Resources\Images\Projectiles\flame.xnb" />
+    <None Include="Resources\Images\Projectiles\flamewave.xnb" />
+    <None Include="Resources\Images\Projectiles\fragment.xnb" />
+    <None Include="Resources\Images\Projectiles\lightning.xnb" />
+    <None Include="Resources\Images\Projectiles\pulse.xnb" />
+    <None Include="Resources\Images\Projectiles\rocket.xnb" />
+    <None Include="Resources\Images\Projectiles\wave.xnb" />
+    <None Include="Resources\Images\Towers\flamethrower.xnb" />
+    <None Include="Resources\Images\Towers\machinegun.xnb" />
+    <None Include="Resources\Images\Towers\missileLauncher.xnb" />
+    <None Include="Resources\Images\Towers\railgun.xnb" />
+    <None Include="Resources\Images\Towers\shockwaveGenerator.xnb" />
+    <None Include="Resources\Images\Towers\speedbump.xnb" />
+    <None Include="Resources\Images\Towers\sprinkler.xnb" />
+    <None Include="Resources\Images\Towers\teslaCoil.xnb" />
+    <None Include="Resources\Images\Towers\turret.xnb" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\Sounds\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\v2.0\Microsoft.Xna.GameStudio.Common.targets" />

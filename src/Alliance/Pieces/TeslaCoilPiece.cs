@@ -5,10 +5,12 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-using Alliance.Projectiles;
 using Alliance.Data;
-using Alliance.Helpers;
 using Alliance.Utilities;
+using Alliance.Entities;
+using Alliance.Projectiles;
+using Alliance.Parameters;
+using Alliance.Objects;
 
 namespace Alliance.Pieces
 {
@@ -32,90 +34,41 @@ namespace Alliance.Pieces
     private readonly Size FrameSize;
     private readonly Color LightningColor;
 
-    private string mDescription;
-    private float mRadius;
-    private float mAttack;
-    private int mPrice;
-    private int mUpgradePercent;
     private int mIndex;
     private float mAggregateTimeSinceUpdate;
     private TeslaState mTeslaState;
     private Color mColor;
 
-    public override string Description
-    {
-      get { return mDescription; }
-    }
-
-    public override string Name
-    {
-      get { return TeslaCoilName; }
-    }
-
-    public override string UltimateName
-    {
-      get { return UltimateTeslaCoilName; }
-    }
-
-    public override PieceGrouping Grouping
-    {
-      get { return PieceGrouping.Three; }
-    }
-
-    public override float Radius
-    {
-      get { return mRadius; }
-      protected set { mRadius = value; }
-    }
-
-    public override float Attack
-    {
-      get { return mAttack; }
-      protected set { mAttack = value; }
-    }
-
-    public override int Price
-    {
-      get { return mPrice; }
-      protected set { mPrice = value; }
-    }
-
-    public override int UpgradePercent
-    {
-      get { return mUpgradePercent; }
-    }
-
-    protected override bool CanFireProjectiles
-    {
-      get { return false; }
-    }
-
     public TeslaCoilPiece()
     {
+      // setup the description
       StringBuilder sb = new StringBuilder();
       sb.AppendLine("Fires a charged burst of electricity. The burst is very effective against ground units.");
-      mDescription = sb.ToString();
 
+      // set the properties needed
+      mDescription = sb.ToString();
       mRadius = 75;
       mAttack = 9000;
-      mProjectileLifeInSeconds = 6.7f;
-
-      mNumberProjectilesToFire = 1;
-      mUpgradePercent = 45;
       mPrice = 100;
+      mUpgradePercent = 45;
+      mProjectileLifeInSeconds = 6.7f;
+      mCanFireProjectiles = false;
+      mName = TeslaCoilName;
+      mUltimateName = UltimateTeslaCoilName;
+      mGrouping = PieceGrouping.Three;
 
+      // set the properties of the piece
       mIndex = 0;
       mAggregateTimeSinceUpdate = 0;
       mTeslaState = TeslaState.Idle;
       mColor = Color.White;
+      FrameSize = new Size(GetTowerImage().Width / (NumberIndexFrames + 1), GetTowerImage().Height);
       LightningColor = Utils.GetIntermediateColor(
         Utils.GetIntermediateColor(Color.Purple, Color.DarkBlue, .5f, 0, 1),
         Color.Red, .75f, 0, 1);
-
-      FrameSize = new Size(GetTowerImage().Width / (NumberIndexFrames + 1), GetTowerImage().Height);
     }
 
-    protected override Piece CreatePiece(Cell[] cells)
+    protected override Piece CreatePiece(GridCell[] cells)
     {
       TeslaCoilPiece piece = new TeslaCoilPiece();
       return piece;

@@ -2,6 +2,11 @@
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alliance", "Alliance\Alliance.csproj", "{C0B53537-E593-4580-ADFF-469A6673FFF0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0AC88CD5-572B-40CE-9115-32D16369C6A6} = {0AC88CD5-572B-40CE-9115-32D16369C6A6}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AllianceContent", "AllianceContent\AllianceContent.csproj", "{0AC88CD5-572B-40CE-9115-32D16369C6A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +20,12 @@ Global
 		{C0B53537-E593-4580-ADFF-469A6673FFF0}.Release|x86.Build.0 = Release|x86
 		{6D759C4C-A390-4D7E-ACEB-7BEF5682804D}.Debug|x86.ActiveCfg = Debug|x86
 		{6D759C4C-A390-4D7E-ACEB-7BEF5682804D}.Release|x86.ActiveCfg = Release|x86
+		{0AC88CD5-572B-40CE-9115-32D16369C6A6}.Debug|x86.ActiveCfg = Debug|x86
+		{0AC88CD5-572B-40CE-9115-32D16369C6A6}.Debug|x86.Build.0 = Debug|x86
+		{0AC88CD5-572B-40CE-9115-32D16369C6A6}.Release|x86.ActiveCfg = Release|x86
+		{0AC88CD5-572B-40CE-9115-32D16369C6A6}.Release|x86.Build.0 = Release|x86
+		{C885EEC3-31BA-4194-B9A0-21571FCBC59F}.Debug|x86.ActiveCfg = Debug|x86
+		{C885EEC3-31BA-4194-B9A0-21571FCBC59F}.Release|x86.ActiveCfg = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

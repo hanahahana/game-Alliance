@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 using Alliance.Projectiles;
 using Alliance.Data;
 using Alliance.Entities;
-using Alliance.Helpers;
+using Alliance.Objects;
 
 namespace Alliance.Pieces
 {
@@ -48,7 +48,7 @@ namespace Alliance.Pieces
     public Vector2 Position { get { return mPosition; } }
     public float X { get { return mPosition.X; } }
     public float Y { get { return mPosition.Y; } }
-    public Cell[] Cells { get { return mCells; } }
+    public GridCell[] Cells { get { return mCells; } }
     public SizeF Size { get { return mSize; } }
     public float Width { get { return mSize.Width; } }
     public float Height { get { return mSize.Height; } }
@@ -97,12 +97,12 @@ namespace Alliance.Pieces
       return sum;
     }
 
-    public Piece Place(Cell[] cells, SelectionPiece selection)
+    public Piece Place(GridCell[] cells, SelectionPiece selection)
     {
       Piece piece = CreatePiece(cells);
       for (int i = 0; i < cells.Length; ++i)
       {
-        Cell cell = cells[i];
+        GridCell cell = cells[i];
         cell.SetPiece(piece);
       }
 
