@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Net;
 using Microsoft.Xna.Framework.Storage;
+using Alliance.Utilities;
 
 namespace Alliance
 {
@@ -25,6 +26,7 @@ namespace Alliance
     private InputProvider input;
 
     public static Dictionary<string, Texture2D> Textures = null;
+    public static Dictionary<string, Color[,]> TextureData = null;
     public static SoundBank Sounds = null;
 
     private AudioEngine audioEngine;
@@ -75,7 +77,26 @@ namespace Alliance
       Sounds = new SoundBank(audioEngine, "Content\\Sounds\\Sound Bank.xsb");
 
       Textures = new Dictionary<string, Texture2D>();
+      TextureData = new Dictionary<string, Color[,]>();
 
+      // load all of the images
+      LoadImages();
+
+      // load all of the image data
+      LoadImageData();
+    }
+
+    private void LoadImageData()
+    {
+      foreach (string key in Textures.Keys)
+      {
+        Texture2D texture = Textures[key];
+        TextureData[key] = Utils.TextureTo2DArray(texture);
+      }
+    }
+
+    private void LoadImages()
+    {
       // load the bases
       Textures.Add("towerBase", LoadImage("Bases\\towerBase"));
 

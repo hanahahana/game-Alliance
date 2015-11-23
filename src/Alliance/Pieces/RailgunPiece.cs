@@ -10,16 +10,26 @@ namespace Alliance.Pieces
 {
   public class RailgunPiece : Piece
   {
-    private const string MissileName = "Rail Gun";
+    private const string RailgunName = "Rail Gun";
+    private const string UltimateRailgunName = "Annihilator";
+
     private string mDescription;
     private float mRadius;
+    private float mAttack;
+    private int mUpgradePercent;
 
     public RailgunPiece()
     {
       StringBuilder sb = new StringBuilder();
       sb.AppendLine("Fires an electrical pulse at the enemy. This can shoot very far, and is extremely powerful, but isn't very fast.");
       mDescription = sb.ToString();
+
       mRadius = 180;
+      mAttack = 2500f;
+      mProjectilesPerSecond = .5f;
+      mNumberProjectilesToFire = 3;
+      mProjectileLifeInSeconds = 5.5f;
+      mUpgradePercent = 15;
     }
 
     public override string Description
@@ -29,7 +39,12 @@ namespace Alliance.Pieces
 
     public override string Name
     {
-      get { return MissileName; }
+      get { return RailgunName; }
+    }
+
+    public override string UltimateName
+    {
+      get { return UltimateRailgunName; }
     }
 
     public override PieceGrouping Grouping
@@ -40,26 +55,18 @@ namespace Alliance.Pieces
     public override float Radius
     {
       get { return mRadius; }
+      protected set { mRadius = value; }
     }
 
     public override float Attack
     {
-      get { return 2500f; }
+      get { return mAttack; }
+      protected set { mAttack = value; }
     }
 
-    public override float ProjectilesPerSecond
+    public override int UpgradePercent
     {
-      get { return .09f; }
-    }
-
-    public override float ProjectileLifeSeconds
-    {
-      get { return 5.5f; }
-    }
-
-    public override int NumberProjectilesToFire
-    {
-      get { return 3; }
+      get { return mUpgradePercent; }
     }
 
     protected override Piece CreatePiece(Cell[] cells)
@@ -70,7 +77,7 @@ namespace Alliance.Pieces
 
     protected override Projectile CreateProjectile()
     {
-      RailgunProjectile projectile = new RailgunProjectile(this, ProjectileLifeSeconds);
+      RailgunProjectile projectile = new RailgunProjectile(ProjectileLifeSeconds);
       return projectile;
     }
 

@@ -80,6 +80,7 @@
     <Compile Include="Pieces\RailgunPiece.cs" />
     <Compile Include="Pieces\ShockwavePiece.cs" />
     <Compile Include="Pieces\SpeedBumpPiece.cs" />
+    <Compile Include="DrawData.cs" />
     <Compile Include="Projectiles\MissileProjectile.cs" />
     <Compile Include="Projectiles\Projectile.cs" />
     <Compile Include="Projectiles\RailgunProjectile.cs" />

@@ -14,15 +14,17 @@ namespace Alliance.Pieces
     private const string SpeedBumpName = "Speed Bump";
     private string mDescription;
     private float mRadius;
+    private float mAttack;
 
     public SpeedBumpPiece()
     {
       StringBuilder sb = new StringBuilder();
       sb.Append("Slows the enemy down by threatening to destroy their transportation.");
-      sb.AppendLine(" Careful, some enemies can roll right over them without feeling anything!");
+      sb.AppendLine(" Careful, some enemies can roll right over them without feeling anything! (for now they're red).");
       mDescription = sb.ToString();
       mLevel = Piece.MaxLevel;
       mRadius = 20;
+      mAttack = .5f;
     }
 
     public override bool IsBlocking
@@ -40,6 +42,11 @@ namespace Alliance.Pieces
       get { return SpeedBumpName; }
     }
 
+    public override string UltimateName
+    {
+      get { return SpeedBumpName; }
+    }
+
     public override PieceGrouping Grouping
     {
       get { return PieceGrouping.One; }
@@ -48,11 +55,18 @@ namespace Alliance.Pieces
     public override float Radius
     {
       get { return mRadius; }
+      protected set { mRadius = value; }
     }
 
     public override float Attack
     {
-      get { return .5f; }
+      get { return mAttack; }
+      protected set { mAttack = value; }
+    }
+
+    public override int UpgradePercent
+    {
+      get { return 0; }
     }
 
     public override bool FaceTarget

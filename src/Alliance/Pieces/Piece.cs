@@ -34,20 +34,26 @@ namespace Alliance.Pieces
     protected float mOrientation;
     protected float mElapsedProjectileSeconds;
     protected List<Projectile> mQueuedProjectiles = new List<Projectile>(50);
+    protected float mProjectilesPerSecond = DefaultProjectilesPerSecond;
+    protected float mProjectileVelocity = DefaultProjectileVelocity;
+    protected float mProjectileLifeInSeconds = DefaultProjectileLifeInSeconds;
+    protected int mNumberProjectilesToFire = DefaultNumberProjectilesToFire;
 
     public abstract string Description { get; }
     public abstract string Name { get; }
+    public abstract string UltimateName { get; }
     public abstract PieceGrouping Grouping { get; }
-    public abstract float Radius { get; }
-    public abstract float Attack { get; }
+    public abstract float Radius { get; protected set; }
+    public abstract float Attack { get; protected set; }
+    public abstract int UpgradePercent { get; }
 
     public virtual bool IsBlocking { get { return true; } }
     public virtual bool FaceTarget { get { return true; } }
 
-    public virtual float ProjectilesPerSecond { get { return DefaultProjectilesPerSecond; } }
-    public virtual float ProjectileVelocity { get { return DefaultProjectileVelocity; } }
-    public virtual float ProjectileLifeSeconds { get { return DefaultProjectileLifeInSeconds; } }
-    public virtual int NumberProjectilesToFire { get { return DefaultNumberProjectilesToFire; } }
+    public virtual float ProjectilesPerSecond { get { return mProjectilesPerSecond; } }
+    public virtual float ProjectileVelocity { get { return mProjectileVelocity; } }
+    public virtual float ProjectileLifeSeconds { get { return mProjectileLifeInSeconds; } }
+    public virtual int NumberProjectilesToFire { get { return mNumberProjectilesToFire; } }
 
     protected virtual float TurnSpeed { get { return DefaultTurnSpeed; } }
     protected virtual bool CanFireProjectiles { get { return true; } }
@@ -84,7 +90,7 @@ namespace Alliance.Pieces
           projectile.Position = inside.Location + myCenter;
           projectile.Orientation = mOrientation;
           projectile.Attack = Attack;
-          projectile.UpdateOut(i * NumberProjectilesToFire);
+          projectile.UpdateByFrameCount(i * NumberProjectilesToFire);
           mQueuedProjectiles.Add(projectile);
         }
       }
@@ -106,6 +112,23 @@ namespace Alliance.Pieces
     {
       mState = PieceState.Upgraded;
       ++mLevel;
+
+      // upgrade the attack and the radius
+      float factor = 1f + ((float)UpgradePercent / 100f);
+      Attack *= factor;
+      Radius *= factor;
+      Attack = (float)Math.Round(Attack);
+
+      // upgrade the projectile variables
+      UpgradeProjectileVariables(factor);
+    }
+
+    protected virtual void UpgradeProjectileVariables(float factor)
+    {
+      mProjectilesPerSecond *= factor;
+      mProjectileVelocity *= factor;
+      mProjectileLifeInSeconds *= (1.001f);
+      mNumberProjectilesToFire += (mLevel / 4);
     }
 
     protected virtual Texture2D GetTowerImage()
@@ -198,6 +221,7 @@ namespace Alliance.Pieces
       {
         DrawWeaponBase(spriteBatch, bounds, inside);
         DrawWeaponTower(spriteBatch, bounds, inside);
+        DrawCurrentLevel(spriteBatch, bounds, inside);
       }
       else if (mState == PieceState.Selling || mState == PieceState.Upgrading)
       {
@@ -254,6 +278,24 @@ namespace Alliance.Pieces
         scale,
         SpriteEffects.None,
         0f);
+    }
+
+    protected virtual void DrawCurrentLevel(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
+    {
+      if (mLevel < MaxLevel)
+      {
+        float spacing = 2f;
+        float dimension = (bounds.Width - (spacing * 5f)) / 8f;
+
+        float x = bounds.X + spacing;
+        float y = bounds.Bottom - (spacing + dimension);
+
+        for (int i = 0; i < mLevel; ++i, x += (spacing + dimension))
+        {
+          BoxF box = new BoxF(x, y, dimension, dimension);
+          Shapes.FillRectangle(spriteBatch, box, Color.Black);
+        }
+      }
     }
 
     private void DrawProgressState(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)

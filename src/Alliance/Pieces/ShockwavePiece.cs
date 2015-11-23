@@ -12,15 +12,24 @@ namespace Alliance.Pieces
   public class ShockwavePiece : Piece
   {
     private const string ShockwaveName = "Shockwave";
+    private const string UltimateShockwaveName = "Earthquake";
+
     private string mDescription;
     private float mRadius;
+    private float mAttack;
+    private int mUpgradePercent;
 
     public ShockwavePiece()
     {
       StringBuilder sb = new StringBuilder();
-      sb.AppendLine("Creates a shockwave to send at the enemy!");
+      sb.AppendLine("Creates a shockwave to send at the enemy! The shockwave grows as time passes.");
       mDescription = sb.ToString();
+
       mRadius = 50;
+      mAttack = 10000f;
+      mProjectilesPerSecond = .25f;
+      mNumberProjectilesToFire = 3;
+      mUpgradePercent = 15;
     }
 
     public override string Description
@@ -33,6 +42,11 @@ namespace Alliance.Pieces
       get { return ShockwaveName; }
     }
 
+    public override string UltimateName
+    {
+      get { return UltimateShockwaveName; }
+    }
+
     public override PieceGrouping Grouping
     {
       get { return PieceGrouping.Two; }
@@ -41,26 +55,23 @@ namespace Alliance.Pieces
     public override float Radius
     {
       get { return mRadius; }
+      protected set { mRadius = value; }
     }
 
     public override float Attack
     {
-      get { return 10000f; }
+      get { return mAttack; }
+      protected set { mAttack = value; }
+    }
+
+    public override int UpgradePercent
+    {
+      get { return mUpgradePercent; }
     }
 
     public override bool FaceTarget
     {
       get { return false; }
-    }
-
-    public override float ProjectilesPerSecond
-    {
-      get { return .25f; }
-    }
-
-    public override int NumberProjectilesToFire
-    {
-      get { return 3; }
     }
 
     protected override Piece CreatePiece(Cell[] cells)

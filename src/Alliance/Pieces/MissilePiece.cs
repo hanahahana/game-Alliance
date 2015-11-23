@@ -11,16 +11,25 @@ namespace Alliance.Pieces
   public class MissilePiece : Piece
   {
     private const string MissileName = "Missile";
+    private const string UltimateMissileName = "Missile Blaster";
+
     private string mDescription;
     private float mRadius;
+    private float mAttack;
+    private int mUpgradePercent;
 
     public MissilePiece()
     {
       StringBuilder sb = new StringBuilder();
       sb.Append("Slams multiple missiles into the enemy. They explode on contact and affect the surrounding pieces.");
-      sb.AppendLine(" Missiles are best with flying enemies but can sometimes damage friendly units.");
+      sb.AppendLine(" Missiles are best with flying enemies.");
       mDescription = sb.ToString();
+
       mRadius = 80;
+      mAttack = 50f;
+
+      mNumberProjectilesToFire = 5;
+      mUpgradePercent = 15;
     }
 
     public override string Description
@@ -33,6 +42,11 @@ namespace Alliance.Pieces
       get { return MissileName; }
     }
 
+    public override string UltimateName
+    {
+      get { return UltimateMissileName; }
+    }
+
     public override PieceGrouping Grouping
     {
       get { return PieceGrouping.Two; }
@@ -41,16 +55,18 @@ namespace Alliance.Pieces
     public override float Radius
     {
       get { return mRadius; }
+      protected set { mRadius = value; }
     }
 
     public override float Attack
     {
-      get { return 50f; }
+      get { return mAttack; }
+      protected set { mAttack = value; }
     }
 
-    public override int NumberProjectilesToFire
+    public override int UpgradePercent
     {
-      get { return 5; }
+      get { return mUpgradePercent; }
     }
 
     protected override Piece CreatePiece(Cell[] cells)

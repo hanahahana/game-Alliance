@@ -85,19 +85,21 @@ namespace Alliance
       cptDescription.Y = (lstPieces.Y + lstPieces.Height) + 4;
       cptDescription.Width = lstPieces.Width;
       cptDescription.Height = (int)Math.Round(captionFont.MeasureString("Z").Y + 5);
-      cptDescription.BackColor = Color.DarkGray;
-      cptDescription.BorderColor = Color.DarkGray;
+      cptDescription.BackColor = new Color(226, 201, 160);
+      cptDescription.BorderColor = Color.Blue;
+      cptDescription.BorderThickness = 1;
       cptDescription.Font = captionFont;
+      cptDescription.CenterCaption = true;
 
       txtDescription = new TextBox();
       txtDescription.X = lstPieces.X;
-      txtDescription.Y = (cptDescription.Y + cptDescription.Height);
+      txtDescription.Y = (cptDescription.Y + cptDescription.Height - 1);
       txtDescription.Width = lstPieces.Width;
       txtDescription.Height = (int)(Y + Height) - (txtDescription.Y + 4);
 
-      txtDescription.BackColor = Color.LightGray;
-      txtDescription.BorderColor = Color.LightGray;
-      txtDescription.BorderThickness = 2;
+      txtDescription.BackColor = Color.White;
+      txtDescription.BorderColor = Color.Blue;
+      txtDescription.BorderThickness = 1;
 
       mGui.Controls.Add(cptDescription);
       mGui.Controls.Add(txtDescription);
@@ -375,11 +377,19 @@ namespace Alliance
           // remove the piece
           mPieces.RemoveAt(i);
 
+          // if the currently selected piece is this piece, then set it to null
+          if (piece.Equals(mSelectedPiece))
+            mSelectedPiece = null;
+
           // if we remove a piece the grid needs to be re-solved
           resolve = true;
         }
 
-        mProjectiles.AddRange(piece.PopProjectiles());
+        Projectile[] projectiles = piece.PopProjectiles();
+        if (piece.State == PieceState.Idle)
+        {
+          mProjectiles.AddRange(projectiles);
+        }
       }
 
       if (resolve)
@@ -482,7 +492,32 @@ namespace Alliance
       if (piece != null)
       {
         txtDescription.Text = piece.Description;
-        cptDescription.Text = piece.Name;
+
+        StringBuilder properties = new StringBuilder();
+        float newAttack = (float)Math.Round(piece.Attack * (1 + (piece.UpgradePercent / 100f)));
+
+        properties.AppendFormat("Attack: {0}", piece.Attack);
+        if (piece.CanUpgrade)
+        {
+          properties.AppendFormat(" + {0}", newAttack - piece.Attack);
+        }
+        properties.AppendLine();
+
+        txtDescription.AppendText(properties.ToString());
+
+        string caption = piece.Name;
+        if (0 < piece.Level)
+        {
+          if (piece.Level < Piece.MaxLevel)
+          {
+            caption = string.Concat(caption, " Lvl ", piece.Level);
+          }
+          else if (!(piece is SpeedBumpPiece))
+          {
+            caption = piece.UltimateName;
+          }
+        }
+        cptDescription.Text = caption;
       }
     }
 
@@ -581,32 +616,40 @@ namespace Alliance
         // if the projectile is still alive, check to see if it hit anything
         if (projectile.IsAlive)
         {
-          Vector2 position = projectile.GetCenter(uparams.Offset);
-          Index index = Utils.GetIndexCorrespondingTo(position, CellWidth, CellHeight, uparams.Offset);
-          if (Utils.IndexValid(index, this.NumCols, this.NumRows))
-          {
-            //Cells[index.C, index.R].Attributes = DebugAttributes.OccupiedByProjectile;
-            Entity target = mEntities.Find(new Predicate<Entity>(
-              delegate(Entity entity)
-              {
-                Cell cell = null;
-                if (entity.CurrentLife > 0)
-                {
-                  cell = entity.CurrentCell;
-                  if (cell == null)
-                  {
-                    cell = entity.TargetCell;
-                  }
-                }
+          // get the bounding box of the projectile
+          BoxF box = projectile.GetBoundingBox(uparams.Offset);
 
-                return cell != null && cell.Equals(Cells[index.C, index.R]);
+          // find all the invaders who's bounding box intersects this projectile
+          List<Entity> intersectingInvaders = mEntities.FindAll(new Predicate<Entity>(
+            delegate(Entity target)
+            {
+              BoxF targetBox = target.GetBoundingBox(uparams.Offset);
+              return box.IntersectsWith(targetBox);
+            }));
+
+          // if there are any
+          if (intersectingInvaders.Count > 0)
+          {
+            // get the center of the box
+            Vector2 center = box.Location + (box.Size.ToVector2() * .5f);
+
+            // sort the invaders by the one who is closests to me (the projectile)
+            intersectingInvaders.Sort(new Comparison<Entity>(
+              delegate(Entity a, Entity b)
+              {
+                double aDist = Utils.FastDist(a.GetCenter(uparams.Offset), center);
+                double bDist = Utils.FastDist(b.GetCenter(uparams.Offset), center);
+                return aDist.CompareTo(bDist);
               }));
 
-            if (target != null)
-            {
-              target.CurrentLife -= projectile.Attack;
-              projectile.IsAlive = false;
-            }
+            // get the entity and the collision variables
+            Entity invader = intersectingInvaders[0];
+
+            // we collide!
+            projectile.IsAlive = false;
+
+            // decrement the life
+            invader.CurrentLife -= projectile.Attack;
           }
         }
 

@@ -98,12 +98,17 @@ namespace Alliance.Projectiles
       mIsAlive = true;
       mTimeToLive = timeToLiveInSeconds;
       mColor = Color.White;
-      Size = new SizeF(7.25f, 3.625f);
+      Size = new SizeF(12f, 3.625f);
     }
 
-    public virtual Texture2D GetProjectileImage()
+    protected virtual Texture2D GetProjectileImage()
     {
       return AllianceGame.Textures["bullet"];
+    }
+
+    public virtual Color[,] GetProjectileImageData()
+    {
+      return AllianceGame.TextureData["bullet"];
     }
 
     public virtual void Update(GameTime gameTime)
@@ -129,53 +134,88 @@ namespace Alliance.Projectiles
       }
     }
 
-    public virtual void Draw(SpriteBatch spriteBatch, Vector2 offset)
-    {
-      Texture2D projectile = GetProjectileImage();
-      SizeF projectileSize = new SizeF(projectile.Width, projectile.Height);
-
-      Vector2 origin = new Vector2(0, projectileSize.Height / 2);
-      Vector2 scale = Utils.ComputeScale(projectileSize, Size);
-
-      spriteBatch.Draw(
-          projectile,
-          Position + offset,
-          null,
-          mColor,
-          mOrientation,
-          origin,
-          scale,
-          SpriteEffects.None,
-          0);
-    }
-
-    public virtual void UpdateOut(int frames)
+    public virtual void UpdateByFrameCount(int frameCount)
     {
       // do nothing here
     }
 
-    public virtual Vector2 GetCenter(Vector2 offset)
+    public virtual DrawData GetDrawData(Vector2 offset)
     {
+      // get the projectile image and size
       Texture2D projectile = GetProjectileImage();
       SizeF projectileSize = new SizeF(projectile.Width, projectile.Height);
 
+      // compute the origin and the scale
       Vector2 origin = new Vector2(0, projectileSize.Height / 2);
       Vector2 scale = Utils.ComputeScale(projectileSize, Size);
 
-      // get the center of the original image
-      Vector2 center = projectileSize.ToVector2() * .5f;
+      // return the data
+      return new DrawData(projectile, projectileSize, Position + offset, origin, scale);
+    }
 
+    public virtual Matrix ComputeTransform(Vector2 offset)
+    {
+      return ComputeTransform(GetDrawData(offset));
+    }
+
+    public virtual Matrix ComputeTransform(DrawData data)
+    {
       // create the matrix for transforming the center
       Matrix transform =
-        Matrix.CreateTranslation(-origin.X, -origin.Y, 0) *
+        Matrix.CreateTranslation(-data.Origin.X, -data.Origin.Y, 0) *
         Matrix.CreateRotationZ(mOrientation) *
-        Matrix.CreateScale(scale.X, scale.Y, 1f) *
-        Matrix.CreateTranslation(X + offset.X, Y + offset.Y, 0);
+        Matrix.CreateScale(data.Scale.X, data.Scale.Y, 1f) *
+        Matrix.CreateTranslation(data.Position.X, data.Position.Y, 0);
+
+      // return the transform
+      return transform;
+    }
+
+    public virtual Vector2 GetCenter(Vector2 offset)
+    {
+      // get the drawing data
+      DrawData data = GetDrawData(offset);
+
+      // get the center of the image
+      Vector2 center = (data.TextureSize / 2f).ToVector2();
+
+      // compute the transform
+      Matrix transform = ComputeTransform(data);
 
       // return the center transformated
       Vector2 result;
       Vector2.Transform(ref center, ref transform, out result);
       return result;
+    }
+
+    public virtual BoxF GetBoundingBox(Vector2 offset)
+    {
+      // get the center of the projectile
+      Vector2 center = GetCenter(offset);
+
+      // create a rough box that has the projectile inside of it
+      float dW = Width * .5f;
+      float dH = Height * .5f;
+      return new BoxF(
+        center.X - dW,
+        center.Y - dH,
+        dW * 2f,
+        dH * 2f);
+    }
+
+    public virtual void Draw(SpriteBatch spriteBatch, Vector2 offset)
+    {
+      DrawData data = GetDrawData(offset);
+      spriteBatch.Draw(
+          data.Texture,
+          data.Position,
+          null,
+          mColor,
+          mOrientation,
+          data.Origin,
+          data.Scale,
+          SpriteEffects.None,
+          0);
     }
   }
 }
