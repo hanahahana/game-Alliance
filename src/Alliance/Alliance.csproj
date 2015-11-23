@@ -76,8 +76,10 @@
     <Compile Include="Messages.cs" />
     <Compile Include="Pieces\MissilePiece.cs" />
     <Compile Include="Pieces\Piece.cs" />
+    <Compile Include="Pieces\RailgunPiece.cs" />
     <Compile Include="Pieces\ShockwavePiece.cs" />
     <Compile Include="Pieces\SpeedBumpPiece.cs" />
+    <Compile Include="Projectiles\Projectile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="AllianceGame.cs" />

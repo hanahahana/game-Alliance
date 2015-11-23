@@ -10,20 +10,25 @@ namespace Alliance.Utilities
   public static class Shapes
   {
     private static bool IsPixelInitialized = false;
-    private static Texture2D InternalPixel;
 
-    static void InitializePixelTexture(GraphicsDevice graphicsDevice)
+    private static Texture2D mInternalPixel;
+    public static Texture2D InternalPixel
+    {
+      get { return mInternalPixel; }
+    }
+
+    public static void InitializePixelTexture(GraphicsDevice graphicsDevice)
     {
       if (!IsPixelInitialized)
       {
         // create pixel texture
         try
         {
-          InternalPixel = new Texture2D(graphicsDevice, 1, 1, 1, TextureUsage.None, SurfaceFormat.Color);
+          mInternalPixel = new Texture2D(graphicsDevice, 1, 1, 1, TextureUsage.None, SurfaceFormat.Color);
           Color[] pixels = new Color[1];
           pixels[0] = Color.White;
-          InternalPixel.SetData<Color>(pixels);
-          InternalPixel.GenerateMipMaps(TextureFilter.Anisotropic);
+          mInternalPixel.SetData<Color>(pixels);
+          mInternalPixel.GenerateMipMaps(TextureFilter.Anisotropic);
           IsPixelInitialized = true;
         }
         catch { }
@@ -116,7 +121,7 @@ namespace Alliance.Utilities
       if (!IsPixelInitialized)
         InitializePixelTexture(spriteBatch.GraphicsDevice);
 
-      spriteBatch.Draw(InternalPixel, position, null, color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+      spriteBatch.Draw(mInternalPixel, position, null, color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
     }
   }
 }

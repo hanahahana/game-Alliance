@@ -11,6 +11,22 @@ namespace Alliance.Utilities
 {
   public static class Utils
   {
+    private enum MajorAxis { X, Y };
+    private static Dictionary<MajorAxis, float> CosValue = new Dictionary<MajorAxis, float>(2);
+    private static Dictionary<MajorAxis, float> SinValue = new Dictionary<MajorAxis, float>(2);
+
+    static Utils()
+    {
+      double Pi = Math.PI;
+      double PiOver2 = Pi / 2.0;
+
+      CosValue[MajorAxis.X] = (float)Math.Cos(Pi);
+      CosValue[MajorAxis.Y] = (float)Math.Cos(PiOver2);
+
+      SinValue[MajorAxis.X] = (float)Math.Sin(Pi);
+      SinValue[MajorAxis.Y] = (float)Math.Sin(PiOver2);
+    }
+
     public static bool InRange(int value, int min, int max)
     {
       return min <= value && value <= max;
@@ -132,6 +148,41 @@ namespace Alliance.Utilities
     public static Color FromArgb(int a, int r, int g, int b)
     {
       return new Color((byte)r, (byte)g, (byte)b, (byte)a);
+    }
+
+    public static Vector2 ComputeScale(SizeF originalSize, SizeF desiredSize)
+    {
+      return new Vector2(desiredSize.Width / originalSize.Width, desiredSize.Height / originalSize.Height);
+    }
+
+    public static bool EllipseContains(BoxF ellipse, Vector2 pt)
+    {
+      /*
+       * X = (x-x0)*cos(t)+(y-y0)*sin(t); % Translate and rotate coords. 
+       * Y = -(x-x0)*sin(t)+(y-y0)*cos(t); % to align with ellipse 
+       * X^2/a^2 + Y^2/b^2 < 1
+       */
+
+      float dx = pt.X - ellipse.X;
+      float dy = pt.Y - ellipse.Y;
+
+      float a = Math.Max(ellipse.Width, ellipse.Height);
+      float b = Math.Min(ellipse.Width, ellipse.Height);
+
+      MajorAxis axis = (ellipse.Width < ellipse.Height) ? MajorAxis.Y : MajorAxis.X;
+      float cosT = CosValue[axis];
+      float sinT = SinValue[axis];
+
+      float X = (dx * cosT) + (dy * sinT);
+      float Y = -((dx * sinT) + (dy * cosT));
+
+      float X2 = X * X;
+      float Y2 = Y * Y;
+
+      float a2 = a * a;
+      float b2 = b * b;
+
+      return ((X2 / a2) + (Y2 / b2)) < 1;
     }
   }
 }

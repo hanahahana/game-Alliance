@@ -5,6 +5,8 @@ using Microsoft.Xna.Framework;
 using Alliance.Data;
 using Microsoft.Xna.Framework.Graphics;
 using Alliance.Utilities;
+using Alliance.Entities;
+using Alliance.Projectiles;
 
 namespace Alliance.Pieces
 {
@@ -47,6 +49,7 @@ namespace Alliance.Pieces
     public const float ProgressPerSecond = 50f;
     public const float Delta = 5f;
     public const float Delta2 = Delta * 2;
+    public const float DefaultProjectilesPerSecond = 1.5f;
 
     public abstract string Description { get; }
     public abstract string Name { get; }
@@ -54,6 +57,7 @@ namespace Alliance.Pieces
     public abstract float Radius { get; }
 
     protected abstract Piece CreatePiece(Cell[] cells);
+    protected abstract Projectile CreateProjectile();
 
     protected Vector2 mPosition;
     protected Cell[] mCells;
@@ -62,6 +66,12 @@ namespace Alliance.Pieces
     protected PieceState mState;
     protected float mProgress = 0;
     protected int mLevel;
+    protected Entity mTarget;
+    protected float mOrientation;
+    protected float mElapsedProjectileSeconds;
+    protected List<Projectile> mQueuedProjectiles = new List<Projectile>(50);
+
+    protected virtual float ProjectilesPerSecond { get { return DefaultProjectilesPerSecond; } }
 
     public Vector2 Position { get { return mPosition; } }
     public float X {get { return mPosition.X; }}
@@ -74,8 +84,10 @@ namespace Alliance.Pieces
     public int Level { get { return mLevel; } }
     public bool CanUpgrade { get { return mLevel < MaxLevel; } }
     public PieceState State { get { return mState; } }
+    public float Orientation { get { return mOrientation; } }
 
     public virtual bool IsBlocking { get { return true; } }
+    public virtual bool FaceTarget { get { return true; } }
 
     public bool Selected
     {
@@ -127,6 +139,13 @@ namespace Alliance.Pieces
 
     public virtual void Update(GameTime gameTime)
     {
+      // if we're not idle, then clear the projectiles
+      if (mState != PieceState.Idle)
+      {
+        // clear away the projectiles
+        mQueuedProjectiles.Clear();
+      }
+
       // once we've upgrade, set this back to idle
       if (mState == PieceState.Upgraded)
       {
@@ -158,6 +177,61 @@ namespace Alliance.Pieces
           }
         }
       }
+
+      // if we're just idle
+      if (mState == PieceState.Idle)
+      {
+        // face the target
+        TurnToFaceTarget();
+
+        // update the projectiles per second
+        mElapsedProjectileSeconds += (float)(ProjectilesPerSecond * gameTime.ElapsedGameTime.TotalSeconds);
+        if (mElapsedProjectileSeconds >= 1.0f)
+        {
+          // decrement the value
+          mElapsedProjectileSeconds -= 1.0f;
+
+          // fire a projectile
+          FireProjectile();
+        }
+      }
+    }
+
+    protected virtual void FireProjectile()
+    {
+      if (mTarget != null)
+      {
+        Projectile projectile = CreateProjectile();
+        if (projectile != null)
+        {
+          projectile.Orientation = mOrientation;
+          projectile.Velocity = new Vector2(
+                        (float)Math.Cos(mOrientation),
+                        (float)Math.Sin(mOrientation));
+          projectile.IsAlive = true;
+          mQueuedProjectiles.Add(projectile);
+        }
+      }
+    }
+
+    public Projectile[] GetProjectiles()
+    {
+      Projectile[] retval = mQueuedProjectiles.ToArray();
+      mQueuedProjectiles.Clear();
+      return retval;
+    }
+
+    private void TurnToFaceTarget()
+    {
+      if (mTarget != null)
+      {
+        float dx = mTarget.X - X;
+        float dy = mTarget.Y - Y;
+
+        float desiredAngle = (float)Math.Atan2(dy, dx);
+        float difference = Utils.WrapAngle(desiredAngle - mOrientation);
+        mOrientation = Utils.WrapAngle(mOrientation + difference);
+      }
     }
 
     protected virtual void FinalizeSell()
@@ -181,7 +255,8 @@ namespace Alliance.Pieces
 
       if (mState == PieceState.Idle)
       {
-        DrawWeapon(spriteBatch, bounds, inside);
+        DrawWeaponBase(spriteBatch, bounds, inside);
+        DrawWeaponTower(spriteBatch, bounds, inside);
       }
       else if (mState == PieceState.Selling || mState == PieceState.Upgrading)
       {
@@ -189,7 +264,7 @@ namespace Alliance.Pieces
       }
     }
 
-    protected void DrawProgressState(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
+    protected virtual void DrawProgressState(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
     {
       float width = inside.Width;
       float height = 4f;
@@ -197,33 +272,53 @@ namespace Alliance.Pieces
       float x = inside.X + ((inside.Width / 2f) - (width / 2f));
       float y = inside.Y + ((inside.Height / 2f) - (height / 2f));
 
-      float progWidth = width * Utils.CalculatePercent(mProgress, 0, MaxProgress);
-      Color progColor = Utils.GetIntermediateColor(Color.Red, Color.DarkGreen, mProgress, 0, MaxProgress);
+      float progressWidth = width * Utils.CalculatePercent(mProgress, 0, MaxProgress);
+      Color progressColor = Utils.GetIntermediateColor(Color.Red, Color.DarkGreen, mProgress, 0, MaxProgress);
 
-      Shapes.FillRectangle(spriteBatch, x, y, progWidth, height, progColor);
+      Shapes.FillRectangle(spriteBatch, x, y, progressWidth, height, progressColor);
       Shapes.DrawRectangle(spriteBatch, x, y, width, height, Color.Black);
     }
 
-    protected void DrawWeapon(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
+    protected virtual void DrawWeaponTower(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
     {
-      Shapes.DrawRectangle(spriteBatch, inside, Color.Black);
-      if (mLevel < MaxLevel)
-      {
-        BoxF upgrade = new BoxF(inside.X + 2, inside.Bottom - 5, 3f, 3f);
-        for (int l = 0; l < mLevel; ++l)
-        {
-          Shapes.FillRectangle(spriteBatch, upgrade, Color.Navy);
-          upgrade.X += 4f;
-        }
-      }
-      else
-      {
-        BoxF insideInside = new BoxF(inside.X + 1, inside.Y + 1, inside.Width - 1, inside.Height - 1);
-        Shapes.FillRectangle(spriteBatch, insideInside, Color.Gold);
-      }
+      Texture2D wtower = GetWeaponTower();
+      SizeF imgSize = new SizeF(wtower.Width, wtower.Height);
+      SizeF actSize = new SizeF(bounds.Width - Delta, inside.Height);
+
+      Vector2 scale = Utils.ComputeScale(imgSize, actSize);
+      Vector2 imgCenter = imgSize.ToVector2() * .5f;
+      Vector2 myCenter = actSize.ToVector2() * .5f;
+
+      if (!FaceTarget)
+        mOrientation = 0;
+
+      Color color = Color.Gray;
+      spriteBatch.Draw(
+        wtower,
+        inside.Location + myCenter,
+        null,
+        color,
+        mOrientation,
+        imgCenter,
+        scale,
+        SpriteEffects.None,
+        0f);
     }
 
-    protected void DrawBackground(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
+    protected virtual Texture2D GetWeaponTower()
+    {
+      return AllianceGame.Textures["turret"];
+    }
+
+    protected virtual void DrawWeaponBase(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
+    {
+      Texture2D wbase = AllianceGame.Textures["towerBase"];
+      Vector2 scale = Utils.ComputeScale(new SizeF(wbase.Width, wbase.Height), bounds.Size);
+      Color color = Utils.NewAlpha(Color.Gray, .5f);
+      spriteBatch.Draw(wbase, bounds.Location, null, color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+    }
+
+    protected virtual void DrawBackground(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
     {
       Color bgColor = (mLevel == MaxLevel ? Utils.GetIntermediateColor(Color.Beige, Color.SkyBlue, .5f, 0, 1f) : Color.Beige);
       Color color = mSelected ? Color.DarkGreen : bgColor;
@@ -248,13 +343,24 @@ namespace Alliance.Pieces
       }
     }
 
-    public static void Follow(Piece piece, SelectionPiece mSelectionPiece)
+    public static void FollowSelectionPiece(Piece piece, SelectionPiece mSelectionPiece)
     {
       if (piece != null && mSelectionPiece != null)
       {
         piece.mPosition = mSelectionPiece.Bounds.Location;
         piece.mSize = mSelectionPiece.Bounds.Size;
       }
+    }
+
+    public void SetTarget(Entity entity)
+    {
+      if (mTarget == null)
+        mTarget = entity;
+    }
+
+    public void ClearTarget()
+    {
+      mTarget = null;
     }
   }
 }

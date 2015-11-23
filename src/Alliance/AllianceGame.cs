@@ -77,6 +77,11 @@ namespace Alliance
       Textures = new Dictionary<string, Texture2D>();
       Textures.Add("tank", Content.Load<Texture2D>("Images\\tank"));
       Textures.Add("mouse", Content.Load<Texture2D>("Images\\mouse"));
+      Textures.Add("towerBase", Content.Load<Texture2D>("Images\\towerBase"));
+      Textures.Add("railgun", Content.Load<Texture2D>("Images\\railgun"));
+      Textures.Add("turret", Content.Load<Texture2D>("Images\\turret"));
+      Textures.Add("missileLauncher", Content.Load<Texture2D>("Images\\missileLauncher"));
+      Textures.Add("shockwaveGenerator", Content.Load<Texture2D>("Images\\shockwaveGenerator"));
     }
 
     /// <summary>

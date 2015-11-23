@@ -207,16 +207,16 @@ namespace Alliance.Entities
 
       Texture2D texture = AllianceGame.Textures["tank"];
       Vector2 scale = new Vector2(Width / texture.Width, Height / texture.Height);
-      Vector2 center = new Vector2(texture.Width / 2f, texture.Height / 2f);
-      Vector2 cellCenter = new Vector2(Width / 2f, Height / 2f);
+      Vector2 imgCenter = new Vector2(texture.Width / 2f, texture.Height / 2f);
+      Vector2 myCenter = new Vector2(Width / 2f, Height / 2f);
 
       spriteBatch.Draw(
         texture,
-        mBounds.Location + offset + cellCenter, 
+        mBounds.Location + offset + myCenter, 
         null, 
         Color.White, 
         mOrientation, 
-        center, 
+        imgCenter, 
         scale, 
         SpriteEffects.None, 
         0f);

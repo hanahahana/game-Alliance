@@ -22,6 +22,7 @@ using MLA.Utilities.Algorithms;
 using MLA.Utilities.Algorithms.Data;
 using MLA.Utilities.Helpers;
 using MLA.Utilities;
+using Alliance.Projectiles;
 
 namespace Alliance
 {
@@ -54,6 +55,7 @@ namespace Alliance
     {
       mPieces = new List<Piece>(100);
       mEntities = new List<Entity>(100);
+      mProjectiles = new List<Projectile>(100);
       mSelectionPiece = new SelectionPiece();
     }
 
@@ -346,7 +348,7 @@ namespace Alliance
         if (piece == null)
         {
           piece = lstPieces.Items[lstPieces.SelectedIndex].Value as Piece;
-          Piece.Follow(piece, mSelectionPiece);
+          Piece.FollowSelectionPiece(piece, mSelectionPiece);
         }
       }
 
@@ -373,6 +375,8 @@ namespace Alliance
           // if we remove a piece the grid needs to be re-solved
           resolve = true;
         }
+
+        mProjectiles.AddRange(piece.GetProjectiles());
       }
 
       if (resolve)
@@ -510,6 +514,98 @@ namespace Alliance
       }
     }
 
+    private void UpdatePieceTargets(UpdateParams uparams)
+    {
+      foreach (Piece piece in mPieces)
+      {
+        // clear out the current target
+        piece.ClearTarget();
+      }
+
+      foreach (Entity invader in mEntities)
+      {
+        // define the center of the invader
+        BoxF box = invader.Bounds;
+
+        // find all of the pieces that this invader is contained within
+        List<Piece> pieces = mPieces.FindAll(new Predicate<Piece>(delegate(Piece piece)
+        {
+          // get the radius squared
+          float rad2 = piece.Radius * piece.Radius;
+
+          // get the center of the circle
+          Vector2 center = new Vector2(piece.X + (piece.Width * .5f), piece.Y + (piece.Height * .5f));
+
+          /*
+           * if sqrt( (rectangleRight.x - circleCenter.x)^2 + (rectangleBottom.y - circleCenter.y)^2) < radius then they intersect
+           * if sqrt( (rectangleRight.x - circleCenter.x)^2 + (rectangleTop.y - circleCenter.y)^2) < radius then they intersect
+           * if sqrt( (rectangleLeft.x - circleCenter.x)^2 + (rectangleTop.y - circleCenter.y)^2) < radius then they intersect
+           * if sqrt( (rectangleLeft.x - circleCenter.x)^2 + (rectangleBottom.y - circleCenter.y)^2) < radius then they intersect
+           */
+
+          float rightMinusCenter = box.Right - center.X;
+          float leftMinusCenter = box.Left - center.X;
+          float bottomMinusCenter = box.Bottom - center.Y;
+          float topMinusCenter = box.Top - center.Y;
+
+          float dist1 = (rightMinusCenter * rightMinusCenter) + (bottomMinusCenter * bottomMinusCenter);
+          float dist2 = (rightMinusCenter * rightMinusCenter) + (topMinusCenter * topMinusCenter);
+          float dist3 = (leftMinusCenter * leftMinusCenter) + (topMinusCenter * topMinusCenter);
+          float dist4 = (leftMinusCenter * leftMinusCenter) + (bottomMinusCenter * bottomMinusCenter);
+
+          return dist1 < rad2 ||
+            dist2 < rad2 ||
+            dist3 < rad2 ||
+            dist4 < rad2;
+        }));
+
+        // for each piece, set their current target
+        foreach (Piece piece in pieces)
+        {
+          piece.SetTarget(invader);
+        }
+      }
+    }
+
+    private void UpdateProjectiles(UpdateParams uparams)
+    {
+      BoxF viewport = new BoxF(X, Y, Width, Height);
+      for (int i = mProjectiles.Count - 1; i > -1; --i)
+      {
+        Projectile projectile = mProjectiles[i];
+        projectile.Update(uparams.GameTime);
+
+        // if the projectile is still alive, check to see if it hit anything
+        if (projectile.IsAlive)
+        {
+          // go through each of the invaders
+          foreach (Entity invader in mEntities)
+          {
+            // if we hit one of them
+            if (projectile.Bounds.IntersectsWith(invader.Bounds))
+            {
+              // decrement the invaders life value
+              // set the projectile to dead
+              projectile.IsAlive = false;
+              break;
+            }
+          }
+        }
+
+        // if the projectile is still alive, check to see if it went out of bounds
+        if (projectile.IsAlive)
+        {
+          projectile.IsAlive = viewport.Contains(projectile.Bounds);
+        }
+
+        // if the projectile is dead, then remove it from the list
+        if (!projectile.IsAlive)
+        {
+          mProjectiles.RemoveAt(i);
+        }
+      }
+    }
+
     #endregion
 
     #region Drawing Functions
@@ -562,6 +658,15 @@ namespace Alliance
         shapeBatch.FillEllipse(pos, size, Utils.NewAlpha(Color.SlateBlue, .5f));
         shapeBatch.DrawEllipse(pos, size, Color.Gold);
         shapeBatch.End();
+      }
+    }
+
+    private void DrawProjectiles()
+    {
+      Vector2 offset = (Vector2)MiddleOffset + mPosition;
+      foreach (Projectile projectile in mProjectiles)
+      {
+        projectile.Draw(mSpriteBatch, offset);
       }
     }
 

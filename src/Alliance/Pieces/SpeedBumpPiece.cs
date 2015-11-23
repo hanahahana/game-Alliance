@@ -1,6 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Xna.Framework.Graphics;
+using Alliance.Data;
+using Alliance.Projectiles;
+using Microsoft.Xna.Framework;
 
 namespace Alliance.Pieces
 {
@@ -45,10 +49,30 @@ namespace Alliance.Pieces
       get { return mRadius; }
     }
 
+    public override bool FaceTarget
+    {
+      get { return false; }
+    }
+
     protected override Piece CreatePiece(Cell[] cells)
     {
       SpeedBumpPiece piece = new SpeedBumpPiece();
       return piece;
+    }
+
+    protected override void DrawWeaponBase(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
+    {
+
+    }
+
+    protected override void DrawWeaponTower(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
+    {
+
+    }
+
+    protected override Projectile CreateProjectile()
+    {
+      return null;
     }
   }
 }

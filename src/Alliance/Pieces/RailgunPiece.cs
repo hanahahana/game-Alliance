@@ -8,19 +8,18 @@ using Microsoft.Xna.Framework;
 
 namespace Alliance.Pieces
 {
-  public class MissilePiece : Piece
+  public class RailgunPiece : Piece
   {
-    private const string MissileName = "Missile";
+    private const string MissileName = "Rail Gun";
     private string mDescription;
     private float mRadius;
 
-    public MissilePiece()
+    public RailgunPiece()
     {
       StringBuilder sb = new StringBuilder();
-      sb.Append("Slams multiple missiles into the enemy. They explode on contact and affect the surrounding pieces.");
-      sb.AppendLine(" Missiles are best with flying enemies but can sometimes damage friendly units.");
+      sb.AppendLine("Fires an electrical pulse at the enemy. This can shoot very far, and is extremely powerful, but isn't very fast.");
       mDescription = sb.ToString();
-      mRadius = 80;
+      mRadius = 180;
     }
 
     public override string Description
@@ -43,23 +42,28 @@ namespace Alliance.Pieces
       get { return mRadius; }
     }
 
+    protected override float ProjectilesPerSecond
+    {
+      get { return .4f; }
+    }
+
     protected override Piece CreatePiece(Cell[] cells)
     {
-      MissilePiece piece = new MissilePiece();
+      RailgunPiece piece = new RailgunPiece();
       return piece;
     }
 
     protected override Texture2D GetWeaponTower()
     {
-      return AllianceGame.Textures["missileLauncher"];
+      return AllianceGame.Textures["railgun"];
     }
 
     protected override Projectile CreateProjectile()
     {
-      SizeF size = new SizeF(8, 4);
-      Projectile projectile = new Projectile(0.85);
-      projectile.Bounds = new BoxF(mPosition + new Vector2(Delta, 0) + (mSize.ToVector2() * .5f), size);
-      projectile.Color = Color.Gray;
+      SizeF size = new SizeF(30, 4);
+      Projectile projectile = new Projectile(5.85);
+      projectile.Bounds = new BoxF(mPosition + (mSize.ToVector2() * .5f) - (size.ToVector2() * .5f), size);
+      projectile.Color = Color.DarkRed;
       return projectile;
     }
   }

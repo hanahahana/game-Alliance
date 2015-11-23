@@ -22,6 +22,7 @@ using MLA.Utilities.Algorithms;
 using MLA.Utilities.Algorithms.Data;
 using MLA.Utilities.Helpers;
 using MLA.Utilities;
+using Alliance.Projectiles;
 
 namespace Alliance
 {
@@ -49,6 +50,7 @@ namespace Alliance
 
     private List<Piece> mPieces;
     private List<Entity> mEntities;
+    private List<Projectile> mProjectiles;
 
     private GuiManager mGui;
     private ListBox lstPieces;
@@ -116,6 +118,12 @@ namespace Alliance
       // update all invaliders
       UpdateInvaliders(uparams);
 
+      // update the piece targets
+      UpdatePieceTargets(uparams);
+
+      // update all projectiles
+      UpdateProjectiles(uparams);
+
       base.Update(gameTime);
     }
 
@@ -126,6 +134,7 @@ namespace Alliance
       DrawGrid();
       DrawPieces();
       DrawInvaders();
+      DrawProjectiles();
 
       mSpriteBatch.End();
 
