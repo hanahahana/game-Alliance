@@ -11,8 +11,9 @@ using Alliance.Pieces;
 using Alliance.Projectiles;
 using Alliance.Parameters;
 using Alliance.Objects;
-using MLA.Utilities.Helpers;
 using Alliance.Components;
+
+using MLA.Utilities.Helpers;
 
 namespace Alliance.Invaders
 {
@@ -35,33 +36,13 @@ namespace Alliance.Invaders
   public abstract class Invader : Sprite, ITextDisplay
   {
     public const float MaxMovementPerSecond = 77.7f;
-    public const float MinMovementPerSecond = 11.1f;
+    public const float MinMovementPerSecond = 07.7f;
 
-    public const int MaxEntityLevel = 1000;
-    public const int MinEntityLevel = 1;
+    public const int MaxInvaderLevel = 10000;
+    public const int MinInvaderLevel = 1;
 
-    public const float MaxEntityLife = 8000000f;
-    public const float MinEntityLife = 5000f;
-
-    /// <summary>
-    /// Samples that are used to determine life given a level
-    /// </summary>
-    protected static readonly List<Vector2> LvlLfeSamples = new List<Vector2>(
-      new Vector2[] 
-      { 
-        new Vector2(MinEntityLevel, MinEntityLife), 
-        new Vector2(MaxEntityLevel, MaxEntityLife) 
-      });
-
-    /// <summary>
-    /// Samples that are used to determine MPS given a level
-    /// </summary>
-    protected static readonly List<Vector2> LvlMpsSamples = new List<Vector2>(
-      new Vector2[]
-      {
-        new Vector2(MinEntityLevel, MinMovementPerSecond), 
-        new Vector2(MaxEntityLevel, MaxMovementPerSecond) 
-      });
+    public const float MaxInvaderLife = 100000000f;
+    public const float MinInvaderLife = 100f;
 
     protected GridCell mTargetCell;
     protected GridCell mCurrentCell;
@@ -77,7 +58,7 @@ namespace Alliance.Invaders
 
     public abstract float MaximumLife { get; }
     public abstract InvaderAttributes Attributes { get; set; }
-    public abstract int Cash { get; }
+    public abstract double Value { get; }
 
     public GridCell TargetCell
     {
@@ -374,9 +355,9 @@ namespace Alliance.Invaders
           }
         case InvaderAttributes.FireResistant | InvaderAttributes.SpeedBumpResistant:
           {
-            color = Utils.GetIntermediateColor(
+            color = Utils.BlendColors(
               speedBumpResistant,
-              fireResistant, .45f, 0f, 1f);
+              fireResistant, .45f);
             break;
           }
       }
@@ -430,9 +411,9 @@ namespace Alliance.Invaders
       text.AppendLine("Abilities:");
       text.AppendLine(string.Format("{0}", Attributes));
       text.AppendLine();
+      text.AppendLine(string.Format("Level: {0}", mLevel));
       text.AppendLine(string.Format("Life: {0}", (double)CurrentLife));
       text.AppendLine(string.Format("Speed: {0}", MPS));
-      text.AppendLine(string.Format("Level: {0}", mLevel));
       text.AppendLine(string.Format("Status: {0}", mState));
       return text.ToString();
     }

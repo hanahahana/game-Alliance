@@ -29,11 +29,11 @@ namespace Alliance.Pieces
       // set the properties of the piece
       mDescription = sb.ToString();
       mRadius = 50;
-      mAttack = 10000f;
+      mAttack = 800;
       mProjectilesPerSecond = .25f;
       mNumberProjectilesToFire = 3;
-      mUpgradePercent = 15;
-      mPrice = 540;
+      mUpgradePercent = 5;
+      mPrice = 50;
       mFaceTarget = false;
       mName = ShockwaveName;
       mUltimateName = UltimateShockwaveName;

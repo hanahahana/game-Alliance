@@ -15,11 +15,11 @@ namespace Alliance.Objects
 
   public static class Player
   {
-    private static int mCash = 0;
+    private static double mCash = 0;
     private static int mLife = 0;
     private static PlayerState mState;
 
-    public static int Cash
+    public static double Cash
     {
       get { return mCash; }
     }
@@ -48,7 +48,7 @@ namespace Alliance.Objects
 
     public static bool PurchasePiece(Piece piece)
     {
-      int newCash = mCash - piece.Price;
+      double newCash = mCash - piece.Price;
       if (newCash >= 0)
       {
         mCash = newCash;
@@ -58,7 +58,7 @@ namespace Alliance.Objects
 
     public static void SellPiece(Piece piece)
     {
-      int cash = piece.Price;
+      double cash = piece.Price;
       if (mState == PlayerState.Designing)
         cash = piece.GetLifetimePrice();
       mCash += cash;
@@ -76,7 +76,7 @@ namespace Alliance.Objects
 
     public static void CollectSpoils(Invader invader)
     {
-      mCash += invader.Cash;
+      mCash += invader.Value;
     }
   }
 }

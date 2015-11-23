@@ -23,15 +23,15 @@ namespace Alliance.Pieces
     {
       // setup the description
       StringBuilder sb = new StringBuilder();
-      sb.Append("Ignites gasoline to produce a constant flame. Careful, some enemies can't be burned.");
+      sb.AppendLine("Ignites gasoline to produce a constant flame. Careful, some enemies can't be burned.");
 
       // set the properties of the piece
       mDescription = sb.ToString();
-      mRadius = 70;
-      mAttack = 9000000;
+      mRadius = 200;
+      mAttack = 80000;
       mNumberProjectilesToFire = 1;
       mUpgradePercent = 20;
-      mPrice = 10;
+      mPrice = 12884902;
       mProjectilesPerSecond = 20;
       mProjectileLifeInSeconds = .1876f;
       mName = FlameThrowerPieceName;
@@ -97,7 +97,7 @@ namespace Alliance.Pieces
       }
       else
       {
-        float extra = mRadius / 2f;
+        float extra = mRadius / 3f;
         projectile = new FlameProjectile(mProjectileLifeInSeconds);
         projectile.Size = new SizeF(projectile.Width + extra, projectile.Height + extra);
       }

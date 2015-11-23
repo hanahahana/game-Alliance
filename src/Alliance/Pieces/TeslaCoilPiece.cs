@@ -39,6 +39,8 @@ namespace Alliance.Pieces
     private float mAggregateTimeSinceUpdate;
     private TeslaState mTeslaState;
 
+    private static Texture2D mDisplayImage = null;
+
     public TeslaCoilPiece()
     {
       // setup the description
@@ -47,9 +49,9 @@ namespace Alliance.Pieces
 
       // set the properties needed
       mDescription = sb.ToString();
-      mRadius = 75;
+      mRadius = 220;
       mAttack = 9000;
-      mPrice = 100;
+      mPrice = 1000;
       mUpgradePercent = 45;
       mProjectileLifeInSeconds = 6.7f;
       mCanFireProjectiles = false;
@@ -62,10 +64,13 @@ namespace Alliance.Pieces
       mAggregateTimeSinceUpdate = 0;
       mTeslaState = TeslaState.Idle;
       Color = Color.White;
-      FrameSize = new Size(GetImage().Width / (NumberIndexFrames + 1), GetImage().Height);
-      LightningColor = Utils.GetIntermediateColor(
-        Utils.GetIntermediateColor(Color.Purple, Color.DarkBlue, .5f, 0, 1),
-        Color.Red, .75f, 0, 1);
+
+      // get the image
+      Texture2D image = GetImage();
+      FrameSize = new Size(image.Width / (NumberIndexFrames + 1), image.Height);
+      LightningColor = Utils.BlendColors(
+        new Color[] { Color.Purple, Color.DarkBlue, Color.Red },
+        new float[] { .5f, .75f });
     }
 
     protected override Piece CreatePiece(GridCell[] cells)
@@ -84,6 +89,16 @@ namespace Alliance.Pieces
     protected override string ImageKey
     {
       get { return "teslaCoil"; }
+    }
+
+    public override Texture2D GetDisplayImage()
+    {
+      return AllianceGame.Images[ImageKey][0].Texture;
+    }
+
+    protected override Vector2[] GetImageHull()
+    {
+      return AllianceGame.Images[ImageKey][0].Hull;
     }
 
     protected override void UpgradeProjectileVariables(float factor)
@@ -111,7 +126,8 @@ namespace Alliance.Pieces
         mIndex = 0;
       }
 
-      Color = Utils.GetIntermediateColor(Color.Beige, LightningColor, mIndex, 0, NumberIndexFrames);
+      float factor = ((float)mIndex) / ((float)NumberIndexFrames);
+      Color = Utils.BlendColors(Color.Beige, LightningColor, factor);
     }
 
     private void UpdateTeslaState(GameTime gameTime)

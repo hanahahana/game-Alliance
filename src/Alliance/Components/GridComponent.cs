@@ -84,7 +84,7 @@ namespace Alliance.Components
     public override void Initialize()
     {
       base.Initialize();
-      Player.InitializePlayer(100000, 5000);
+      Player.InitializePlayer(1000, 5000);
       InitializeVariables();
       InitializeProperties();
       InitializeGrid();

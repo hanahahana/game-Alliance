@@ -126,12 +126,22 @@ namespace Alliance.Utilities
       return (value - min) / (max - min);
     }
 
-    public static Color GetIntermediateColor(Color startColor, Color endColor, float value, float min, float max)
+    public static Color BlendColors(Color[] colors, float[] factors)
+    {
+      Color retval = colors[0];
+      for (int i = 1; i < colors.Length; ++i)
+      {
+        retval = BlendColors(retval, colors[i], factors[i - 1]);
+      }
+      return retval;
+    }
+
+    public static Color BlendColors(Color startColor, Color endColor, float factor)
     {
       Color c = startColor;
       Color c2 = endColor;
 
-      float pc = value * 1.0F / (max - min);
+      float pc = factor;
 
       int ca = c.A, cr = c.R, cg = c.G, cb = c.B;
       int c2a = c2.A, c2r = c2.R, c2g = c2.G, c2b = c2.B;
@@ -486,6 +496,34 @@ namespace Alliance.Utilities
         H[++top] = P[minmin];  // push joining endpoint onto stack
 
       return top + 1;
+    }
+
+    public static Vector2[] CreateConvexHull(Texture2D texture)
+    {
+      Color[] colorData = new Color[texture.Width * texture.Height];
+      texture.GetData<Color>(colorData);
+
+      List<Vector2> pixels = new List<Vector2>(colorData.Length);
+      for (int x = 0; x < texture.Width; ++x)
+      {
+        for (int y = 0; y < texture.Height; ++y)
+        {
+          Color color = colorData[x + (y * texture.Width)];
+          if (color.A > 250)
+          {
+            pixels.Add(new Vector2(x, y));
+          }
+        }
+      }
+
+      Vector2[] polygon = pixels.ToArray();
+      Vector2[] H = new Vector2[polygon.Length];
+      int n = Utils.Chain2DConvexHull(polygon, polygon.Length, ref H);
+
+      Vector2[] values = new Vector2[n];
+      Array.Copy(H, values, n);
+
+      return values;
     }
   }
 }

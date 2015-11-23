@@ -18,19 +18,22 @@ namespace Alliance.Pieces
   {
     private const string SpeedBumpName = "Speed Bump";
 
+    protected override string ImageKey
+    {
+      get { return "speedbump"; }
+    }
+
     public SpeedBumpPiece()
     {
       // setup the description
       StringBuilder sb = new StringBuilder();
-      sb.Append("Slows the enemy down by threatening to destroy their transportation.");
-      sb.AppendLine(" Careful, some enemies can roll right over them!");
+      sb.AppendLine("Slows the enemy down all while chucking up debri. Careful, some enemies aren't affected!");
 
       // set the properties of the piece
       mDescription = sb.ToString();
-      mPrice = 5;
+      mPrice = 1;
       mLevel = Piece.MaxLevel;
-      mRadius = 20;
-      mAttack = .5f;
+      mAttack = 2;
       mPriceAtLevels[Piece.MaxLevel - 1] = mPrice;
       mUpgradePercent = 0;
       mFaceTarget = false;
@@ -56,7 +59,7 @@ namespace Alliance.Pieces
     protected override void DrawWeaponBase(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
     {
       // draw a speed bump!
-      Texture2D speedbump = AllianceGame.Textures["speedbump"];
+      Texture2D speedbump = GetImage();
       SizeF speedbumpSize = new SizeF(speedbump.Width, speedbump.Height);
 
       Vector2 scale = Utils.ComputeScale(speedbumpSize, bounds.Size);

@@ -15,7 +15,7 @@ namespace Alliance.Invaders
   {
     private InvaderAttributes mAttributes;
     private readonly float mMaximumLife;
-    private int mCash;
+    private double mValue;
 
     public override float MaximumLife
     {
@@ -28,9 +28,9 @@ namespace Alliance.Invaders
       set { mAttributes = value; }
     }
 
-    public override int Cash
+    public override double Value
     {
-      get { return mCash; }
+      get { return mValue; }
     }
 
     public Tank(GridCell startCell, GridCell goalCell, DijkstraType dijkstraType)
@@ -48,23 +48,16 @@ namespace Alliance.Invaders
       }
 
       // determine the level
-      mLevel = RandomHelper.Next(MaxEntityLevel) + 1;
+      mLevel = RandomHelper.Next(MaxInvaderLevel) + 1;
 
       // interpolate the varaibles
-      if (mLevel > MinEntityLevel)
-      {
-        mMaximumLife = Utils.SpLine(LvlLfeSamples, mLevel);
-        mMPS = Utils.SpLine(LvlMpsSamples, mLevel);
-      }
-      else
-      {
-        mMaximumLife = MinEntityLife;
-        mMPS = MinMovementPerSecond;
-      }
+      float mu = ((float)mLevel / (float)MaxInvaderLevel);
+      mMaximumLife = (float)Math.Round(MathHelper.SmoothStep(MinInvaderLife, MaxInvaderLife, mu));
+      mMPS = (float)Math.Round(MathHelper.SmoothStep(MinMovementPerSecond, MaxMovementPerSecond, mu));
 
       // set the remaining variables
       mCurrentLife = MaximumLife;
-      mCash = (int)Math.Round((float)mLevel * 1.5f);
+      mValue = Math.Round((double)mLevel * 1.23456789);
     }
   }
 }

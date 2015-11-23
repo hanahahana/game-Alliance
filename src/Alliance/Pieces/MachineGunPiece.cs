@@ -23,15 +23,15 @@ namespace Alliance.Pieces
     {
       // setup the description
       StringBuilder sb = new StringBuilder();
-      sb.Append("Fires a constant stream of bullets at the enemy. These are very weak, but very fast. These also turn very slow...");
+      sb.AppendLine("Fires a constant stream of bullets at the enemy. These are weak and fast. They also miss...alot.");
 
       // set the properties of the piece
       mDescription = sb.ToString();
       mRadius = 100;
-      mAttack = 20;
+      mAttack = 100;
       mNumberProjectilesToFire = 2;
       mUpgradePercent = 20;
-      mPrice = 10;
+      mPrice = 8;
       mProjectilesPerSecond = 15;
       mProjectileLifeInSeconds = 3.4567f;
       mName = MachineGunName;

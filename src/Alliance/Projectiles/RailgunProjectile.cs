@@ -16,7 +16,7 @@ namespace Alliance.Projectiles
     public RailgunProjectile(double timeToLiveInSeconds)
       : base(timeToLiveInSeconds)
     {
-      Color = Utils.GetIntermediateColor(Color.Yellow, Color.Red, .65f, 0f, 1f);
+      Color = Utils.BlendColors(Color.Yellow, Color.Red, .65f);
     }
 
     protected override string ImageKey

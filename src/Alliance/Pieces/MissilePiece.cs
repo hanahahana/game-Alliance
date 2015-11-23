@@ -17,20 +17,20 @@ namespace Alliance.Pieces
   public class MissilePiece : Piece
   {
     private const string MissileName = "Missile";
-    private const string UltimateMissileName = "Missile Blaster";
+    private const string UltimateMissileName = "Blaster";
 
     public MissilePiece()
     {
       // setup the description
       StringBuilder sb = new StringBuilder();
-      sb.Append("Slams multiple missiles into the enemy! They explode on contact and create debri.");
+      sb.AppendLine("Slams multiple missiles into the enemy! They explode on contact and create debri.");
 
       // set the properties of the piece
       mDescription = sb.ToString();
-      mRadius = 80;
-      mAttack = 50f;
+      mRadius = 100;
+      mAttack = 250;
       mNumberProjectilesToFire = 2;
-      mUpgradePercent = 15;
+      mUpgradePercent = 20;
       mPrice = 15;
       mName = MissileName;
       mUltimateName = UltimateMissileName;

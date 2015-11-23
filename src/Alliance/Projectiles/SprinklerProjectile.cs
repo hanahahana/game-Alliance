@@ -14,7 +14,7 @@ namespace Alliance.Projectiles
     public SprinklerProjectile(double timeToLiveInSeconds)
       : base(timeToLiveInSeconds)
     {
-      Color = Utils.GetIntermediateColor(Color.LightBlue, Color.DarkBlue, .65f, 0f, 1f);
+      Color = Utils.BlendColors(Color.LightBlue, Color.DarkBlue, .65f);
       Size = new SizeF(10f, 8f);
     }
 

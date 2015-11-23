@@ -28,8 +28,7 @@ namespace Alliance
     private InputProvider input;
     private PlayerHudComponent player;
 
-    public static Dictionary<string, Texture2D> Textures = null;
-    public static Dictionary<string, Vector2[]> TextureHulls = null;
+    public static Dictionary<string, Image> Images = null;
     public static Dictionary<string, SpriteFont> Fonts = null;
 
     public AllianceGame()
@@ -64,8 +63,7 @@ namespace Alliance
     protected override void Initialize()
     {
       // initialize the dictionaries
-      Textures = new Dictionary<string, Texture2D>();
-      TextureHulls = new Dictionary<string, Vector2[]>();
+      Images = new Dictionary<string, Image>();
       Fonts = new Dictionary<string, SpriteFont>();
 
       // load all of the fonts
@@ -73,9 +71,6 @@ namespace Alliance
 
       // load all of the images
       LoadImages();
-
-      // load all of the image data
-      LoadImageData();
 
       // enumerate through the components
       base.Initialize();
@@ -95,39 +90,6 @@ namespace Alliance
       base.LoadContent();
     }
 
-    private void LoadImageData()
-    {
-      foreach (string key in Textures.Keys)
-      {
-        Texture2D texture = Textures[key];
-        Color[] colorData = new Color[texture.Width * texture.Height];
-        texture.GetData<Color>(colorData);
-
-        List<Vector2> pixels = new List<Vector2>(colorData.Length);
-        for (int x = 0; x < texture.Width; ++x)
-        {
-          for (int y = 0; y < texture.Height; ++y)
-          {
-            Color color = colorData[x + (y * texture.Width)];
-            if (color.A > 250)
-            {
-              pixels.Add(new Vector2(x, y));
-            }
-          }
-        }
-
-        Vector2[] polygon = pixels.ToArray();
-        Vector2[] H = new Vector2[polygon.Length];
-        int n = Utils.Chain2DConvexHull(polygon, polygon.Length, ref H);
-
-        Vector2[] values = new Vector2[n];
-        Array.Copy(H, values, n);
-
-        // store the values
-        TextureHulls[key] = values;
-      }
-    }
-
     private void LoadFonts()
     {
       Fonts["ComicSans"] = LoadFont("ComicSans");
@@ -138,39 +100,35 @@ namespace Alliance
 
     private void LoadImages()
     {
-      // load the bases
-      Textures.Add("towerBase", LoadImage("towerBase"));
+      Image[] images = new Image[]
+      {
+        new Image(contentManager, "towerBase", false, 0, 0),
+        new Image(contentManager, "tank", false, 0, 0),
+        new Image(contentManager, "mouse", false, 0, 0),
+        new Image(contentManager, "railgun", false, 0, 0),
+        new Image(contentManager, "turret", false, 0, 0),
+        new Image(contentManager, "missileLauncher", false, 0, 0),
+        new Image(contentManager, "shockwaveGenerator", false, 0, 0),
+        new Image(contentManager, "speedbump", false, 0, 0),
+        new Image(contentManager, "sprinkler", false, 0, 0),
+        new Image(contentManager, "teslaCoil", true, 5, 1),
+        new Image(contentManager, "machinegun", false, 0, 0),
+        new Image(contentManager, "flamethrower", false, 0, 0),
+        new Image(contentManager, "rocket", false, 0, 0),
+        new Image(contentManager, "bullet", false, 0, 0),
+        new Image(contentManager, "pulse", false, 0, 0),
+        new Image(contentManager, "debri", false, 0, 0),
+        new Image(contentManager, "fragment", false, 0, 0),
+        new Image(contentManager, "lightning", false, 0, 0),
+        new Image(contentManager, "flame", false, 0, 0),
+        new Image(contentManager, "flamewave", false, 0, 0),
+        new Image(contentManager, "wave", false, 0, 0),
+      };
 
-      // load the enemies
-      Textures.Add("tank", LoadImage("tank"));
-      Textures.Add("mouse", LoadImage("mouse"));
-
-      // load the towers
-      Textures.Add("railgun", LoadImage("railgun"));
-      Textures.Add("turret", LoadImage("turret"));
-      Textures.Add("missileLauncher", LoadImage("missileLauncher"));
-      Textures.Add("shockwaveGenerator", LoadImage("shockwaveGenerator"));
-      Textures.Add("speedbump", LoadImage("speedbump"));
-      Textures.Add("sprinkler", LoadImage("sprinkler"));
-      Textures.Add("teslaCoil", LoadImage("teslaCoil"));
-      Textures.Add("machinegun", LoadImage("machinegun"));
-      Textures.Add("flamethrower", LoadImage("flamethrower"));
-
-      // load the projectiles
-      Textures.Add("rocket", LoadImage("rocket"));
-      Textures.Add("bullet", LoadImage("bullet"));
-      Textures.Add("wave", LoadImage("wave"));
-      Textures.Add("pulse", LoadImage("pulse"));
-      Textures.Add("debri", LoadImage("debri"));
-      Textures.Add("fragment", LoadImage("fragment"));
-      Textures.Add("lightning", LoadImage("lightning"));
-      Textures.Add("flame", LoadImage("flame"));
-      Textures.Add("flamewave", LoadImage("flamewave"));
-    }
-
-    private Texture2D LoadImage(string name)
-    {
-      return contentManager.Load<Texture2D>(string.Format("{0}", name));
+      foreach (Image image in images)
+      {
+        Images[image.Key] = image;
+      }
     }
 
     private SpriteFont LoadFont(string name)

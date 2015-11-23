@@ -48,11 +48,11 @@
     </Reference>
     <Reference Include="MLA.Utilities, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\MLA Library Projects\Utilities\Utilities\bin\Debug\MLA.Utilities.dll</HintPath>
+      <HintPath>..\..\..\Library Projects\Utilities\MLA.Utilities\bin\Debug\MLA.Utilities.dll</HintPath>
     </Reference>
     <Reference Include="MLA.Xna.Gui, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\MLA Library Projects\XNA\Gui\MLA.Xna.Gui\bin\x86\Debug\MLA.Xna.Gui.dll</HintPath>
+      <HintPath>..\..\..\Library Projects\XNA\Gui\MLA.Xna.Gui\bin\x86\Debug\MLA.Xna.Gui.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib">
       <Private>False</Private>
@@ -75,6 +75,7 @@
     <Compile Include="Data\Sprite.cs" />
     <Compile Include="Data\SizeF.cs" />
     <Compile Include="Data\DijkstraData.cs" />
+    <Compile Include="Image.cs" />
     <Compile Include="Parameters\DrawParams.cs" />
     <Compile Include="Invaders\Invader.cs" />
     <Compile Include="Invaders\Tank.cs" />

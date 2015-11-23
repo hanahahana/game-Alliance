@@ -20,7 +20,7 @@ namespace Alliance.Projectiles
       mVelocity = Utils.ComputeProjectileDirection(orientation);
       mAttack = projectile.Attack * 3f;
 
-      Color = Utils.GetIntermediateColor(Color.Yellow, Color.Black, .55f, 0, 1);
+      Color = Utils.BlendColors(Color.Yellow, Color.Black, .55f);
       mOrientation = orientation;
       Position = projectile.Position;
       Size = new SizeF(3.5f, 3.5f);

@@ -773,6 +773,9 @@ namespace Alliance.Utilities
         Vector3 v = new Vector3(i, j, 0);
         vertices[idx++] = new VertexPositionColor(v, color);
       }
+
+      if (idx < vertices.Length)
+        vertices[idx] = vertices[0];
       return vertices;
     }
   }

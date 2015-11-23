@@ -109,9 +109,19 @@ namespace Alliance.Data
       hull = null;
     }
 
-    public Texture2D GetImage()
+    public virtual Texture2D GetImage()
     {
-      return AllianceGame.Textures[ImageKey];
+      return AllianceGame.Images[ImageKey].Texture;
+    }
+
+    public virtual Texture2D GetDisplayImage()
+    {
+      return GetImage();
+    }
+
+    protected virtual Vector2[] GetImageHull()
+    {
+      return AllianceGame.Images[ImageKey].Hull;
     }
 
     public virtual BoxF GetBoundingBox(Vector2 offset)
@@ -169,7 +179,7 @@ namespace Alliance.Data
 
     public Polygon GetHull(Vector2 offset)
     {
-      Vector2[] polygon = AllianceGame.TextureHulls[ImageKey];
+      Vector2[] polygon = GetImageHull();
       if (hull == null)
       {
         Matrix transform = CreateTransform(GetDrawData(offset));

@@ -27,9 +27,9 @@ namespace Alliance.Pieces
 
       // set the properties of the piece
       mDescription = sb.ToString();
-      mRadius = 180;
-      mAttack = 2500f;
-      mProjectilesPerSecond = .25f;
+      mRadius = 280;
+      mAttack = 2500;
+      mProjectilesPerSecond = .1f;
       mNumberProjectilesToFire = 3;
       mProjectileLifeInSeconds = 5.5f;
       mUpgradePercent = 15;

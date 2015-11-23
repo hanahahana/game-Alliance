@@ -30,7 +30,7 @@ namespace Alliance.Pieces
     protected const float DefaultTurnSpeed = 1.5f;
     protected const int DefaultNumberProjectilesToFire = 1;
 
-    protected int[] mPriceAtLevels = new int[MaxLevel + 1];
+    protected double[] mPriceAtLevels = new double[MaxLevel + 1];
     protected GridCell[] mCells;
     protected bool mSelected;
     protected PieceState mState;
@@ -43,7 +43,7 @@ namespace Alliance.Pieces
     protected string mDescription = string.Empty;
     protected float mRadius = 15f;
     protected float mAttack = 15f;
-    protected int mPrice = 15;
+    protected double mPrice = 15;
     protected int mUpgradePercent = 15;
     protected bool mFaceTarget = true;
     protected bool mIsBlocking = true;
@@ -118,22 +118,22 @@ namespace Alliance.Pieces
       Clear();
     }
 
-    protected int UpgradePrice(float factor)
+    protected virtual double UpgradePrice(float factor)
     {
-      return (int)Math.Round(Price * factor);
+      return Math.Round(Price * factor);
     }
 
-    protected float UpgradeAttack(float factor)
+    protected virtual float UpgradeAttack(float factor)
     {
       return (float)Math.Round(Attack * factor);
     }
 
-    protected float ComputeUpgradeFactor()
+    protected virtual float ComputeUpgradeFactor()
     {
       return 1f + ((float)UpgradePercent / 100f);
     }
 
-    protected float UpgradeRadius(float factor)
+    protected virtual float UpgradeRadius(float factor)
     {
       return (Radius * factor);
     }
@@ -278,14 +278,14 @@ namespace Alliance.Pieces
 
     protected virtual void DrawBackground(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
     {
-      Color bgColor = (mLevel == MaxLevel ? Utils.GetIntermediateColor(Color.Beige, Color.SkyBlue, .5f, 0, 1f) : Color.Beige);
+      Color bgColor = (mLevel == MaxLevel ? Utils.BlendColors(Color.Beige, Color.SkyBlue, .5f) : Color.Beige);
       Color color = mSelected ? Color.DarkGreen : bgColor;
       Shapes.FillRectangle(spriteBatch, bounds, color);
     }
 
     protected virtual void DrawWeaponBase(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
     {
-      Texture2D wbase = AllianceGame.Textures["towerBase"];
+      Texture2D wbase = AllianceGame.Images["towerBase"].Texture;
       Vector2 scale = Utils.ComputeScale(new SizeF(wbase.Width, wbase.Height), bounds.Size);
 
       Color color = Utils.NewAlpha(Color.Gray, .5f);
@@ -361,10 +361,17 @@ namespace Alliance.Pieces
       float y = inside.Y + ((inside.Height / 2f) - (height / 2f));
 
       float progressWidth = width * Utils.CalculatePercent(mProgress, 0, MaxProgress);
-      Color progressColor = Utils.GetIntermediateColor(Color.Red, Color.DarkGreen, mProgress, 0, MaxProgress);
+      float factor = mProgress / (MaxProgress);
+
+      Color progressColor = Utils.BlendColors(Color.Red, Color.DarkGreen, factor);
 
       Shapes.FillRectangle(spriteBatch, x, y, progressWidth, height, progressColor);
       Shapes.DrawRectangle(spriteBatch, x, y, width, height, Color.Black);
+    }
+
+    public void AddTarget(Invader invader)
+    {
+      // TODO: better AI for choosing targets
     }
   }
 }

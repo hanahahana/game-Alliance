@@ -57,7 +57,7 @@ namespace Alliance.Pieces
     public virtual PieceGrouping Grouping { get { return mGrouping; } }
     public virtual float Radius { get { return mRadius; } }
     public virtual float Attack { get { return mAttack; } }
-    public virtual int Price { get { return mPrice; } }
+    public virtual double Price { get { return mPrice; } }
     public virtual int UpgradePercent { get { return mUpgradePercent; } }
     public virtual bool IsBlocking { get { return mIsBlocking; } }
     public virtual bool FaceTarget { get { return mFaceTarget; } }
@@ -80,10 +80,10 @@ namespace Alliance.Pieces
     protected override string ImageKey { get { return "turret"; } }
     protected override Vector2 Origin { get { return Vector2.Zero; } }
 
-    public int GetLifetimePrice()
+    public double GetLifetimePrice()
     {
       // we get the price that it was to place the piece
-      int sum = mPriceAtLevels[0];
+      double sum = mPriceAtLevels[0];
 
       // cycle through the levels
       for (int i = 0; i < mLevel; ++i)
@@ -137,6 +137,11 @@ namespace Alliance.Pieces
         mProgress = 0;
         mState = PieceState.Selling;
       }
+    }
+
+    public void SellInstant()
+    {
+      FinalizeSell();
     }
 
     public void Upgrade()
@@ -197,8 +202,10 @@ namespace Alliance.Pieces
       text.AppendLine(Description);
       float factor = ComputeUpgradeFactor();
 
+      ++mLevel;
       float newAttack = UpgradeAttack(factor);
-      int newPrice = UpgradePrice(factor);
+      double newPrice = UpgradePrice(factor);
+      --mLevel;
 
       lines.Add(string.Format("Attack: {0}", Attack));
       lines.Add(string.Format("Cost: {0:c2}", Price));

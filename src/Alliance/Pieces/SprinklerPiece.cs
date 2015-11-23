@@ -20,6 +20,12 @@ namespace Alliance.Pieces
     private const string SprinklerName = "Sprinkler";
     private const string UltimateSprinklerName = "Sprayer";
 
+    private const float MinVelocity = DefaultProjectileVelocity;
+    private const float MaxVelocity = DefaultProjectileVelocity * 3;
+
+    private const float MinPieSlices = 2f;
+    private const float MaxPieSlices = 16f;
+
     private const float RadiansPerSecond = 5.5f;
     private const float TotalSeconds = MathHelper.TwoPi / RadiansPerSecond;
 
@@ -29,17 +35,17 @@ namespace Alliance.Pieces
     {
       // setup the description
       StringBuilder sb = new StringBuilder();
-      sb.AppendLine("Sprinkles projectiles around. This tower doesn't aim, just shoots. Good for closing up loose holes in paths.");
+      sb.AppendLine("Sprinkles projectiles around (without aiming). Good for closing up holes in your maze.");
 
       // set the properties of the piece
       mDescription = sb.ToString();
       mRadius = 20;
       mAttack = 25;
-      mPiePieces = 2;
+      mPiePieces = MinPieSlices;
       mProjectilesPerSecond = TotalSeconds * mPiePieces;
       mNumberProjectilesToFire = 1;
       mUpgradePercent = 15;
-      mPrice = 100;
+      mPrice = 5;
       mFaceTarget = false;
       mName = SprinklerName;
       mUltimateName = UltimateSprinklerName;
@@ -56,15 +62,40 @@ namespace Alliance.Pieces
       Utils.WrapAngle(mOrientation);
     }
 
+    protected override float UpgradeAttack(float factor)
+    {
+      if (mLevel == MaxLevel)
+      {
+        return Invader.MaxInvaderLife * 5f;
+      }
+      else
+      {
+        return base.UpgradeAttack(factor);
+      }
+    }
+
+    protected override double UpgradePrice(float factor)
+    {
+      if (mLevel == MaxLevel - 1)
+      {
+        // set the price to be outrageous
+        return int.MaxValue;
+      }
+      else
+      {
+        return base.UpgradePrice(factor);
+      }
+    }
+
     protected override void UpgradeProjectileVariables(float factor)
     {
       base.UpgradeProjectileVariables(factor);
 
       float mu = (float)mLevel / (float)MaxLevel;
-      mUpgradePercent = (int)Math.Round(mUpgradePercent * factor * 3.5f);
+      mUpgradePercent = (int)Math.Round(mUpgradePercent * factor * 2f);
 
-      mProjectileVelocity = MathHelper.Lerp(DefaultProjectileVelocity, DefaultProjectileVelocity * 3f, mu);
-      mPiePieces = MathHelper.Lerp(2f, 16f, mu);
+      mProjectileVelocity = MathHelper.Lerp(MinVelocity, MaxVelocity, mu);
+      mPiePieces = MathHelper.Lerp(MinPieSlices, MaxPieSlices, mu);
 
       mNumberProjectilesToFire = 1;
       mProjectilesPerSecond = TotalSeconds * mPiePieces;
@@ -75,9 +106,9 @@ namespace Alliance.Pieces
       base.FinalizeUpgrade();
       if (mLevel == MaxLevel)
       {
-        StringBuilder sb = new StringBuilder(mDescription);
-        sb.AppendLine();
-        sb.AppendLine("Not sure how you got this uber tower but congratulations!");
+        // set the description
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine("Extremely powerful and fast sprayer. Extremely expensive too...nice job!");
         mDescription = sb.ToString();
       }
     }

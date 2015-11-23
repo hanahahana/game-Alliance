@@ -98,10 +98,21 @@ namespace Alliance.Components
       lstPieces.HideSelection = false;
 
       List<Piece> pieces = Utils.RetrieveAllSublcassesOf<Piece>();
-      foreach (Piece piece in pieces)
+      List<Texture2D> images = new List<Texture2D>(pieces.Count);
+
+      for(int i = 0; i < pieces.Count; ++i)
       {
-        lstPieces.Items.Add(new ListBoxItem(piece));
+        // create the item
+        ListBoxItem item = new ListBoxItem(pieces[i]);
+        item.ImageIndex = i;
+        item.ImageColor = Color.Gray;
+
+        // add the item and image
+        lstPieces.Items.Add(item);
+        images.Add(pieces[i].GetDisplayImage());
       }
+
+      lstPieces.ImageList = images;
 
       mGui.Controls.Add(lstPieces);
     }
@@ -262,8 +273,8 @@ namespace Alliance.Components
 
           // remove the piece
           int last = mPieces.Count - 1;
+          piece.SellInstant();
           mPieces.RemoveAt(last);
-          piece.Clear();
 
           // re-solve the grid
           SolveGrid();
