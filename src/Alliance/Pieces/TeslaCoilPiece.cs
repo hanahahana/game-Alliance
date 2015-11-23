@@ -1,28 +1,22 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
-
+using Alliance.Data;
+using Alliance.Enums;
+using Alliance.Objects;
+using Alliance.Parameters;
+using Alliance.Projectiles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
-using Alliance.Data;
-using Alliance.Utilities;
-using Alliance.Invaders;
-using Alliance.Projectiles;
-using Alliance.Parameters;
-using Alliance.Objects;
 using MLA.Utilities;
+using MLA.Utilities.Xna;
+using MLA.Utilities.Xna.Helpers;
 
 namespace Alliance.Pieces
 {
-  public enum TeslaState
-  {
-    Idle,
-    Charging,
-    Firing,
-    Discharging,
-  }
-
+  /// <summary>
+  /// The tesla coil tower. It's meant to emulate firing a charged blast of electricity.
+  /// </summary>
+  [Serializable]
   public class TeslaCoilPiece : Piece
   {
     private const string TeslaCoilName = "Tesla Coil";
@@ -39,8 +33,6 @@ namespace Alliance.Pieces
     private float mAggregateTimeSinceUpdate;
     private TeslaState mTeslaState;
 
-    private static Texture2D mDisplayImage = null;
-
     public TeslaCoilPiece()
     {
       // setup the description
@@ -48,16 +40,21 @@ namespace Alliance.Pieces
       sb.AppendLine("Fires a charged burst of electricity. The burst is very effective against ground units.");
 
       // set the properties needed
-      mDescription = sb.ToString();
-      mRadius = 220;
-      mAttack = 9000;
-      mPrice = 1000;
-      mUpgradePercent = 45;
-      mProjectileLifeInSeconds = 6.7f;
-      mCanFireProjectiles = false;
-      mName = TeslaCoilName;
-      mUltimateName = UltimateTeslaCoilName;
-      mGrouping = PieceGrouping.Three;
+      Attack = 9000;
+      Price = 2500;
+      Radius = 250;
+      UpgradePercent = 45;
+      LevelVisibility = 75;
+
+      Description = sb.ToString();
+      ProjectileLifeInSeconds = 6.7f;
+      CanFireProjectiles = false;
+      Name = TeslaCoilName;
+      UltimateName = UltimateTeslaCoilName;
+      Grouping = PieceGrouping.Three;
+      ImageKey = "teslaCoil";
+      Element = Element.Electricity;
+      Specialty = PieceSpecialty.Both;
 
       // set the properties of the piece
       mIndex = 0;
@@ -68,7 +65,7 @@ namespace Alliance.Pieces
       // get the image
       Texture2D image = GetImage();
       FrameSize = new Size(image.Width / (NumberIndexFrames + 1), image.Height);
-      LightningColor = Utils.BlendColors(
+      LightningColor = ColorHelper.Blend(
         new Color[] { Color.Purple, Color.DarkBlue, Color.Red },
         new float[] { .5f, .75f });
     }
@@ -81,14 +78,9 @@ namespace Alliance.Pieces
 
     protected override Projectile CreateProjectile()
     {
-      LightningProjectile projectile = new LightningProjectile(mProjectileLifeInSeconds, mTarget);
+      LightningProjectile projectile = new LightningProjectile(this, ProjectileLifeInSeconds, Target);
       projectile.Color = LightningColor;
       return projectile;
-    }
-
-    protected override string ImageKey
-    {
-      get { return "teslaCoil"; }
     }
 
     public override Texture2D GetDisplayImage()
@@ -104,10 +96,10 @@ namespace Alliance.Pieces
     protected override void UpgradeProjectileVariables(float factor)
     {
       base.UpgradeProjectileVariables(factor);
-      ++mProjectilesPerSecond;
+      ++ProjectilesPerSecond;
 
-      mProjectileVelocity = DefaultProjectileVelocity;
-      ++mNumberProjectilesToFire;
+      ProjectileSpeed = DefaultProjectileSpeed;
+      ++NumberProjectilesToFire;
     }
 
     public override void Update(GameTime gameTime)
@@ -116,7 +108,7 @@ namespace Alliance.Pieces
       base.Update(gameTime);
 
       // if we're idle, then we COULD be firing
-      if (mState == PieceState.Idle)
+      if (State == PieceState.Idle)
       {
         UpdateTeslaState(gameTime);
       }
@@ -127,7 +119,7 @@ namespace Alliance.Pieces
       }
 
       float factor = ((float)mIndex) / ((float)NumberIndexFrames);
-      Color = Utils.BlendColors(Color.Beige, LightningColor, factor);
+      Color = ColorHelper.Blend(Color.Beige, LightningColor, factor);
     }
 
     private void UpdateTeslaState(GameTime gameTime)
@@ -194,7 +186,7 @@ namespace Alliance.Pieces
 
         if (mIndex == NumberIndexFrames)
         {
-          FireProjectile();
+          FireProjectile(gameTime);
           mTeslaState = TeslaState.Firing;
         }
       }
@@ -202,13 +194,13 @@ namespace Alliance.Pieces
 
     private void UpdateTeslaIdleState(GameTime gameTime)
     {
-      if (mTarget != null)
+      if (Target != null)
       {
         mTeslaState = TeslaState.Charging;
       }
     }
 
-    protected override DrawData GetDrawData(Vector2 offset)
+    protected override TextureDrawData GetTextureDrawData(Vector2 offset)
     {
       Tuple<BoxF, BoxF> outin = GetOutsideInsideBounds(offset);
       BoxF bounds = outin.First;
@@ -218,20 +210,21 @@ namespace Alliance.Pieces
       SizeF imgSize = new SizeF(FrameSize.Width, FrameSize.Height);
       SizeF actSize = new SizeF(bounds.Width, bounds.Height);
 
-      Vector2 scale = Utils.ComputeScale(imgSize, actSize);
+      Vector2 scale = MathematicsHelper.ComputeScale(imgSize, actSize);
       Vector2 origin = imgSize.ToVector2() * .5f;
       Vector2 center = actSize.ToVector2() * .5f;
 
-      return new DrawData(wtower, imgSize, bounds.Location + center, origin, scale);
+      return new TextureDrawData(wtower, imgSize, bounds.Location + center, origin, scale);
     }
 
-    protected override void DrawWeaponTower(SpriteBatch spriteBatch, Vector2 offset)
+    protected override void DrawWeaponTower(DrawParams dparams, Vector2 offset)
     {
-      DrawData data = GetDrawData(offset);
+      TextureDrawData data = GetTextureDrawData(offset);
       Rectangle source = new Rectangle(
         mIndex * FrameSize.Width, 0,
         FrameSize.Width, FrameSize.Height);
 
+      SpriteBatch spriteBatch = dparams.SpriteBatch;
       spriteBatch.Draw(
         data.Texture,
         data.Position,

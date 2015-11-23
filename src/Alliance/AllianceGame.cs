@@ -1,15 +1,9 @@
-using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Net;
-using Microsoft.Xna.Framework.Storage;
-using Alliance.Utilities;
 using Alliance.Components;
+using Alliance.Screens;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Alliance
 {
@@ -20,38 +14,25 @@ namespace Alliance
   {
     private GraphicsDeviceManager graphics;
     private GraphicsDevice device;
-    private SpriteBatch spriteBatch;
     private ResourceContentManager contentManager;
-
-    private MessageComponent messages;
-    private GridComponent grid;
-    private InputProvider input;
-    private PlayerHudComponent player;
+    private ScreenComponent screenManager;
 
     public static Dictionary<string, Image> Images = null;
     public static Dictionary<string, SpriteFont> Fonts = null;
+    public static Dictionary<string, List<string>> Strings = null;
+    public static Dictionary<string, Texture2D> Textures = null;
+    public static GridComponent CurrentGrid = null;
 
     public AllianceGame()
     {
       contentManager = new ResourceContentManager(Services, ContentResources.ResourceManager);
       contentManager.RootDirectory = "Resources";
-
       graphics = new GraphicsDeviceManager(this);
-      Content.RootDirectory = "Content";
 
-      grid = new GridComponent(this);
-      Components.Add(grid);
+      screenManager = new ScreenComponent(this);
+      Components.Add(screenManager);
 
-      messages = MessageComponent.CreateInstance(this);
-      Components.Add(messages);
-
-      input = new InputProvider(this);
-      Components.Add(input);
-
-      player = new PlayerHudComponent(this);
-      Components.Add(player);
-
-      Services.AddService(typeof(InputProvider), input);
+      screenManager.AddScreen(new MainMenuScreen());
     }
 
     /// <summary>
@@ -62,15 +43,29 @@ namespace Alliance
     /// </summary>
     protected override void Initialize()
     {
+      // the mouse is visible
+      IsMouseVisible = true;
+      graphics.PreferredBackBufferWidth = 800;
+      graphics.PreferredBackBufferHeight = 600;
+      graphics.ApplyChanges();
+
       // initialize the dictionaries
       Images = new Dictionary<string, Image>();
       Fonts = new Dictionary<string, SpriteFont>();
+      Strings = new Dictionary<string, List<string>>();
+      Textures = new Dictionary<string, Texture2D>();
 
       // load all of the fonts
       LoadFonts();
 
       // load all of the images
       LoadImages();
+
+      // load all of the strings
+      LoadStrings();
+
+      // load all of the textures
+      LoadTextures();
 
       // enumerate through the components
       base.Initialize();
@@ -84,27 +79,49 @@ namespace Alliance
     {
       // Create a new SpriteBatch, which can be used to draw textures.
       device = GraphicsDevice;
-      spriteBatch = new SpriteBatch(device);
 
       // run through the components
       base.LoadContent();
     }
 
+    private void LoadTextures()
+    {
+      Textures["background"] = Load<Texture2D>("background");
+      Textures["blank"] = Load<Texture2D>("blank");
+      Textures["gradient"] = Load<Texture2D>("gradient");
+    }
+
+    private void LoadStrings()
+    {
+      Strings["story"] = Load<List<string>>("story");
+      Strings["wizard"] = Load<List<string>>("wizard");
+    }
+
     private void LoadFonts()
     {
-      Fonts["ComicSans"] = LoadFont("ComicSans");
-      Fonts["Tahoma"] = LoadFont("Tahoma");
-      Fonts["Verdana"] = LoadFont("Verdana");
-      Fonts["Georgia"] = LoadFont("Georgia");
+      Fonts["ComicSans"] = Load<SpriteFont>("ComicSans");
+      Fonts["Tahoma"] = Load<SpriteFont>("Tahoma");
+      Fonts["Verdana"] = Load<SpriteFont>("Verdana");
+      Fonts["Georgia"] = Load<SpriteFont>("Georgia");
+      Fonts["Arial"] = Load<SpriteFont>("Arial");
+      Fonts["BookmanOldStyle"] = Load<SpriteFont>("BookmanOldStyle");
+      Fonts["TimesNewRoman"] = Load<SpriteFont>("TimesNewRoman");
     }
 
     private void LoadImages()
     {
       Image[] images = new Image[]
       {
+        // bases
         new Image(contentManager, "towerBase", false, 0, 0),
-        new Image(contentManager, "tank", false, 0, 0),
-        new Image(contentManager, "mouse", false, 0, 0),
+
+        // enemies ( all enemies are animated to avoid exceptions )
+        new Image(contentManager, "walker", true, 4, 1),
+        new Image(contentManager, "biker", true, 4, 1),
+        new Image(contentManager, "flapper", true, 5, 1),
+        new Image(contentManager, "glider", true, 4, 1),
+
+        // towers
         new Image(contentManager, "railgun", false, 0, 0),
         new Image(contentManager, "turret", false, 0, 0),
         new Image(contentManager, "missileLauncher", false, 0, 0),
@@ -114,6 +131,9 @@ namespace Alliance
         new Image(contentManager, "teslaCoil", true, 5, 1),
         new Image(contentManager, "machinegun", false, 0, 0),
         new Image(contentManager, "flamethrower", false, 0, 0),
+        new Image(contentManager, "seeker", false, 0, 0),
+
+        // projectiles
         new Image(contentManager, "rocket", false, 0, 0),
         new Image(contentManager, "bullet", false, 0, 0),
         new Image(contentManager, "pulse", false, 0, 0),
@@ -123,6 +143,7 @@ namespace Alliance
         new Image(contentManager, "flame", false, 0, 0),
         new Image(contentManager, "flamewave", false, 0, 0),
         new Image(contentManager, "wave", false, 0, 0),
+        new Image(contentManager, "lockmissile", false, 0, 0),
       };
 
       foreach (Image image in images)
@@ -131,36 +152,9 @@ namespace Alliance
       }
     }
 
-    private SpriteFont LoadFont(string name)
+    private T Load<T>(string p)
     {
-      return contentManager.Load<SpriteFont>(string.Format("{0}", name));
-    }
-
-    /// <summary>
-    /// UnloadContent will be called once per game and is the place to unload
-    /// all content.
-    /// </summary>
-    protected override void UnloadContent()
-    {
-      // TODO: Unload any non ContentManager content here
-    }
-
-    /// <summary>
-    /// Allows the game to run logic such as updating the world,
-    /// checking for collisions, gathering input, and playing audio.
-    /// </summary>
-    /// <param name="gameTime">Provides a snapshot of timing values.</param>
-    protected override void Update(GameTime gameTime)
-    {
-      if (IsActive)
-      {
-        grid.FillMode = GridFillMode.Solid;
-        if (Keyboard.GetState().IsKeyDown(Keys.Space))
-        {
-          grid.FillMode = GridFillMode.Polygons;
-        }
-        base.Update(gameTime);
-      }
+      return contentManager.Load<T>(p);
     }
 
     /// <summary>

@@ -1,27 +1,27 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Xna.Framework.Graphics;
-using Alliance.Data;
+using Microsoft.Xna.Framework;
+using MLA.Utilities.Xna;
+using Alliance.Pieces;
 
 namespace Alliance.Projectiles
 {
+  /// <summary>
+  /// The projectile fired by the machine gun tower.
+  /// </summary>
+  [Serializable]
   public class BulletProjectile : Projectile
   {
-    public BulletProjectile(double timeToLiveInSeconds)
-      : base(timeToLiveInSeconds)
+    public BulletProjectile(Piece parent, double timeToLiveInSeconds)
+      : base(parent, timeToLiveInSeconds)
     {
       Size = new SizeF(6f, 2f);
+      ImageKey = "bullet";
     }
 
-    public override void UpdateByFrameCount(int frameCount)
+    public override void UpdateByFrameCount(GameTime gameTime, int frameCount)
     {
-      Position += ((frameCount + 1) * Velocity * MovementPerSecond * 4);
-    }
-
-    protected override string ImageKey
-    {
-      get { return "bullet"; }
+      float time = (float)(gameTime.ElapsedGameTime.TotalSeconds * (frameCount + 1.0));
+      Position += (time * VelocityFactor * VelocityFactor);
     }
   }
 }

@@ -151,9 +151,6 @@
   <data name="missileLauncher" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Images\Towers\missileLauncher.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="mouse" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Images\Enemies\mouse.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="pulse" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Images\Projectiles\pulse.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -175,9 +172,6 @@
   <data name="Tahoma" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Fonts\Tahoma.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="tank" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Images\Enemies\tank.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="teslaCoil" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Images\Towers\teslaCoil.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -192,5 +186,47 @@
   </data>
   <data name="wave" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Images\Projectiles\wave.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="seeker" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Images\Towers\seeker.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="lockmissile" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Images\Projectiles\lockmissile.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Arial" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Fonts\Arial.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="BookmanOldStyle" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Fonts\BookmanOldStyle.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="background" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Textures\background.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="blank" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Textures\blank.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="gradient" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Textures\gradient.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="story" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Strings\story.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="TimesNewRoman" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Fonts\TimesNewRoman.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="wizard" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Strings\wizard.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="walker" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Images\Enemies\walker.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="glider" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Images\Enemies\glider.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="biker" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Images\Enemies\biker.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="flapper" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Images\Enemies\flapper.xnb;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

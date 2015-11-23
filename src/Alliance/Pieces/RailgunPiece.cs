@@ -1,19 +1,16 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
-
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-
-using Alliance.Data;
-using Alliance.Utilities;
-using Alliance.Invaders;
-using Alliance.Projectiles;
-using Alliance.Parameters;
 using Alliance.Objects;
+using Alliance.Projectiles;
+using Alliance.Invaders;
+using Alliance.Enums;
 
 namespace Alliance.Pieces
 {
+  /// <summary>
+  /// The railgun tower. It's meant to emulate firing a powerful, yet slow blast of energy.
+  /// </summary>
+  [Serializable]
   public class RailgunPiece : Piece
   {
     private const string RailgunName = "Rail Gun";
@@ -26,16 +23,21 @@ namespace Alliance.Pieces
       sb.AppendLine("Fires an electrical pulse at the enemy. This can shoot very far, and is extremely powerful, but isn't very fast.");
 
       // set the properties of the piece
-      mDescription = sb.ToString();
-      mRadius = 280;
-      mAttack = 2500;
-      mProjectilesPerSecond = .1f;
-      mNumberProjectilesToFire = 3;
-      mProjectileLifeInSeconds = 5.5f;
-      mUpgradePercent = 15;
-      mPrice = 250;
-      mName = RailgunName;
-      mUltimateName = UltimateRailgunName;
+      Attack = 2000;
+      Price = 600;
+      Radius = 200;
+      UpgradePercent = 15;
+      LevelVisibility = 20;
+
+      Description = sb.ToString();
+      ProjectilesPerSecond = 0.5f;
+      NumberProjectilesToFire = 1;
+      ProjectileLifeInSeconds = 5.5f;
+      Name = RailgunName;
+      UltimateName = UltimateRailgunName;
+      ImageKey = "railgun";
+      Element = Element.Electricity;
+      Specialty = PieceSpecialty.Flight;
     }
 
     protected override Piece CreatePiece(GridCell[] cells)
@@ -46,13 +48,8 @@ namespace Alliance.Pieces
 
     protected override Projectile CreateProjectile()
     {
-      RailgunProjectile projectile = new RailgunProjectile(ProjectileLifeInSeconds);
+      RailgunProjectile projectile = new RailgunProjectile(this, ProjectileLifeInSeconds);
       return projectile;
-    }
-
-    protected override string ImageKey
-    {
-      get { return "railgun"; }
     }
   }
 }

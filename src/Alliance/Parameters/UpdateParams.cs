@@ -1,38 +1,40 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 
+using Alliance.Input;
 using Microsoft.Xna.Framework;
-
-using Alliance.Components;
 
 namespace Alliance.Parameters
 {
+  /// <summary>
+  /// Represents parameters passed to methods to perform updates.
+  /// </summary>
   public class UpdateParams
   {
-    private GameTime mGameTime;
-    public GameTime GameTime
-    {
-      get { return mGameTime; }
-    }
+    /// <summary>
+    /// Gets the game time coming to apply to each item being updated.
+    /// </summary>
+    public GameTime GameTime { get; private set; }
 
-    private InputProvider mInput;
-    public InputProvider Input
-    {
-      get { return mInput; }
-    }
+    /// <summary>
+    /// Gets the input provider service.
+    /// </summary>
+    public InputState Input { get; private set; }
 
-    private Vector2 mOffset;
-    public Vector2 Offset
-    {
-      get { return mOffset; }
-    }
+    /// <summary>
+    /// Gets the offset to use when updating the position of objects.
+    /// </summary>
+    public Vector2 Offset { get; private set; }
 
-    public UpdateParams(GameTime gameTime, InputProvider input, Vector2 offset)
+    /// <summary>
+    /// Creates update parameters containing the necessary objects.
+    /// </summary>
+    /// <param name="gameTime">The game time to pass on.</param>
+    /// <param name="input">The input provider to pass on.</param>
+    /// <param name="offset">The global offset pass on.</param>
+    public UpdateParams(GameTime gameTime, InputState input, Vector2 offset)
     {
-      mGameTime = gameTime;
-      mInput = input;
-      mOffset = offset;
+      GameTime = gameTime;
+      Input = input;
+      Offset = offset;
     }
   }
 }

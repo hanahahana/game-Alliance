@@ -1,39 +1,32 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
-
-using MLA.Utilities.Helpers;
-
+using Alliance.Data;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
-using Alliance.Data;
-using Alliance.Utilities;
+using MLA.Utilities.Helpers;
+using MLA.Utilities.Xna;
+using MLA.Utilities.Xna.Helpers;
 using Alliance.Pieces;
-using Alliance.Parameters;
 
 namespace Alliance.Projectiles
 {
+  /// <summary>
+  /// The projectile fired by the shockwave tower.
+  /// </summary>
+  [Serializable]
   public class ShockwaveProjectile : Projectile
   {
-    const float ScalesPerSecond = 1.5f;
-    const float RotationsPerSecond = 34.567f;
+    private const float ScalesPerSecond = 1.5f;
+    private const float RotationsPerSecond = 34.567f;
 
     private BoxF mOwnerBounds;
-    private float mScale = 1.0f;
 
-    public override bool IsAlive
-    {
-      get { return base.IsAlive; }
-      set { base.IsAlive = true; }
-    }
-
-    public ShockwaveProjectile(BoxF ownerBounds, double timeToLiveInSeconds)
-      : base(timeToLiveInSeconds)
+    public ShockwaveProjectile(Piece parent, BoxF ownerBounds, double timeToLiveInSeconds)
+      : base(parent, timeToLiveInSeconds)
     {
       mOwnerBounds = ownerBounds;
-      Color = RandomHelper.NextBool() ? Color.Gray :
-        RandomHelper.NextBool() ? Color.Black : Color.DarkGray;
+      Color = Color.Gray;
+      ImageKey = "wave";
+      StayAlive = true;
     }
 
     public override void Update(GameTime gameTime)
@@ -44,40 +37,39 @@ namespace Alliance.Projectiles
       // if we're still alive, then update out
       if (IsAlive)
       {
-        UpdateScaleAndOrientation((float)gameTime.ElapsedGameTime.TotalSeconds);
+        UpdateVariables((float)gameTime.ElapsedGameTime.TotalSeconds);
       }
     }
 
-    protected void UpdateScaleAndOrientation(float elapsedSeconds)
+    protected void UpdateVariables(float elapsedSeconds)
     {
-      mScale += elapsedSeconds * ScalesPerSecond;
-      mOrientation += elapsedSeconds * RotationsPerSecond;
-      Size = mOwnerBounds.Size * .5f * mScale;
+      //mScale += elapsedSeconds * ScalesPerSecond;
+      //Size = mOwnerBounds.Size * .5f * mScale;
+
+      // spin the projectile
+      Orientation += elapsedSeconds * RotationsPerSecond;
+      Orientation = MathHelper.WrapAngle(Orientation);
     }
 
-    public override void UpdateByFrameCount(int frameCount)
+    public override void UpdateByFrameCount(GameTime gameTime, int frameCount)
     {
-      UpdateScaleAndOrientation(frameCount * .1f);
+      float time = (float)(gameTime.ElapsedGameTime.TotalSeconds * (frameCount + 1.0) * 10.0);
+      UpdateVariables(time);
     }
 
-    protected override string ImageKey
-    {
-      get { return "wave"; }
-    }
-
-    protected override DrawData GetDrawData(Vector2 offset)
+    protected override TextureDrawData GetTextureDrawData(Vector2 offset)
     {
       Texture2D projectile = GetImage();
       SizeF projectileSize = new SizeF(projectile.Width, projectile.Height);
 
       Vector2 origin = projectileSize.ToVector2() * .5f;
-      Vector2 scale = Utils.ComputeScale(projectileSize, Size);
+      Vector2 scale = MathematicsHelper.ComputeScale(projectileSize, Size);
 
       Vector2 position = mOwnerBounds.Location;
       position += ((mOwnerBounds.Size.ToVector2() * .5f));
 
       // return the data
-      return new DrawData(projectile, projectileSize, position + offset, origin, scale);
+      return new TextureDrawData(projectile, projectileSize, position + offset, origin, scale);
     }
   }
 }

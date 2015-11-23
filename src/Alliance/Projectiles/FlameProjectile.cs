@@ -1,24 +1,32 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Alliance.Data;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
-using Alliance.Parameters;
 using Alliance.Invaders;
+using Alliance.Parameters;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using MLA.Utilities.Xna;
+using MLA.Utilities.Xna.Helpers;
+using Alliance.Pieces;
 
 namespace Alliance.Projectiles
 {
+  /// <summary>
+  /// The projectile fired by the flame thrower tower.
+  /// </summary>
+  [Serializable]
   public class FlameProjectile : Projectile
   {
-    private const float SecondsPerFrame = 1f / 12.3456789f;
+    private const float SecondsPerFrame = 1.0f / 12.3456789f;
+
     private float mSecondsSinceUpdate = 0;
     private SpriteEffects effects = SpriteEffects.None;
 
-    public FlameProjectile(double timeToLiveInSeconds)
-      : base(timeToLiveInSeconds)
+    public FlameProjectile(Piece parent, double timeToLiveInSeconds)
+      : base(parent, timeToLiveInSeconds)
     {
-      Size = new SizeF(40f, 40f);
+      Size = new SizeF(20f, 80f);
+      ImageKey = "flame";
+      Origin = new Vector2(0, GetImage().Height / 2);
     }
 
     public override void Update(GameTime gameTime)
@@ -33,14 +41,18 @@ namespace Alliance.Projectiles
       }
     }
 
-    public override void UpdateByFrameCount(int frameCount)
+    protected override TextureDrawData GetTextureDrawData(Vector2 offset)
     {
-      Position += ((frameCount + 1) * Velocity * MovementPerSecond * 20f);
+      Texture2D image = GetImage();
+      SizeF imgSize = new SizeF(image.Width, image.Height);
+      Vector2 scale = MathematicsHelper.ComputeScale(imgSize, Size);
+      return new TextureDrawData(image, imgSize, Position + offset, Origin, scale);
     }
 
-    protected override string ImageKey
+    public override void UpdateByFrameCount(GameTime gameTime, int frameCount)
     {
-      get { return "flame"; }
+      float time = (float)(gameTime.ElapsedGameTime.TotalSeconds * ((frameCount + 1.0) * 20.0));
+      Position += (time * VelocityFactor * VelocityFactor);
     }
 
     public override void OnCollidedWithInvader(Invader invader)
@@ -53,17 +65,17 @@ namespace Alliance.Projectiles
       SpriteBatch spriteBatch = dparams.SpriteBatch;
       Vector2 offset = dparams.Offset;
 
-      DrawData data = GetDrawData(offset);
+      TextureDrawData data = GetTextureDrawData(offset);
       spriteBatch.Draw(
           data.Texture,
           data.Position,
           null,
           Color,
-          mOrientation,
+          Orientation,
           data.Origin,
           data.Scale,
           effects,
-          0);
+          0f);
     }
   }
 }

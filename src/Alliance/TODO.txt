@@ -1,0 +1,16 @@
+* Update message component to display messages like +$500.00 and -1 for civilian life
+* Add difficulty setting
+* Display where civilians are
+* Add different types of enemies
+* Add towers that only target specific enemies
+* Add sound
+* Develop EM weapon
+* Develop Nuclear Weapon (instantly destroys everything on the board except Math.Min(CurrentCivilians, 100)
+* Develop MAPA Cannon (can only buy once; uses the souls of civlians; 25% chance of ending the game; takes up 10x10)
+
+
+Topics for C# code
+* Consider a complete redesign
+* Advanced AI
+  - http://christophermpark.blogspot.com/2009/06/designing-emergent-ai-part-2.html
+  - http://stackoverflow.com/questions/605124/fixed-point-math-in-c

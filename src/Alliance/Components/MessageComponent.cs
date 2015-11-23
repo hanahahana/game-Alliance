@@ -1,137 +1,88 @@
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
-
+using Alliance.Enums;
+using Alliance.Parameters;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
-using Alliance.Utilities;
-using Alliance.Data;
+using MLA.Utilities.Xna;
+using MLA.Utilities.Xna.Drawing;
+using MLA.Utilities.Xna.Graphics;
+using MLA.Utilities.Xna.Helpers;
 
 namespace Alliance.Components
 {
-  public sealed class MessageComponent : DrawableGameComponent
+  /// <summary>
+  /// 
+  /// </summary>
+  public sealed class MessageComponent : DrawableComponent
   {
-    private enum MessageState { FadeIn, Displayed, FadeOut, Complete };
+    public const float DefaultFadeTimeMs = 2500f;
+    public const float MessageMargin = 5;
+    public const float TwoMessageMargin = MessageMargin * 2;
 
     #region Private Message Class
+
+    private enum MessageState { FadeIn, Displayed, FadeOut, Complete };
     private class Message
     {
-      public const float DefaultFadeTimeMs = 1500f;
-
-      private Vector2 mPosition;
-      public Vector2 Position
-      {
-        get { return mPosition; }
-      }
-
-      private SizeF mSize;
-      public SizeF Size
-      {
-        get { return mSize; }
-      }
-
-      private string mText;
-      public string Text
-      {
-        get { return mText; }
-      }
-
-      private float mRemainingTime;
-      public float RemainingTime
-      {
-        get { return mRemainingTime; }
-      }
-
-      private MessageState mState;
-      public MessageState State
-      {
-        get { return mState; }
-      }
-
-      private Color mBackColor;
-      public Color BackColor
-      {
-        get { return mBackColor; }
-      }
-
-      private Color mForeColor;
-      public Color ForeColor
-      {
-        get { return mForeColor; }
-      }
-
-      private bool mFadeEffects;
-      public bool FadeEffects
-      {
-        get { return mFadeEffects; }
-      }
-
-      private SpriteFont mFont;
-      public SpriteFont Font
-      {
-        get { return mFont; }
-      }
-
-      private float mAlpha;
-      public float Alpha
-      {
-        get { return mAlpha; }
-      }
-
-      private float mFadeTimeMs;
-      public float FadeTimeMs
-      {
-        get { return mFadeTimeMs; }
-      }
+      public Vector2 Position { get; private set; }
+      public SizeF Size { get; private set; }
+      public string Text { get; private set; }
+      public float RemainingTime { get; private set; }
+      public MessageState State { get; private set; }
+      public Color BackColor { get; private set; }
+      public Color ForeColor { get; private set; }
+      public bool FadeEffects { get; private set; }
+      public SpriteFont Font { get; private set; }
+      public float Alpha { get; private set; }
+      public float FadeTimeMs { get; private set; }
 
       public Message(string text, Vector2 position, float aliveTimeMs, float fadeTimeMs, Color backColor, Color foreColor, SpriteFont font, bool useFadeEffects)
       {
-        mText = text;
-        mPosition = position;
-        mRemainingTime = aliveTimeMs;
-        mBackColor = backColor;
-        mForeColor = foreColor;
-        mFont = font;
-        mFadeEffects = useFadeEffects;
-        mFadeTimeMs = fadeTimeMs;
-        mState = (mFadeEffects ? MessageState.FadeIn : MessageState.Displayed);
-        mSize = new SizeF(mFont.MeasureString(mText));
-        mAlpha = (mFadeEffects ? 0 : 1f);
+        Text = text;
+        Position = position;
+        RemainingTime = aliveTimeMs;
+        BackColor = backColor;
+        ForeColor = foreColor;
+        Font = font;
+        FadeEffects = useFadeEffects;
+        FadeTimeMs = fadeTimeMs;
+        State = (FadeEffects ? MessageState.FadeIn : MessageState.Displayed);
+        Size = new SizeF(Font.MeasureString(Text));
+        Alpha = (FadeEffects ? 0 : 1f);
       }
 
       public void Update(GameTime gameTime)
       {
-        switch (mState)
+        switch (State)
         {
           case MessageState.FadeIn:
             {
               AdjustAlpha((float)gameTime.ElapsedGameTime.TotalMilliseconds);
-              if (mAlpha >= 1f)
+              if (Alpha >= 1f)
               {
-                mState = MessageState.Displayed;
-                mAlpha = 1f;
+                State = MessageState.Displayed;
+                Alpha = 1f;
               }
               break;
             }
           case MessageState.FadeOut:
             {
               AdjustAlpha(-(float)gameTime.ElapsedGameTime.TotalMilliseconds);
-              if (mAlpha <= 0f)
+              if (Alpha <= 0f)
               {
-                mState = MessageState.Complete;
-                mAlpha = 0f;
+                State = MessageState.Complete;
+                Alpha = 0f;
               }
               break;
             }
           case MessageState.Displayed:
             {
-              mRemainingTime -= (float)gameTime.ElapsedGameTime.TotalMilliseconds;
-              if (mRemainingTime <= 0f)
+              RemainingTime -= (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+              if (RemainingTime <= 0f)
               {
-                mState = (mFadeEffects ? MessageState.FadeOut : MessageState.Complete);
-                mRemainingTime = 0f;
+                State = (FadeEffects ? MessageState.FadeOut : MessageState.Complete);
+                RemainingTime = 0f;
               }
               break;
             }
@@ -142,26 +93,32 @@ namespace Alliance.Components
 
       private void AdjustAlpha(float elapsedMilliseconds)
       {
-        mAlpha += (mFadeTimeMs * elapsedMilliseconds);
+        Alpha += (FadeTimeMs * elapsedMilliseconds);
       }
 
-      public void Draw(SpriteBatch spriteBatch)
+      public void Draw(DrawParams data)
       {
-        if (mState != MessageState.Complete)
+        if (State != MessageState.Complete)
         {
-          mBackColor = Utils.NewAlpha(mBackColor, mAlpha);
-          mForeColor = Utils.NewAlpha(mForeColor, mAlpha);
+          BackColor = ColorHelper.NewAlpha(BackColor, Alpha);
+          ForeColor = ColorHelper.NewAlpha(ForeColor, Alpha);
+          BoxF box = new BoxF
+          {
+            X = Position.X - MessageMargin,
+            Y = Position.Y - MessageMargin,
+            Width = Size.Width + TwoMessageMargin,
+            Height = Size.Height + TwoMessageMargin
+          };
 
-          BoxF box = new BoxF(mPosition.X - 3, mPosition.Y - 2, mSize.Width + 6, mSize.Height + 4);
-          Shapes.FillRectangle(spriteBatch, box, mBackColor);
-          Shapes.DrawRectangle(spriteBatch, box, mForeColor);
-          spriteBatch.DrawString(mFont, mText, mPosition, mForeColor);
+          data.Graphics.FillRectangle(box, BackColor);
+          data.Graphics.DrawRectangle(box, ForeColor);
+          data.SpriteBatch.DrawString(Font, Text, Position, ForeColor);
         }
       }
 
       public void Readjust()
       {
-        mPosition -= (new Vector2(mSize.Width / 2f, mSize.Height / 2f));
+        Position -= (new Vector2(Size.Width / 2f, Size.Height / 2f));
       }
     }
     #endregion
@@ -173,44 +130,10 @@ namespace Alliance.Components
     private static bool mDefaultUseFadeEffects;
     private static SpriteFont mDefaultFont;
     private static SpriteBatch mSpriteBatch;
+    private static GraphicsBase mGraphics;
     private static int creationRequests;
     private static List<Message> mMessages = new List<Message>();
     private static MessageComponent mComponentInstance;
-
-    public static Color DefaultForeColor
-    {
-      get { return mDefaultForeColor; }
-    }
-
-    public static Vector2 DefaultPosition
-    {
-      get { return mDefaultPosition; }
-    }
-
-    public static Color DefaultBackColor
-    {
-      get { return mDefaultBackColor; }
-    }
-
-    public static float DefaultAliveTime
-    {
-      get { return mDefaultAliveTime; }
-    }
-
-    public static bool DefaultUseFadeEffects
-    {
-      get { return mDefaultUseFadeEffects; }
-    }
-
-    public static SpriteFont DefaultFont
-    {
-      get { return mDefaultFont; }
-    }
-
-    public static SpriteBatch SpriteBatch
-    {
-      get { return mSpriteBatch; }
-    }
 
     static MessageComponent()
     {
@@ -234,7 +157,7 @@ namespace Alliance.Components
       return mComponentInstance;
     }
 
-    protected override void LoadContent()
+    public override void LoadContent()
     {
       LoadStaticContent(Game);
     }
@@ -243,12 +166,17 @@ namespace Alliance.Components
     {
       if (mDefaultFont == null)
       {
-        mDefaultFont = AllianceGame.Fonts["Tahoma"];
+        mDefaultFont = AllianceGame.Fonts["TimesNewRoman"];
       }
 
       if (mSpriteBatch == null)
       {
         mSpriteBatch = new SpriteBatch(game.GraphicsDevice);
+      }
+
+      if (mGraphics == null)
+      {
+        mGraphics = new PrimitiveGraphics(mSpriteBatch);
       }
     }
 
@@ -259,19 +187,23 @@ namespace Alliance.Components
       {
         Message msg = mMessages[i];
         msg.Update(gameTime);
+
         if (msg.State == MessageState.Complete)
+        {
           mMessages.RemoveAt(i);
+          --i;
+        }
       }
       base.Update(gameTime);
     }
 
     public override void Draw(GameTime gameTime)
     {
+      DrawParams data = new DrawParams(gameTime, Vector2.Zero, GridFillMode.Solid, mSpriteBatch, mGraphics);
       mSpriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.Deferred, SaveStateMode.SaveState);
-      foreach (Message msg in mMessages)
-      {
-        msg.Draw(mSpriteBatch);
-      }
+
+      mMessages.ForEach(msg => msg.Draw(data));
+
       mSpriteBatch.End();
       base.Draw(gameTime);
     }
@@ -286,13 +218,18 @@ namespace Alliance.Components
       AddMessage(text, position, aliveTimeMs, null, null, null, null, useFadeEffects, true);
     }
 
+    public static void AddMessage(string text, Vector2 position, float aliveTimeMs, SpriteFont font, bool useFadeEffects)
+    {
+      AddMessage(text, position, aliveTimeMs, null, null, null, font, useFadeEffects, true);
+    }
+
     public static void AddMessage(string text, Vector2? position, float? aliveTimeMs, float? fadeTimeMs, Color? backColor, Color? foreColor, SpriteFont font, bool? useFadeEffects, bool adjustPosition)
     {
       Message message = new Message(
         text,
         position.HasValue ? position.Value : mDefaultPosition,
         aliveTimeMs.HasValue ? aliveTimeMs.Value : mDefaultAliveTime,
-        fadeTimeMs.HasValue ? fadeTimeMs.Value : Message.DefaultFadeTimeMs,
+        fadeTimeMs.HasValue ? fadeTimeMs.Value : DefaultFadeTimeMs,
         backColor.HasValue ? backColor.Value : mDefaultBackColor,
         foreColor.HasValue ? foreColor.Value : mDefaultForeColor,
         font != null ? font : mDefaultFont,

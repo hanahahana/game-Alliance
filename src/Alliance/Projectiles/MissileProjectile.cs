@@ -1,27 +1,25 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
-
-using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
+using Alliance.Pieces;
 
 namespace Alliance.Projectiles
 {
+  /// <summary>
+  /// The projectile fired by the missile tower.
+  /// </summary>
+  [Serializable]
   public class MissileProjectile : Projectile
   {
-    public MissileProjectile(double timeToLiveInSeconds)
-      : base(timeToLiveInSeconds)
+    public MissileProjectile(Piece parent, double timeToLiveInSeconds)
+      : base(parent, timeToLiveInSeconds)
     {
-
+      ImageKey = "rocket";
     }
 
-    public override void UpdateByFrameCount(int frameCount)
+    public override void UpdateByFrameCount(GameTime gameTime, int frameCount)
     {
-      Position += (frameCount * .5f * Velocity * MovementPerSecond);
-    }
-
-    protected override string ImageKey
-    {
-      get { return "rocket"; }
+      float time = (float)(gameTime.ElapsedGameTime.TotalSeconds * (frameCount * .5));
+      Position += (time * VelocityFactor * VelocityFactor);
     }
   }
 }

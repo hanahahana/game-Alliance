@@ -1,129 +1,132 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Alliance.Utilities;
-using Alliance.Parameters;
-using Alliance.Projectiles;
+using MLA.Utilities.Xna;
+using MLA.Utilities.Xna.Helpers;
 
 namespace Alliance.Data
 {
+  /// <summary>
+  /// 
+  /// </summary>
+  [Serializable]
   public abstract class Sprite
   {
-    private BoxF mBounds;
-    private Polygon hull;
+    private BoxF previousBounds;
+    private Polygon hullCache;
 
-    protected float mOrientation;
-    protected Color mColor;
+    /// <summary>
+    /// Gets or sets the color to draw the sprite.
+    /// </summary>
+    public Color Color { get; set; }
 
-    public Color Color
-    {
-      get { return mColor; }
-      set { mColor = value; }
-    }
+    /// <summary>
+    /// Gets or sets the orientation of the sprite (the angle).
+    /// </summary>
+    public float Orientation { get; set; }
 
-    public float Orientation
-    {
-      get { return mOrientation; }
-      protected set { mOrientation = value; }
-    }
+    /// <summary>
+    /// Gets or sets the upper-left x coordinate of the sprite.
+    /// </summary>
+    public float X { get; set; }
 
-    public BoxF Bounds
-    {
-      get { return mBounds; }
-      set 
-      {
-        if (value != mBounds) hull = null;
-        mBounds = value; 
-      }
-    }
+    /// <summary>
+    /// Gets or sets the upper-left y coordinate of the sprite.
+    /// </summary>
+    public float Y { get; set; }
 
-    public Vector2 Position
-    {
-      get { return mBounds.Location; }
-      set 
-      {
-        if (value != mBounds.Location) hull = null;
-        mBounds.Location = value; 
-      }
-    }
+    /// <summary>
+    /// Gets or sets the width of the sprite.
+    /// </summary>
+    public float Width { get; set; }
 
-    public float X
-    {
-      get { return mBounds.X; }
-      set 
-      {
-        if (value != mBounds.X) hull = null;
-        mBounds.X = value; 
-      }
-    }
+    /// <summary>
+    /// Gets or sets the height of the sprite.
+    /// </summary>
+    public float Height { get; set; }
 
-    public float Y
-    {
-      get { return mBounds.Y; }
-      set 
-      {
-        if (value != mBounds.Y) hull = null;
-        mBounds.Y = value; 
-      }
-    }
+    /// <summary>
+    /// Gets or sets the position of the sprite (X,Y)
+    /// </summary>
+    public Vector2 Position { get { return new Vector2(X, Y); } set { X = value.X; Y = value.Y; } }
 
-    public SizeF Size
-    {
-      get { return mBounds.Size; }
-      set 
-      {
-        if (value != mBounds.Size) hull = null;
-        mBounds.Size = value; 
-      }
-    }
+    /// <summary>
+    /// Gets or sets the size of the sprite (Width,Height)
+    /// </summary>
+    public SizeF Size { get { return new SizeF(Width, Height); } set { Width = value.Width; Height = value.Height; } }
 
-    public float Width
-    {
-      get { return mBounds.Width; }
-      set 
-      {
-        if (value != mBounds.Width) hull = null;
-        mBounds.Width = value; 
-      }
-    }
+    /// <summary>
+    /// Gets or sets the bounds of the sprite (X,Y,Width,Height) or (Position,Size)
+    /// </summary>
+    public BoxF Bounds { get { return new BoxF(Position, Size); } set { Position = value.Location; Size = value.Size; } }
 
-    public float Height
-    {
-      get { return mBounds.Height; }
-      set 
-      {
-        if (value != mBounds.Height) hull = null;
-        mBounds.Height = value; 
-      }
-    }
+    /// <summary>
+    /// Gets or sets the velocity of the sprite (how fast and in what direction). This is usually multipled by a scalar value reprsenting
+    /// the speed.
+    /// </summary>
+    /// <example>X += Velocity * Scalar * elapsedSeconds.</example>
+    public Vector2 Velocity { get; set; }
 
-    protected abstract string ImageKey { get; }
-    protected abstract Vector2 Origin { get; }
+    /// <summary>
+    /// Gets or sets the factor to apply to the velocity.
+    /// </summary>
+    public Vector2 VelocityFactor { get; set; }
 
+    /// <summary>
+    /// Gets the image key to use when retrieving the image for this sprite.
+    /// </summary>
+    public string ImageKey { get; protected set; }
+
+    /// <summary>
+    /// Gets the origin to use when drawing the sprite
+    /// </summary>
+    public Vector2 Origin { get; protected set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public Sprite()
     {
-      mBounds = BoxF.Empty;
-      mOrientation = 0f;
-      hull = null;
+      Orientation = 0f;
+      Bounds = BoxF.Empty;
+      previousBounds = Bounds;
+      hullCache = null;
+      VelocityFactor = Vector2.One;
+      Origin = Vector2.Zero;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     public virtual Texture2D GetImage()
     {
       return AllianceGame.Images[ImageKey].Texture;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     public virtual Texture2D GetDisplayImage()
     {
       return GetImage();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     protected virtual Vector2[] GetImageHull()
     {
       return AllianceGame.Images[ImageKey].Hull;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="offset"></param>
+    /// <returns></returns>
     public virtual BoxF GetBoundingBox(Vector2 offset)
     {
       // get the center of the projectile
@@ -139,10 +142,15 @@ namespace Alliance.Data
         dH * 2f);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="offset"></param>
+    /// <returns></returns>
     protected virtual Vector2 GetCenter(Vector2 offset)
     {
       // get the drawing data
-      DrawData data = GetDrawData(offset);
+      TextureDrawData data = GetTextureDrawData(offset);
 
       // get the center of the image
       Vector2 center = (data.TextureSize / 2f).ToVector2();
@@ -156,20 +164,30 @@ namespace Alliance.Data
       return result;
     }
 
-    protected virtual DrawData GetDrawData(Vector2 offset)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="offset"></param>
+    /// <returns></returns>
+    protected virtual TextureDrawData GetTextureDrawData(Vector2 offset)
     {
       Texture2D image = GetImage();
       SizeF imgSize = new SizeF(image.Width, image.Height);
-      Vector2 scale = Utils.ComputeScale(imgSize, Size);
-      return new DrawData(image, imgSize, Position + offset, Origin, scale);
+      Vector2 scale = MathematicsHelper.ComputeScale(imgSize, Size);
+      return new TextureDrawData(image, imgSize, Position + offset, Origin, scale);
     }
 
-    protected virtual Matrix CreateTransform(DrawData data)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="data"></param>
+    /// <returns></returns>
+    protected virtual Matrix CreateTransform(TextureDrawData data)
     {
       // create the matrix for transforming the center
       Matrix transform =
         Matrix.CreateTranslation(-data.Origin.X, -data.Origin.Y, 0) *
-        Matrix.CreateRotationZ(mOrientation) *
+        Matrix.CreateRotationZ(Orientation) *
         Matrix.CreateScale(data.Scale.X, data.Scale.Y, 1f) *
         Matrix.CreateTranslation(data.Position.X, data.Position.Y, 0);
 
@@ -177,22 +195,37 @@ namespace Alliance.Data
       return transform;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="offset"></param>
+    /// <returns></returns>
     public Polygon GetHull(Vector2 offset)
     {
       Vector2[] polygon = GetImageHull();
-      if (hull == null)
+      if (hullCache == null || Bounds != previousBounds)
       {
-        Matrix transform = CreateTransform(GetDrawData(offset));
-        hull = new Polygon(polygon, transform);
+        Matrix transform = CreateTransform(GetTextureDrawData(offset));
+        hullCache = new Polygon(polygon, transform);
+        previousBounds = Bounds;
       }
-      return hull;
+      return hullCache;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     public override int GetHashCode()
     {
-      return mBounds.GetHashCode();
+      return Bounds.GetHashCode();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <returns></returns>
     public override bool Equals(object obj)
     {
       Sprite polygon = obj as Sprite;

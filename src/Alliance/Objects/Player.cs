@@ -1,82 +1,138 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
-
-using Alliance.Pieces;
+using Alliance.Data;
+using Alliance.Enums;
 using Alliance.Invaders;
+using Alliance.Pieces;
 
 namespace Alliance.Objects
 {
-  public enum PlayerState
-  {
-    Designing,
-    Running,
-  };
-
+  /// <summary>
+  /// Holds data specific to a single player.
+  /// </summary>
   public static class Player
   {
-    private static double mCash = 0;
-    private static int mLife = 0;
-    private static PlayerState mState;
+    /// <summary>
+    /// This is the experience needed to level up.
+    /// </summary>
+    public const int ExpFactor = 100;
 
-    public static double Cash
-    {
-      get { return mCash; }
-    }
+    /// <summary>
+    /// This is the maximum level that the player can reach.
+    /// </summary>
+    public const int MaximumLevel = 100;
 
-    public static int Life
-    {
-      get { return mLife; }
-    }
+    /// <summary>
+    /// Gets the amount of money that the player has.
+    /// </summary>
+    public static float Cash { get; private set; }
 
-    public static bool IsAlive
-    {
-      get { return mLife > 0; }
-    }
+    /// <summary>
+    /// Gets the amount of experience that the player has.
+    /// </summary>
+    public static float Experience { get; private set; }
 
-    public static PlayerState State
-    {
-      get { return mState; }
-    }
+    /// <summary>
+    /// Gets the amount of experience that the player needs to level up.
+    /// </summary>
+    public static float ExperienceNeeded { get; private set; }
 
-    public static void InitializePlayer(int initialCash, int initialLife)
+    /// <summary>
+    /// Gets the civilians that the player has.
+    /// </summary>
+    public static int Civilians { get; private set; }
+
+    /// <summary>
+    /// Gets the current state of the player.
+    /// </summary>
+    public static PlayerState State { get; private set; }
+
+    /// <summary>
+    /// Gets the current level of the player.
+    /// </summary>
+    public static int Level { get; private set; }
+
+    /// <summary>
+    /// Gets the current time until the invaders arrive
+    /// </summary>
+    public static TimeSpan TimeUntilInvadersArrive { get; set; }
+
+    /// <summary>
+    /// Gets a value indicating if the player is alive.
+    /// </summary>
+    public static bool IsAlive { get { return Civilians > 0; } }
+
+    public static void InitializePlayer(int initialCash, int civilians)
     {
-      mCash = initialCash;
-      mLife = initialLife;
-      mState = PlayerState.Designing;
+      Cash = initialCash;
+      Civilians = civilians;
+      State = PlayerState.Designing;
+      Level = 1;
+      Experience = 0;
+      ExperienceNeeded = (Level * Level * ExpFactor);
+
+      // at first, the invaders take 2 minutes to arrive
+      TimeUntilInvadersArrive = TimeSpan.FromMinutes(2.0);
     }
 
     public static bool PurchasePiece(Piece piece)
     {
-      double newCash = mCash - piece.Price;
+      float newCash = Cash - piece.Price;
       if (newCash >= 0)
       {
-        mCash = newCash;
+        Cash = newCash;
       }
       return newCash >= 0;
     }
 
     public static void SellPiece(Piece piece)
     {
-      double cash = piece.Price;
-      if (mState == PlayerState.Designing)
+      float cash = piece.Price;
+      if (State == PlayerState.Designing)
         cash = piece.GetLifetimePrice();
-      mCash += cash;
+      Cash += cash;
     }
 
     public static void InvaderGotThrough(Invader invader)
     {
-      --mLife;
+      --Civilians;
     }
 
     public static bool EnoughCashFor(Piece piece)
     {
-      return (mCash - piece.Price) >= 0;
+      return (Cash - piece.Price) >= 0;
+    }
+
+    public static void TriggerDesignPhaseOver()
+    {
+      State = PlayerState.Running;
     }
 
     public static void CollectSpoils(Invader invader)
     {
-      mCash += invader.Value;
+      // update the cash and the invaders
+      Cash += invader.Value;
+      Experience += invader.Experience;
+
+      // if we have enough experience and we aren't at the maximum level
+      if (Experience >= ExperienceNeeded && Level < MaximumLevel)
+      {
+        // level up
+        ++Level;
+
+        // set the experience needed
+        ExperienceNeeded = Level * Level * ExpFactor;
+      }
+    }
+
+    public static void Load(SaveData data)
+    {
+      Cash = data.Cash;
+      Civilians = data.Civilians;
+      State = data.PlayerState;
+      Level = data.Level;
+      Experience = data.Experience;
+      ExperienceNeeded = data.ExperienceNeeded;
+      TimeUntilInvadersArrive = data.TimeUntilInvadersArrive;
     }
   }
 }

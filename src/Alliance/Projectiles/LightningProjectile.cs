@@ -1,30 +1,32 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
-
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-
-using Alliance.Utilities;
 using Alliance.Data;
 using Alliance.Invaders;
 using Alliance.Parameters;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using MLA.Utilities.Xna;
+using Alliance.Pieces;
 
 namespace Alliance.Projectiles
 {
+  /// <summary>
+  /// The projectile fired by the tesla coil tower.
+  /// </summary>
+  [Serializable]
   public class LightningProjectile : Projectile
   {
     private const float SecondsPerFrame = 1f / 22.3456789f;
-    private float mSecondsSinceUpdate = 0;
 
     private Invader mTarget;
     private SpriteEffects effects = SpriteEffects.None;
+    private float mSecondsSinceUpdate = 0;
 
-    public LightningProjectile(double timeToLiveInSeconds, Invader target)
-      : base(timeToLiveInSeconds)
+    public LightningProjectile(Piece parent, double timeToLiveInSeconds, Invader target)
+      : base(parent, timeToLiveInSeconds)
     {
       mTarget = target;
       Size = new SizeF(48f, 12f);
+      ImageKey = "lightning";
     }
 
     public override void Update(GameTime gameTime)
@@ -38,23 +40,18 @@ namespace Alliance.Projectiles
       }
     }
 
-    protected override string ImageKey
-    {
-      get { return "lightning"; }
-    }
-
     public override void Draw(DrawParams dparams)
     {
       SpriteBatch spriteBatch = dparams.SpriteBatch;
       Vector2 offset = dparams.Offset;
 
-      DrawData data = GetDrawData(offset);
+      TextureDrawData data = GetTextureDrawData(offset);
       spriteBatch.Draw(
           data.Texture,
           data.Position,
           null,
           Color,
-          mOrientation,
+          Orientation,
           data.Origin,
           data.Scale,
           effects,

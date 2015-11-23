@@ -1,32 +1,31 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
-using Alliance.Utilities;
+
+using MLA.Utilities.Xna.Helpers;
+using Alliance.Pieces;
 
 namespace Alliance.Projectiles
 {
+  /// <summary>
+  /// The projectile fired by the rail gun tower.
+  /// </summary>
+  [Serializable]
   public class RailgunProjectile : Projectile
   {
-    const float PixelsPerSecond = 150f;
-
-    public RailgunProjectile(double timeToLiveInSeconds)
-      : base(timeToLiveInSeconds)
+    public RailgunProjectile(Piece parent, double timeToLiveInSeconds)
+      : base(parent, timeToLiveInSeconds)
     {
-      Color = Utils.BlendColors(Color.Yellow, Color.Red, .65f);
+      Color = ColorHelper.Blend(Color.Yellow, Color.Red, .65f);
+      ImageKey = "pulse";
     }
 
-    protected override string ImageKey
+    public override void UpdateByFrameCount(GameTime gameTime, int frameCount)
     {
-      get { return "pulse"; }
-    }
-
-    public override void UpdateByFrameCount(int frameCount)
-    {
-      Position += (Velocity * MovementPerSecond * ((float)frameCount * .75f));
+      float time = (float)(gameTime.ElapsedGameTime.TotalSeconds * ((frameCount + 1.0) * 20.0) * .75);
+      Position += (time * VelocityFactor * VelocityFactor);
     }
   }
 }

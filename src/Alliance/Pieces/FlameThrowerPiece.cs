@@ -1,19 +1,18 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
-
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-
-using Alliance.Data;
-using Alliance.Utilities;
-using Alliance.Invaders;
-using Alliance.Projectiles;
-using Alliance.Parameters;
+using Alliance.Enums;
 using Alliance.Objects;
+using Alliance.Projectiles;
+using Microsoft.Xna.Framework;
+using MLA.Utilities.Xna;
+using MLA.Utilities.Xna.Helpers;
 
 namespace Alliance.Pieces
 {
+  /// <summary>
+  /// The flame thrower tower. It's meant to emulate firing a flame wave, or a constant flame.
+  /// </summary>
+  [Serializable]
   public class FlameThrowerPiece : Piece
   {
     private const string FlameThrowerPieceName = "Flame Thrower";
@@ -26,52 +25,53 @@ namespace Alliance.Pieces
       sb.AppendLine("Ignites gasoline to produce a constant flame. Careful, some enemies can't be burned.");
 
       // set the properties of the piece
-      mDescription = sb.ToString();
-      mRadius = 200;
-      mAttack = 80000;
-      mNumberProjectilesToFire = 1;
-      mUpgradePercent = 20;
-      mPrice = 12884902;
-      mProjectilesPerSecond = 20;
-      mProjectileLifeInSeconds = .1876f;
-      mName = FlameThrowerPieceName;
-      mUltimateName = UltimateFlameThrowerPieceName;
-      mGrouping = PieceGrouping.Four;
-    }
+      Attack = 10000;
+      Price = 1000000;
+      Radius = 300;
+      UpgradePercent = 10;
+      LevelVisibility = 90;
 
-    protected override string ImageKey
-    {
-      get { return "flamethrower"; }
+      Description = sb.ToString();
+      NumberProjectilesToFire = 1;
+      ProjectilesPerSecond = 15;
+      ProjectileLifeInSeconds = .1876f;
+      Name = FlameThrowerPieceName;
+      UltimateName = UltimateFlameThrowerPieceName;
+      Grouping = PieceGrouping.Four;
+      ImageKey = "flamethrower";
+      Element = Element.Fire;
+      Specialty = PieceSpecialty.Ground;
     }
 
     public override void Update(GameTime gameTime)
     {
       base.Update(gameTime);
-      if (mLevel == MaxLevel)
+      if (Level == MaxLevel)
       {
-        mOrientation = Environment.TickCount / 1000f;
-        mOrientation = Utils.WrapAngle(mOrientation);
+        Orientation = Environment.TickCount / 1000f;
+        Orientation = MathematicsHelper.WrapAngle(Orientation);
       }
     }
 
     protected override void FinalizeUpgrade()
     {
       base.FinalizeUpgrade();
-      if (mLevel == MaxLevel)
+      if (Level == MaxLevel)
       {
-        mOrientation = 0;
-        mFaceTarget = false;
-
-        mNumberProjectilesToFire = 1;
-        mProjectileLifeInSeconds = DefaultProjectileLifeInSeconds * 5;
-        mRadius = 100;
-
-        mProjectilesPerSecond = 10;
-        mProjectileLifeInSeconds = 1.1676f;
-
         StringBuilder sb = new StringBuilder();
         sb.AppendLine("Rotates to gain energy and releases a VERY powerful flame wave. Careful, some enemies can't be burned.");
-        mDescription = sb.ToString();
+
+        Orientation = 0;
+        FaceTarget = false;
+
+        NumberProjectilesToFire = 1;
+        ProjectileLifeInSeconds = DefaultProjectileLifeInSeconds * 5;
+        Radius = 100;
+
+        ProjectilesPerSecond = 10;
+        ProjectileLifeInSeconds = 1.1676f;
+
+        Description = sb.ToString();
       }
     }
 
@@ -89,17 +89,17 @@ namespace Alliance.Pieces
     protected override Projectile CreateProjectile()
     {
       Projectile projectile = null;
-      if (mLevel == MaxLevel)
+      if (Level == MaxLevel)
       {
         BoxF bounds = new BoxF(this.Position, this.Size);
-        projectile = new FlamewaveProjectile(bounds, mProjectileLifeInSeconds);
+        projectile = new FlamewaveProjectile(this, bounds, ProjectileLifeInSeconds);
         projectile.Size = new SizeF(Width, Height);
       }
       else
       {
-        float extra = mRadius / 3f;
-        projectile = new FlameProjectile(mProjectileLifeInSeconds);
-        projectile.Size = new SizeF(projectile.Width + extra, projectile.Height + extra);
+        float extra = Radius / 3f;
+        projectile = new FlameProjectile(this, ProjectileLifeInSeconds);
+        projectile.Size = new SizeF(Radius, projectile.Height + extra);
       }
       return projectile;
     }

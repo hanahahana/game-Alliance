@@ -1,26 +1,23 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
-
 using Microsoft.Xna.Framework.Graphics;
-
-using Alliance.Utilities;
-using Alliance.Data;
+using MLA.Utilities.Xna;
+using MLA.Utilities.Xna.Helpers;
+using Alliance.Pieces;
 
 namespace Alliance.Projectiles
 {
+  /// <summary>
+  /// The projectile fired by the sprinkler tower.
+  /// </summary>
+  [Serializable]
   public class SprinklerProjectile : Projectile
   {
-    public SprinklerProjectile(double timeToLiveInSeconds)
-      : base(timeToLiveInSeconds)
+    public SprinklerProjectile(Piece parent, double timeToLiveInSeconds)
+      : base(parent, timeToLiveInSeconds)
     {
-      Color = Utils.BlendColors(Color.LightBlue, Color.DarkBlue, .65f);
+      Color = ColorHelper.Blend(Color.LightBlue, Color.DarkBlue, .65f);
       Size = new SizeF(10f, 8f);
-    }
-
-    protected override string ImageKey
-    {
-      get { return "fragment"; }
+      ImageKey = "fragment";
     }
   }
 }

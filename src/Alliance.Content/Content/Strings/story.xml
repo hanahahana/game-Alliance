@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<XnaContent>
+  <!-- TODO: replace this Asset with your own XML asset data. -->
+  <Asset Type="System.Collections.Generic.List[System.String]">
+    <Item>
+      In a world of peace and tranquility, there stands a village at the edge of Alliance continent where all the villagers are young; No
+      one ever makes it past a certain age due to a terrible plague. Once a day, evil beings will infiltrate the village, kill
+      anyone in sight, and then vanish. They show no remorse or sadness, just gleeful smiles as they vicisiously slaughter men, women and children. People
+      of the village are unable to leave due to large gates on the outside built by the evil beings. After many centuries, however, they become
+      accustomed to their way of life. They even began to forget that there is an outside, and they tell stories of how the gates were erected.
+      They've deemed the evil beings "Diety Invaders" and believe that only the chosen ones get taken. The women make as many children as possible
+      to keep the village thriving while the men work the ground for food and shelter. It is a bitter sweet place, yet the villagers are all happy.
+      They live each day as if it was their last cherishing every moment with each other. Until one day, the diety invaders take longer to come and
+      claim the chosen ones. After months of the same behavior, the baffled villagers began to bashfully approach the gates that have been surrounding them.
+      In shock, some of the villagers let out a sharp scream, while others stand speechless. What they see before them sparks a small glimmer of hope once more.
+      Someone, somewhere, somehow, is fighting for them.
+    </Item>
+  </Asset>
+</XnaContent>

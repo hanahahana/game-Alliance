@@ -1,46 +1,29 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 
+using Alliance.Enums;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
-using Alliance.Components;
+using MLA.Utilities.Xna.Graphics;
 
 namespace Alliance.Parameters
 {
+  /// <summary>
+  /// Represents parameters passed to methods to perform drawing.
+  /// </summary>
   public class DrawParams
   {
-    private GameTime mGameTime;
-    public GameTime GameTime
-    {
-      get { return mGameTime; }
-    }
+    public GameTime GameTime { get; private set; }
+    public Vector2 Offset { get; private set; }
+    public GridFillMode FillMode { get; private set; }
+    public SpriteBatch SpriteBatch { get; private set; }
+    public GraphicsBase Graphics { get; private set; }
 
-    private Vector2 mOffset;
-    public Vector2 Offset
+    public DrawParams(GameTime gameTime, Vector2 offset, GridFillMode gridFillMode, SpriteBatch spriteBatch, GraphicsBase graphics)
     {
-      get { return mOffset; }
-    }
-
-    private SpriteBatch mSpriteBatch;
-    public SpriteBatch SpriteBatch
-    {
-      get { return mSpriteBatch; }
-    }
-
-    private GridFillMode mFillMode;
-    public GridFillMode FillMode
-    {
-      get { return mFillMode; }
-    }
-
-    public DrawParams(GameTime gameTime, Vector2 offset, SpriteBatch spriteBatch, GridFillMode gridFillMode)
-    {
-      mGameTime = gameTime;
-      mOffset = offset;
-      mSpriteBatch = spriteBatch;
-      mFillMode = gridFillMode;
+      GameTime = gameTime;
+      Offset = offset;
+      FillMode = gridFillMode;
+      SpriteBatch = spriteBatch;
+      Graphics = graphics;
     }
   }
 }

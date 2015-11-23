@@ -1,19 +1,17 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
-
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-
-using Alliance.Data;
-using Alliance.Utilities;
-using Alliance.Invaders;
-using Alliance.Projectiles;
-using Alliance.Parameters;
 using Alliance.Objects;
+using Alliance.Projectiles;
+using Alliance.Invaders;
+using Alliance.Enums;
+
 
 namespace Alliance.Pieces
 {
+  /// <summary>
+  /// The machine gun tower. It's meant to emulate rapidly firing a series of bullets.
+  /// </summary>
+  [Serializable]
   public class MachineGunPiece : Piece
   {
     private const string MachineGunName = "Machine Gun";
@@ -23,33 +21,23 @@ namespace Alliance.Pieces
     {
       // setup the description
       StringBuilder sb = new StringBuilder();
-      sb.AppendLine("Fires a constant stream of bullets at the enemy. These are weak and fast. They also miss...alot.");
+      sb.AppendLine("Fires a constant stream of bullets at the enemy. These are weak and fast but only hit non-flying invaders.");
 
       // set the properties of the piece
-      mDescription = sb.ToString();
-      mRadius = 100;
-      mAttack = 100;
-      mNumberProjectilesToFire = 2;
-      mUpgradePercent = 20;
-      mPrice = 8;
-      mProjectilesPerSecond = 15;
-      mProjectileLifeInSeconds = 3.4567f;
-      mName = MachineGunName;
-      mUltimateName = UltimateMachineGunName;
-    }
+      Attack = 75;
+      Price = 25;
+      Radius = 100;
+      UpgradePercent = 20;
+      LevelVisibility = 1;
 
-    protected override void FinalizeUpgrade()
-    {
-      base.FinalizeUpgrade();
-      if (mLevel == MaxLevel - 1)
-      {
-        mUpgradePercent = 20000;
-      }
-
-      if (mLevel == MaxLevel)
-      {
-        mRadius = 250;
-      }
+      Description = sb.ToString();
+      NumberProjectilesToFire = 2;
+      ProjectilesPerSecond = 15;
+      ProjectileLifeInSeconds = 3.4567f;
+      Name = MachineGunName;
+      UltimateName = UltimateMachineGunName;
+      ImageKey = "machinegun";
+      Specialty = PieceSpecialty.Ground;
     }
 
     protected override void UpgradeProjectileVariables(float factor)
@@ -65,13 +53,8 @@ namespace Alliance.Pieces
 
     protected override Projectile CreateProjectile()
     {
-      BulletProjectile projectile = new BulletProjectile(mProjectileLifeInSeconds);
+      BulletProjectile projectile = new BulletProjectile(this, ProjectileLifeInSeconds);
       return projectile;
-    }
-
-    protected override string ImageKey
-    {
-      get { return "machinegun"; }
     }
   }
 }

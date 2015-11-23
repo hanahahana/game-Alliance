@@ -1,62 +1,40 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
-
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-
 using Alliance.Data;
-using Alliance.Utilities;
 using Alliance.Invaders;
 using Alliance.Parameters;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using MLA.Utilities.Xna;
+using Alliance.Pieces;
+using System.Collections.Generic;
+using System.Collections;
 
 namespace Alliance.Projectiles
 {
+  /// <summary>
+  /// An abstract class representing a projectile. Each projectile class should inherit from this.
+  /// </summary>
+  [Serializable]
   public class Projectile : Sprite
   {
-    public const float MovementPerSecond = 5f;
-
-    protected Vector2 mVelocity;
-    protected bool mIsAlive;
     protected double mTimeToLive;
-    protected float mAttack;
-    protected Vector2 mOrigin;
 
-    public Vector2 Velocity
-    {
-      get { return mVelocity; }
-      set { mVelocity = value; }
-    }
+    public bool IsAlive { get; set; }
+    public float Attack { get; set; }
+    public bool StayAlive { get; set; }
+    public Piece Parent { get; protected set; }
 
-    public virtual bool IsAlive
+    public Projectile(Piece parent, double timeToLiveInSeconds)
     {
-      get { return mIsAlive; }
-      set { mIsAlive = value; }
-    }
-
-    public float Attack
-    {
-      get { return mAttack; }
-      set { mAttack = value; }
-    }
-
-    protected override string ImageKey
-    {
-      get { return "bullet"; }
-    }
-
-    protected override Vector2 Origin
-    {
-      get { return mOrigin; }
-    }
-
-    public Projectile(double timeToLiveInSeconds)
-    {
-      mIsAlive = true;
+      IsAlive = true;
       mTimeToLive = timeToLiveInSeconds;
-      mOrigin = new Vector2(0, GetImage().Height / 2f);
+
+      ImageKey = "bullet";
+      Origin = new Vector2(0, GetImage().Height / 2f);
       Color = Color.White;
       Size = new SizeF(20f, 6.5f);
+      StayAlive = false;
+      Parent = parent;
     }
 
     public virtual void Update(GameTime gameTime)
@@ -65,31 +43,38 @@ namespace Alliance.Projectiles
       UpdatePosition(gameTime);
     }
 
-    protected void UpdateTimeToLive(GameTime gameTime)
+    protected virtual void UpdateTimeToLive(GameTime gameTime)
     {
       // update the time to live
       mTimeToLive -= gameTime.ElapsedGameTime.TotalSeconds;
       mTimeToLive = Math.Max(0, mTimeToLive);
-      mIsAlive = mTimeToLive > 0;
+      IsAlive = mTimeToLive > 0;
     }
 
-    protected void UpdatePosition(GameTime gameTime)
+    protected virtual void UpdatePosition(GameTime gameTime)
     {
       if (IsAlive)
       {
         // if we're still alive, then move the projectile
-        Position += Velocity * MovementPerSecond;
+        float time = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        Position += (time * Velocity * VelocityFactor);
       }
     }
 
-    public virtual void UpdateByFrameCount(int frameCount)
+    public virtual void UpdateByFrameCount(GameTime gameTime, int frameCount)
     {
-      // do nothing here
+      float time = (float)(gameTime.ElapsedGameTime.TotalSeconds * (frameCount + 1.0));
+      Position += (time * VelocityFactor * VelocityFactor);
     }
 
     public virtual void OnCollidedWithInvader(Invader invader)
     {
-      IsAlive = false;
+      IsAlive = StayAlive || false;
+    }
+
+    public virtual bool CanHit(Invader invader)
+    {
+      return (Parent != null) && (Parent.InvaderMatchesSpecialty(invader));
     }
 
     public virtual void Draw(DrawParams dparams)
@@ -97,13 +82,13 @@ namespace Alliance.Projectiles
       SpriteBatch spriteBatch = dparams.SpriteBatch;
       Vector2 offset = dparams.Offset;
 
-      DrawData data = GetDrawData(offset);
+      TextureDrawData data = GetTextureDrawData(offset);
       spriteBatch.Draw(
           data.Texture,
           data.Position,
           null,
           Color,
-          mOrientation,
+          Orientation,
           data.Origin,
           data.Scale,
           SpriteEffects.None,

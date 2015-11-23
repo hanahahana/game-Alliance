@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<XnaContent>
+  <!-- TODO: replace this Asset with your own XML asset data. -->
+  <Asset Type="System.Collections.Generic.List[System.String]">
+    <Item>
+      Hello! Welcome to Alliance. It is absolutely imperative that you read me and get a few details about the game! If you wish to skip me, and take the fools road down to destruction, just click "Exit" at anytime. Otherwise, keep hitting "Next".
+    </Item>
+    <Item>
+      If you didn't read the story, your job is to save the lives of citizens. If you save enough people, the citizens will grow to love you and may even help you out! However, if all the civilians die, it's game over!
+    </Item>
+    <Item>
+      You are stationed in the sky watching over a chunk of Alliance continent and you are armed with sky dollars (pretty sweet; I know) and an assortment of weapons (over on the right there).
+    </Item>
+    <Item>
+      Right now, the invaders are far away (far far far away), but they are rapidly approaching the chunk YOU'RE supposed to be guarding. Don't worry, they can't do anything as long as I'm up (aren't you glad you didn't click 'Exit'). But once I go away, the clock will start ticking.
+    </Item>
+    <Item>
+      You can then either challenge the invaders by using the remaining time to ectoplastransmaterport them here early, or you can wait until they arrive. Either way...look, you have cash, you have weapons. Save the citizens!
+    </Item>
+    <Item>
+      Oh yeah, one last thing. Pressing and holding "P" lets you view the game in "Polygon" mode. "S" sells a selected tower, "U" upgrades a selected tower (as do the buttons), "N" skips to the next wave and "Spacebar" pauses the game. What else...oh yeah. The further along you get, the smarter the invaders get.
+    </Item>
+    <Item>
+      You'll be given new weapons to deal with the increasingly intelligent invaders. No one has ever completely stood off ALL of the waves of invaders, but many have at least seen the teleporting ones. YEAH: T-E-L-E-P-O-R-T-I-N-G! Anywho, you can also click and drag to place multiple weapons. It's okay to hit "Exit" now.
+    </Item>
+  </Asset>
+</XnaContent>

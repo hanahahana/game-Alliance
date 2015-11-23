@@ -1,19 +1,16 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
-
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-
-using Alliance.Data;
-using Alliance.Utilities;
-using Alliance.Invaders;
-using Alliance.Projectiles;
-using Alliance.Parameters;
 using Alliance.Objects;
+using Alliance.Projectiles;
+using Alliance.Invaders;
+using Alliance.Enums;
 
 namespace Alliance.Pieces
 {
+  /// <summary>
+  /// The missile tower. It's meant to emulate firing missiles at an invader.
+  /// </summary>
+  [Serializable]
   public class MissilePiece : Piece
   {
     private const string MissileName = "Missile";
@@ -23,17 +20,21 @@ namespace Alliance.Pieces
     {
       // setup the description
       StringBuilder sb = new StringBuilder();
-      sb.AppendLine("Slams multiple missiles into the enemy! They explode on contact and create debri.");
+      sb.AppendLine("Slams multiple missiles into flying enemies! They explode on contact and create debris.");
 
       // set the properties of the piece
-      mDescription = sb.ToString();
-      mRadius = 100;
-      mAttack = 250;
-      mNumberProjectilesToFire = 2;
-      mUpgradePercent = 20;
-      mPrice = 15;
-      mName = MissileName;
-      mUltimateName = UltimateMissileName;
+      Attack = 75;
+      Price = 25;
+      Radius = 100;
+      UpgradePercent = 20;
+      LevelVisibility = 1;
+
+      Description = sb.ToString();
+      NumberProjectilesToFire = 1;
+      Name = MissileName;
+      UltimateName = UltimateMissileName;
+      ImageKey = "missileLauncher";
+      Specialty = PieceSpecialty.Flight;
     }
 
     protected override Piece CreatePiece(GridCell[] cells)
@@ -44,13 +45,8 @@ namespace Alliance.Pieces
 
     protected override Projectile CreateProjectile()
     {
-      MissileProjectile projectile = new MissileProjectile(ProjectileLifeInSeconds);
+      MissileProjectile projectile = new MissileProjectile(this, ProjectileLifeInSeconds);
       return projectile;
-    }
-
-    protected override string ImageKey
-    {
-      get { return "missileLauncher"; }
     }
   }
 }

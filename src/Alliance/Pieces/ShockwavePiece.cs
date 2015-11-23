@@ -1,20 +1,22 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
-
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-
 using Alliance.Data;
-using Alliance.Utilities;
-using Alliance.Invaders;
-using Alliance.Projectiles;
-using Alliance.Parameters;
 using Alliance.Objects;
+using Alliance.Parameters;
+using Alliance.Projectiles;
+using Microsoft.Xna.Framework;
 using MLA.Utilities;
+using MLA.Utilities.Xna;
+using MLA.Utilities.Xna.Helpers;
+using Alliance.Invaders;
+using Alliance.Enums;
 
 namespace Alliance.Pieces
 {
+  /// <summary>
+  /// The shockwave tower. It's meant to emulate sending out a shockwave when invaders are in range.
+  /// </summary>
+  [Serializable]
   public class ShockwavePiece : Piece
   {
     private const string ShockwaveName = "Shockwave";
@@ -24,19 +26,25 @@ namespace Alliance.Pieces
     {
       // setup the description
       StringBuilder sb = new StringBuilder();
-      sb.AppendLine("Creates a shockwave to send at the enemy! The shockwave grows as time passes.");
+      sb.AppendLine("Creates a shockwave to send at the enemy! The shockwave can't hit flying invaders!");
 
       // set the properties of the piece
-      mDescription = sb.ToString();
-      mRadius = 50;
-      mAttack = 800;
-      mProjectilesPerSecond = .25f;
-      mNumberProjectilesToFire = 3;
-      mUpgradePercent = 5;
-      mPrice = 50;
-      mFaceTarget = false;
-      mName = ShockwaveName;
-      mUltimateName = UltimateShockwaveName;
+      Attack = 2000;
+      Price = 600;
+      Radius = 100;
+      UpgradePercent = 15;
+      LevelVisibility = 20;
+
+      Description = sb.ToString();
+      ProjectilesPerSecond = .1f;
+      NumberProjectilesToFire = 1;
+      FaceTarget = false;
+      Name = ShockwaveName;
+      UltimateName = UltimateShockwaveName;
+      ImageKey = "shockwaveGenerator";
+      ProjectileLifeInSeconds = .8f;
+      Element = Element.Earth;
+      Specialty = PieceSpecialty.Ground;
     }
 
     protected override Piece CreatePiece(GridCell[] cells)
@@ -48,30 +56,32 @@ namespace Alliance.Pieces
     protected override Projectile CreateProjectile()
     {
       BoxF bounds = new BoxF(this.Position, this.Size);
-      ShockwaveProjectile projectile = new ShockwaveProjectile(bounds, 1.0);
-      projectile.Size = new SizeF(Width * .25f, Height * .25f);
+      ShockwaveProjectile projectile = new ShockwaveProjectile(this, bounds, ProjectileLifeInSeconds);
+      //projectile.Size = new SizeF(Width * .25f, Height * .25f);
+      projectile.Size = new SizeF(Radius * 2f, Radius * 2f);
       return projectile;
     }
 
-    protected override string ImageKey
+    protected override float UpgradeRadius(float factor)
     {
-      get { return "shockwaveGenerator"; }
+      // no need to upgrade the radius
+      return Radius;
     }
 
-    protected override void DrawWeaponBase(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
+    protected override void DrawWeaponBase(DrawParams dparams, BoxF bounds, BoxF inside)
     {
       // don't draw the weapon base
     }
 
-    protected override DrawData GetDrawData(Vector2 offset)
+    protected override TextureDrawData GetTextureDrawData(Vector2 offset)
     {
       Tuple<BoxF, BoxF> outin = GetOutsideInsideBounds(offset);
       BoxF bounds = outin.First;
       BoxF inside = outin.Second;
 
-      DrawData data = base.GetDrawData(offset);
-      Vector2 scale = Utils.ComputeScale(data.TextureSize, bounds.Size);
-      return new DrawData(data.Texture, data.TextureSize, bounds.Location, Vector2.Zero, scale);
+      TextureDrawData data = base.GetTextureDrawData(offset);
+      Vector2 scale = MathematicsHelper.ComputeScale(data.TextureSize, bounds.Size);
+      return new TextureDrawData(data.Texture, data.TextureSize, bounds.Location, Vector2.Zero, scale);
     }
   }
 }

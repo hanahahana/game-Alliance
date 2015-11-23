@@ -1,181 +1,117 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Text;
-
-using MLA.Utilities;
-using MLA.Utilities.Algorithms.Data;
-
-using Microsoft.Xna.Framework;
-
+using Alliance.Enums;
+using Alliance.Pathfinding;
 using Alliance.Pieces;
-using Alliance.Data;
-using Alliance.Invaders;
-using Alliance.Parameters;
+using Microsoft.Xna.Framework;
+using MLA.Utilities.Xna;
 
 namespace Alliance.Objects
 {
-  public enum GridCellType
+  /// <summary>
+  /// Represents a particular cell in a grid.
+  /// </summary>
+  [Serializable]
+  public class GridCell : IComparable<GridCell>
   {
-    Empty,
-    Blocked,
-  };
+    public static Predicate<GridCell> CellIsAvailable = (GridCell cell) => 
+    {
+      return 
+        cell.IsWalkable && 
+        cell.Piece == null &&
+        !cell.IsThroughway;
+    };
 
-  public enum DijkstraType : int
-  {
-    Horizontal = 0,
-    Vertical,
-  }
+    private DijkstraNodeAlliance[] mDijkstraData;
 
-  public class GridCell
-  {
-    private BoxF mBounds;
-    private int mRow;
-    private int mColumn;
-    private string mKey;
-    private GridCellType mType;
-    private bool mIsOuter;
-    private bool mIsThroughway;
-    private Piece mPiece;
-    private GridCell[] mAdjacentCells;
-    private int mAdjacentCellsIdx;
-    private DijkstraData[] mDijkstraData;
+    public float X { get; set; }
+    public float Y { get; set; }
+    public float Width { get; set; }
+    public float Height { get; set; }
+    public int Row { get; private set; }
+    public int Column { get; private set;  }
+    public string Key { get; private set; }
+    public GridCellType Type { get; private set; }
+    public bool IsOuter { get; private set; }
+    public bool IsThroughway { get; private set; }
+    public Piece Piece { get; private set; }
+
+    public Vector2 Location
+    {
+      get { return new Vector2(X, Y); }
+      set { X = value.X; Y = value.Y; }
+    }
+
+    public SizeF Size
+    {
+      get { return new SizeF(Width, Height); }
+      set { Width = value.Width; Height = value.Height; }
+    }
 
     public BoxF Bounds
     {
-      get { return mBounds; }
-      set { mBounds = value; }
+      get { return new BoxF(Location, Size); }
+      set { Location = value.Location; Size = value.Size; }
     }
 
-    public float X
-    {
-      get { return mBounds.X; }
-      set { mBounds.X = value; }
-    }
-
-    public float Y
-    {
-      get { return mBounds.Y; }
-      set { mBounds.Y = value; }
-    }
-
-    public float Width
-    {
-      get { return mBounds.Width; }
-      set { mBounds.Width = value; }
-    }
-
-    public float Height
-    {
-      get { return mBounds.Height; }
-      set { mBounds.Height = value; }
-    }
-
-    public int Row
-    {
-      get { return mRow; }
-    }
-
-    public int Column
-    {
-      get { return mColumn; }
-    }
-
-    public string Key
-    {
-      get { return mKey; }
-    }
-
-    public GridCellType Type
-    {
-      get { return mType; }
-    }
-
-    public bool IsOuter
-    {
-      get { return mIsOuter; }
-    }
-
-    public bool IsThroughway
-    {
-      get { return mIsThroughway; }
-    }
-
-    public GridCell[] AdjacentCells
-    {
-      get { return mAdjacentCells; }
-    }
-
-    public Piece Piece
-    {
-      get { return mPiece; }
-    }
-
-    public DijkstraData this[DijkstraType key]
+    public DijkstraNodeAlliance this[DijkstraType key]
     {
       get { return mDijkstraData[(int)key]; }
     }
 
-    public GridCell(int column, int row, bool isOuter, bool isThroughway)
+    public bool IsWalkable
     {
-      mColumn = column;
-      mRow = row;
-      mKey = Guid.NewGuid().ToString();
-      mBounds = BoxF.Empty;
-      mIsOuter = isOuter;
-      mIsThroughway = isThroughway;
-      mAdjacentCells = new GridCell[4];
-      mAdjacentCellsIdx = 0;
-      InitializeDijsktraData();
+      get { return (Type == GridCellType.Empty) && (!IsOuter || IsThroughway); }
     }
 
-    private void InitializeDijsktraData()
+    public GridCell(int column, int row, bool isOuter, bool isThroughway)
     {
-      mDijkstraData = new DijkstraData[2];
-      mDijkstraData[(int)DijkstraType.Horizontal] = new DijkstraData();
-      mDijkstraData[(int)DijkstraType.Vertical] = new DijkstraData();
+      Column = column;
+      Row = row;
+      Key = string.Format("Row:{0}, Column:{1}", Row, Column);
+      Bounds = BoxF.Empty;
+      IsOuter = isOuter;
+      IsThroughway = isThroughway;
+      mDijkstraData = new DijkstraNodeAlliance[2];
     }
 
     public override bool Equals(object obj)
     {
       GridCell node = obj as GridCell;
       if (node == null) return false;
-      return node.mKey.Equals(mKey);
+      return node.Key.Equals(Key);
     }
 
     public override int GetHashCode()
     {
-      return mKey.GetHashCode();
+      return Key.GetHashCode();
     }
 
     public override string ToString()
     {
-      return string.Format("{0}", new Point(mColumn, mRow));
+      return string.Format("{0}", new Point(Column, Row));
     }
 
     public void RemovePiece()
     {
-      mType = GridCellType.Empty;
-      mPiece = null;
+      Type = GridCellType.Empty;
+      Piece = null;
     }
 
     public void SetPiece(Piece piece)
     {
       if (piece.IsBlocking)
-        mType = GridCellType.Blocked;
-      mPiece = piece;
+        Type = GridCellType.Blocked;
+      Piece = piece;
     }
 
-    public AStarNode ToAStarNode()
+    public void LinkDijkstraNode(DijkstraNodeAlliance node, DijkstraType type)
     {
-      bool empty = (mType == GridCellType.Empty);
-      AStarNode node = new AStarNode(X, Y, Width, Height, mColumn, mRow, empty && (!mIsOuter || mIsThroughway));
-      return node;
+      mDijkstraData[(int)type] = node;
     }
 
-    public void Add(GridCell adjacent)
+    public int CompareTo(GridCell other)
     {
-      mAdjacentCells[mAdjacentCellsIdx++] = adjacent;
+      return AllianceUtilities.CompareVector2(Location, other.Location);
     }
   }
 }

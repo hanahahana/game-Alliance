@@ -1,47 +1,50 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
-
+using Alliance.Enums;
+using Alliance.Objects;
+using Alliance.Parameters;
+using Alliance.Projectiles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
-using Alliance.Data;
-using Alliance.Utilities;
-using Alliance.Invaders;
-using Alliance.Projectiles;
-using Alliance.Parameters;
-using Alliance.Objects;
+using MLA.Utilities.Xna;
+using MLA.Utilities.Xna.Helpers;
 
 namespace Alliance.Pieces
 {
+  /// <summary>
+  /// The speed bump tower. It's meant to emulate a speed bump found in real life. TODO: This could be updated
+  /// to make the invaders move when they go over it.
+  /// </summary>
+  [Serializable]
   public class SpeedBumpPiece : Piece
   {
     private const string SpeedBumpName = "Speed Bump";
-
-    protected override string ImageKey
-    {
-      get { return "speedbump"; }
-    }
 
     public SpeedBumpPiece()
     {
       // setup the description
       StringBuilder sb = new StringBuilder();
-      sb.AppendLine("Slows the enemy down all while chucking up debri. Careful, some enemies aren't affected!");
+      sb.AppendLine("Slows the enemy down all while chucking up debris. Careful, some enemies aren't affected!");
 
       // set the properties of the piece
-      mDescription = sb.ToString();
-      mPrice = 1;
-      mLevel = Piece.MaxLevel;
-      mAttack = 2;
-      mPriceAtLevels[Piece.MaxLevel - 1] = mPrice;
-      mUpgradePercent = 0;
-      mFaceTarget = false;
-      mIsBlocking = false;
-      mCanFireProjectiles = false;
-      mName = SpeedBumpName;
-      mUltimateName = SpeedBumpName;
-      mGrouping = PieceGrouping.One;
+      Attack = 5;
+      Price = 1;
+      Radius = 0;
+      UpgradePercent = 0;
+
+      Description = sb.ToString();
+      Level = Piece.MaxLevel;
+      FaceTarget = false;
+      IsBlocking = false;
+      CanFireProjectiles = false;
+      Name = SpeedBumpName;
+      UltimateName = SpeedBumpName;
+      Grouping = PieceGrouping.One;
+      ImageKey = "speedbump";
+      Specialty = PieceSpecialty.Ground;
+
+      // set the price info
+      mPriceAtLevels[Piece.MaxLevel - 1] = Price;
     }
 
     protected override Piece CreatePiece(GridCell[] cells)
@@ -50,21 +53,27 @@ namespace Alliance.Pieces
       return piece;
     }
 
-    protected override void DrawBackground(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
+    protected override Projectile CreateProjectile()
     {
-      Color color = mSelected ? Color.DarkGreen : Color.Beige;
-      Shapes.FillRectangle(spriteBatch, bounds, color);
+      return null;
     }
 
-    protected override void DrawWeaponBase(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
+    protected override void DrawBackground(DrawParams dparams, BoxF bounds, BoxF inside)
+    {
+      Color color = Selected ? Color.DarkGreen : Color.Beige;
+      dparams.Graphics.FillRectangle(bounds, color);
+    }
+
+    protected override void DrawWeaponBase(DrawParams dparams, BoxF bounds, BoxF inside)
     {
       // draw a speed bump!
       Texture2D speedbump = GetImage();
       SizeF speedbumpSize = new SizeF(speedbump.Width, speedbump.Height);
 
-      Vector2 scale = Utils.ComputeScale(speedbumpSize, bounds.Size);
+      Vector2 scale = MathematicsHelper.ComputeScale(speedbumpSize, bounds.Size);
       Color color = Color.White;
 
+      SpriteBatch spriteBatch = dparams.SpriteBatch;
       spriteBatch.Draw(
         speedbump,
         bounds.Location,
@@ -77,7 +86,7 @@ namespace Alliance.Pieces
         0f);
     }
 
-    protected override void DrawWeaponTower(SpriteBatch spriteBatch, Vector2 offset)
+    protected override void DrawWeaponTower(DrawParams dparams, Vector2 offset)
     {
       // don't draw a weapon tower
     }

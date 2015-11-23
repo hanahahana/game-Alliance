@@ -1,27 +1,29 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
-
+using Alliance.Data;
+using Alliance.Enums;
+using Alliance.Invaders;
+using Alliance.Objects;
+using Alliance.Projectiles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
-using Alliance.Data;
-using Alliance.Utilities;
-using Alliance.Invaders;
-using Alliance.Projectiles;
-using Alliance.Parameters;
-using Alliance.Objects;
 using MLA.Utilities;
+using MLA.Utilities.Xna;
+using MLA.Utilities.Xna.Helpers;
 
 namespace Alliance.Pieces
 {
+  /// <summary>
+  /// The sprinkler tower. It's meant to emulate firing a round of bullets in a circle.
+  /// </summary>
+  [Serializable]
   public class SprinklerPiece : Piece
   {
     private const string SprinklerName = "Sprinkler";
     private const string UltimateSprinklerName = "Sprayer";
 
-    private const float MinVelocity = DefaultProjectileVelocity;
-    private const float MaxVelocity = DefaultProjectileVelocity * 3;
+    private const float MinVelocity = DefaultProjectileSpeed;
+    private const float MaxVelocity = DefaultProjectileSpeed * 3;
 
     private const float MinPieSlices = 2f;
     private const float MaxPieSlices = 16f;
@@ -38,18 +40,22 @@ namespace Alliance.Pieces
       sb.AppendLine("Sprinkles projectiles around (without aiming). Good for closing up holes in your maze.");
 
       // set the properties of the piece
-      mDescription = sb.ToString();
-      mRadius = 20;
-      mAttack = 25;
+      Attack = 1000;
+      Price = 600;
+      Radius = 100;
+      UpgradePercent = 50;
+      LevelVisibility = 50;
+
       mPiePieces = MinPieSlices;
-      mProjectilesPerSecond = TotalSeconds * mPiePieces;
-      mNumberProjectilesToFire = 1;
-      mUpgradePercent = 15;
-      mPrice = 5;
-      mFaceTarget = false;
-      mName = SprinklerName;
-      mUltimateName = UltimateSprinklerName;
-      mGrouping = PieceGrouping.One;
+      Description = sb.ToString();
+      ProjectilesPerSecond = TotalSeconds * mPiePieces;
+      NumberProjectilesToFire = 1;
+      FaceTarget = false;
+      Name = SprinklerName;
+      UltimateName = UltimateSprinklerName;
+      Grouping = PieceGrouping.One;
+      ImageKey = "sprinkler";
+      Specialty = PieceSpecialty.Both;
     }
 
     public override void Update(GameTime gameTime)
@@ -58,58 +64,31 @@ namespace Alliance.Pieces
       base.Update(gameTime);
 
       // spin around in a circle
-      mOrientation += ((float)gameTime.ElapsedGameTime.TotalSeconds * RadiansPerSecond);
-      Utils.WrapAngle(mOrientation);
-    }
-
-    protected override float UpgradeAttack(float factor)
-    {
-      if (mLevel == MaxLevel)
-      {
-        return Invader.MaxInvaderLife * 5f;
-      }
-      else
-      {
-        return base.UpgradeAttack(factor);
-      }
-    }
-
-    protected override double UpgradePrice(float factor)
-    {
-      if (mLevel == MaxLevel - 1)
-      {
-        // set the price to be outrageous
-        return int.MaxValue;
-      }
-      else
-      {
-        return base.UpgradePrice(factor);
-      }
+      Orientation += ((float)gameTime.ElapsedGameTime.TotalSeconds * RadiansPerSecond);
+      Orientation = MathematicsHelper.WrapAngle(Orientation);
     }
 
     protected override void UpgradeProjectileVariables(float factor)
     {
       base.UpgradeProjectileVariables(factor);
+      float mu = (float)Level / (float)MaxLevel;
 
-      float mu = (float)mLevel / (float)MaxLevel;
-      mUpgradePercent = (int)Math.Round(mUpgradePercent * factor * 2f);
-
-      mProjectileVelocity = MathHelper.Lerp(MinVelocity, MaxVelocity, mu);
+      ProjectileSpeed = MathHelper.Lerp(MinVelocity, MaxVelocity, mu);
       mPiePieces = MathHelper.Lerp(MinPieSlices, MaxPieSlices, mu);
 
-      mNumberProjectilesToFire = 1;
-      mProjectilesPerSecond = TotalSeconds * mPiePieces;
+      NumberProjectilesToFire = 1;
+      ProjectilesPerSecond = TotalSeconds * mPiePieces;
     }
 
     protected override void FinalizeUpgrade()
     {
       base.FinalizeUpgrade();
-      if (mLevel == MaxLevel)
+      if (Level == MaxLevel)
       {
         // set the description
         StringBuilder sb = new StringBuilder();
         sb.AppendLine("Extremely powerful and fast sprayer. Extremely expensive too...nice job!");
-        mDescription = sb.ToString();
+        Description = sb.ToString();
       }
     }
 
@@ -121,16 +100,11 @@ namespace Alliance.Pieces
 
     protected override Projectile CreateProjectile()
     {
-      SprinklerProjectile projectile = new SprinklerProjectile(mProjectileLifeInSeconds);
+      SprinklerProjectile projectile = new SprinklerProjectile(this, ProjectileLifeInSeconds);
       return projectile;
     }
 
-    protected override string ImageKey
-    {
-      get { return "sprinkler"; }
-    }
-
-    protected override DrawData GetDrawData(Vector2 offset)
+    protected override TextureDrawData GetTextureDrawData(Vector2 offset)
     {
       Tuple<BoxF, BoxF> outin = GetOutsideInsideBounds(offset);
       BoxF bounds = outin.First;
@@ -139,11 +113,11 @@ namespace Alliance.Pieces
       SizeF imgSize = new SizeF(wtower.Width, wtower.Height);
       SizeF actSize = new SizeF(bounds.Width, bounds.Height);
 
-      Vector2 scale = Utils.ComputeScale(imgSize, actSize);
+      Vector2 scale = MathematicsHelper.ComputeScale(imgSize, actSize);
       Vector2 origin = imgSize.ToVector2() * .5f;
       Vector2 center = actSize.ToVector2() * .5f;
 
-      return new DrawData(wtower, imgSize, bounds.Location + center, origin, scale);
+      return new TextureDrawData(wtower, imgSize, bounds.Location + center, origin, scale);
     }
   }
 }
