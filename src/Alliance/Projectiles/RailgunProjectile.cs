@@ -24,11 +24,12 @@ namespace Alliance.Projectiles
     {
       sourcePt = Point.Zero;
       mColor = Utils.GetIntermediateColor(Color.Yellow, Color.Red, .55f, 0f, 1f);
+
       mOwner = owner;
       totalElapsedSeconds = 0;
     }
 
-    protected override Texture2D GetProjectileImage()
+    public override Texture2D GetProjectileImage()
     {
       return AllianceGame.Textures["pulse"];
     }
@@ -52,7 +53,7 @@ namespace Alliance.Projectiles
 
         if ((sourcePt.X + width) >= totalWidth)
           sourcePt.X = 0;
-        Position += (Velocity * MovementPerSecond * .3f);
+        Position += (Velocity * MovementPerSecond);
       }
     }
 
@@ -75,13 +76,37 @@ namespace Alliance.Projectiles
       spriteBatch.Draw(
           projectile,
           Position + offset,
-          source,
+          null,
           mColor,
           mOrientation,
           origin,
           scale,
           SpriteEffects.None,
           0);
+    }
+
+    public override Vector2 GetCenter(Vector2 offset)
+    {
+      Texture2D projectile = GetProjectileImage();
+      SizeF projectileSize = new SizeF(projectile.Width, projectile.Height);
+      float width = (projectileSize.Width / FactorOfWidth);
+      Vector2 origin = new Vector2(0, projectile.Height / 2);
+      Vector2 scale = Utils.ComputeScale(new SizeF(width, projectileSize.Height), Size);
+
+      // get the center of the original image
+      Vector2 center = projectileSize.ToVector2() * .5f;
+
+      // create the matrix for transforming the center
+      Matrix transform =
+        Matrix.CreateTranslation(-origin.X, -origin.Y, 0) *
+        Matrix.CreateRotationZ(mOrientation) *
+        Matrix.CreateScale(scale.X, scale.Y, 1f) *
+        Matrix.CreateTranslation(X + offset.X, Y + offset.Y, 0);
+
+      // return the center transformated
+      Vector2 result;
+      Vector2.Transform(ref center, ref transform, out result);
+      return result;
     }
   }
 }

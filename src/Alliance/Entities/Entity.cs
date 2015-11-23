@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Alliance.Data;
 using Alliance.Utilities;
 using Alliance.Pieces;
+using Alliance.Projectiles;
 
 namespace Alliance.Entities
 {
@@ -28,6 +29,9 @@ namespace Alliance.Entities
     protected float mOrientation;
     protected EntityState mState;
     protected float mMPS;
+    protected float mCurrentLife;
+
+    public abstract float MaximumLife { get; }
 
     public Cell TargetCell
     {
@@ -75,6 +79,12 @@ namespace Alliance.Entities
       set { mMPS = value; }
     }
 
+    public float CurrentLife
+    {
+      get { return mCurrentLife; }
+      set { mCurrentLife = Math.Max(0, value); }
+    }
+
     public float Orientation
     {
       get { return mOrientation; }
@@ -98,6 +108,7 @@ namespace Alliance.Entities
       mBounds.Height = mTargetCell.Height;
 
       mMPS = MaxMovementPerSecond;
+      mCurrentLife = MaximumLife;
       ComputeOrientation();
     }
 
@@ -131,6 +142,7 @@ namespace Alliance.Entities
     public virtual void Update(GameTime gameTime)
     {
       if (mState != EntityState.Alive) return;
+      if (mCurrentLife == 0) mState = EntityState.Dead;
 
       if (mTargetCell == null && mCurrentCell != null)
       {
@@ -207,12 +219,17 @@ namespace Alliance.Entities
 
       Texture2D texture = AllianceGame.Textures["tank"];
       Vector2 scale = new Vector2(Width / texture.Width, Height / texture.Height);
+
       Vector2 imgCenter = new Vector2(texture.Width / 2f, texture.Height / 2f);
       Vector2 myCenter = new Vector2(Width / 2f, Height / 2f);
 
+      // compute the position
+      Vector2 position = mBounds.Location + offset + myCenter;
+
+      //draw the entity itself
       spriteBatch.Draw(
         texture,
-        mBounds.Location + offset + myCenter, 
+        position, 
         null, 
         Color.White, 
         mOrientation, 
@@ -220,6 +237,18 @@ namespace Alliance.Entities
         scale, 
         SpriteEffects.None, 
         0f);
+
+      // compute the bounds of the life bar
+      BoxF bar = new BoxF(Vector2.Add(position - myCenter, new Vector2(0, -4f)), new SizeF(Width, 3f));
+
+      // draw the life bar
+      Shapes.FillRectangle(spriteBatch, 
+        bar.X,
+        bar.Y,
+        bar.Width * Utils.CalculatePercent(mCurrentLife, 0, MaximumLife),
+        bar.Height,
+        Color.Green);
+      Shapes.DrawRectangle(spriteBatch, bar, Color.Black);
     }
   }
 }

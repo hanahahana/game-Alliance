@@ -13,5 +13,10 @@ namespace Alliance.Entities
     {
       mMPS = MathHelper.Lerp(MinMovementPerSecond, MaxMovementPerSecond, RandomHelper.NextSingle());
     }
+
+    public override float MaximumLife
+    {
+      get { return 5000f; }
+    }
   }
 }

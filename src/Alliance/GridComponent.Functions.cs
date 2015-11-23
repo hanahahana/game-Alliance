@@ -581,18 +581,33 @@ namespace Alliance
         // if the projectile is still alive, check to see if it hit anything
         if (projectile.IsAlive)
         {
-          // go through each of the invaders
-          //foreach (Entity invader in mEntities)
-          //{
-          //  // if we hit one of them
-          //  if (projectile.Bounds.IntersectsWith(invader.Bounds))
-          //  {
-          //    // decrement the invaders life value
-          //    // set the projectile to dead
-          //    projectile.IsAlive = false;
-          //    break;
-          //  }
-          //}
+          Vector2 position = projectile.GetCenter(uparams.Offset);
+          Index index = Utils.GetIndexCorrespondingTo(position, CellWidth, CellHeight, uparams.Offset);
+          if (Utils.IndexValid(index, this.NumCols, this.NumRows))
+          {
+            //Cells[index.C, index.R].Attributes = DebugAttributes.OccupiedByProjectile;
+            Entity target = mEntities.Find(new Predicate<Entity>(
+              delegate(Entity entity)
+              {
+                Cell cell = null;
+                if (entity.CurrentLife > 0)
+                {
+                  cell = entity.CurrentCell;
+                  if (cell == null)
+                  {
+                    cell = entity.TargetCell;
+                  }
+                }
+
+                return cell != null && cell.Equals(Cells[index.C, index.R]);
+              }));
+
+            if (target != null)
+            {
+              target.CurrentLife -= projectile.Attack;
+              projectile.IsAlive = false;
+            }
+          }
         }
 
         // if the projectile is still alive, check to see if it went out of bounds
@@ -631,10 +646,17 @@ namespace Alliance
         for (int r = 0; r < NumRows; ++r)
         {
           Cell node = Cells[c, r];
+          BoxF bounds = new BoxF(node.X + offset.X, node.Y + offset.Y, node.Width, node.Height);
+
           if (node.IsOuter && !node.IsThroughway)
           {
-            BoxF bounds = new BoxF(node.X + offset.X, node.Y + offset.Y, node.Width, node.Height);
             Shapes.FillRectangle(mSpriteBatch, bounds, Color.White);
+          }
+
+          if ((node.Attributes & DebugAttributes.OccupiedByProjectile) != 0)
+          {
+            Shapes.FillRectangle(mSpriteBatch, bounds, Color.Red);
+            node.Attributes = DebugAttributes.None;
           }
         }
       }

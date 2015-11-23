@@ -5,6 +5,7 @@ using Alliance.Data;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Alliance.Utilities;
+using Alliance.Entities;
 
 namespace Alliance.Projectiles
 {
@@ -74,7 +75,7 @@ namespace Alliance.Projectiles
       set { mOrientation = value; }
     }
 
-    public bool IsAlive
+    public virtual bool IsAlive
     {
       get { return mIsAlive; }
       set { mIsAlive = value; }
@@ -97,9 +98,10 @@ namespace Alliance.Projectiles
       mIsAlive = true;
       mTimeToLive = timeToLiveInSeconds;
       mColor = Color.White;
+      Size = new SizeF(7.25f, 3.625f);
     }
 
-    protected virtual Texture2D GetProjectileImage()
+    public virtual Texture2D GetProjectileImage()
     {
       return AllianceGame.Textures["bullet"];
     }
@@ -150,6 +152,30 @@ namespace Alliance.Projectiles
     public virtual void UpdateOut(int frames)
     {
       // do nothing here
+    }
+
+    public virtual Vector2 GetCenter(Vector2 offset)
+    {
+      Texture2D projectile = GetProjectileImage();
+      SizeF projectileSize = new SizeF(projectile.Width, projectile.Height);
+
+      Vector2 origin = new Vector2(0, projectileSize.Height / 2);
+      Vector2 scale = Utils.ComputeScale(projectileSize, Size);
+
+      // get the center of the original image
+      Vector2 center = projectileSize.ToVector2() * .5f;
+
+      // create the matrix for transforming the center
+      Matrix transform =
+        Matrix.CreateTranslation(-origin.X, -origin.Y, 0) *
+        Matrix.CreateRotationZ(mOrientation) *
+        Matrix.CreateScale(scale.X, scale.Y, 1f) *
+        Matrix.CreateTranslation(X + offset.X, Y + offset.Y, 0);
+
+      // return the center transformated
+      Vector2 result;
+      Vector2.Transform(ref center, ref transform, out result);
+      return result;
     }
   }
 }

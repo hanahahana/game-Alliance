@@ -18,6 +18,12 @@ namespace Alliance.Projectiles
     private BoxF mOwnerBounds;
     private float mScale = 1.0f;
 
+    public override bool IsAlive
+    {
+      get { return base.IsAlive; }
+      set { base.IsAlive = true; }
+    }
+
     public ShockwaveProjectile(BoxF ownerBounds, double timeToLiveInSeconds)
       : base(timeToLiveInSeconds)
     {
@@ -49,7 +55,7 @@ namespace Alliance.Projectiles
       UpdateScaleAndOrientation(frames * .1f);
     }
 
-    protected override Texture2D GetProjectileImage()
+    public override Texture2D GetProjectileImage()
     {
       return AllianceGame.Textures["wave"];
     }
@@ -75,6 +81,30 @@ namespace Alliance.Projectiles
           scale,
           SpriteEffects.None,
           0);
+    }
+
+    public override Vector2 GetCenter(Vector2 offset)
+    {
+      Texture2D projectile = GetProjectileImage();
+      SizeF projectileSize = new SizeF(projectile.Width, projectile.Height);
+
+      Vector2 origin = new Vector2(0, projectileSize.Height / 2);
+      Vector2 scale = Utils.ComputeScale(projectileSize, Size);
+
+      // get the center of the original image
+      Vector2 center = new Vector2(projectileSize.Width / 2f, 0);
+
+      // create the matrix for transforming the center
+      Matrix transform =
+        Matrix.CreateTranslation(-origin.X, -origin.Y, 0) *
+        Matrix.CreateRotationZ(mOrientation) *
+        Matrix.CreateScale(scale.X, scale.Y, 1f) *
+        Matrix.CreateTranslation(X + offset.X, Y + offset.Y, 0);
+
+      // return the center transformated
+      Vector2 result;
+      Vector2.Transform(ref center, ref transform, out result);
+      return result;
     }
   }
 }

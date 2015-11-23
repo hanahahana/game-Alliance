@@ -45,7 +45,7 @@ namespace Alliance.Pieces
 
     public override float Attack
     {
-      get { return 100f; }
+      get { return 10000f; }
     }
 
     public override bool FaceTarget

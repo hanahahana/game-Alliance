@@ -71,7 +71,6 @@ namespace Alliance.Pieces
     protected override Projectile CreateProjectile()
     {
       RailgunProjectile projectile = new RailgunProjectile(this, ProjectileLifeSeconds);
-      projectile.Size = new SizeF(Width * 2f, Height * .25f);
       return projectile;
     }
 

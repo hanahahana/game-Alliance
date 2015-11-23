@@ -62,7 +62,6 @@ namespace Alliance.Pieces
     protected override Projectile CreateProjectile()
     {
       MissileProjectile projectile = new MissileProjectile(base.ProjectileLifeSeconds);
-      projectile.Size = new SizeF(Width * .55f, Height * .25f);
       return projectile;
     }
 

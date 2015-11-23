@@ -15,6 +15,12 @@ namespace Alliance
     Blocked,
   };
 
+  public enum DebugAttributes
+  {
+    None,
+    OccupiedByProjectile,
+  }
+
   public class Cell : IComparable<Cell>
   {
     private BoxF mBounds;
@@ -30,6 +36,7 @@ namespace Alliance
     private Piece mPiece;
     private Cell[] mAdjacentCells;
     private int mAdjacentCellsIdx;
+    private DebugAttributes mAttributes;
 
     public BoxF Bounds
     {
@@ -112,6 +119,12 @@ namespace Alliance
     {
       get { return mParent; }
       set { mParent = value; }
+    }
+
+    public DebugAttributes Attributes
+    {
+      get { return mAttributes; }
+      set { mAttributes = value; }
     }
 
     public Piece Piece
