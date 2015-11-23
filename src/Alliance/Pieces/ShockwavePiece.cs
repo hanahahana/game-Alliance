@@ -43,9 +43,24 @@ namespace Alliance.Pieces
       get { return mRadius; }
     }
 
+    public override float Attack
+    {
+      get { return 100f; }
+    }
+
     public override bool FaceTarget
     {
       get { return false; }
+    }
+
+    public override float ProjectilesPerSecond
+    {
+      get { return .25f; }
+    }
+
+    public override int NumberProjectilesToFire
+    {
+      get { return 3; }
     }
 
     protected override Piece CreatePiece(Cell[] cells)
@@ -54,35 +69,17 @@ namespace Alliance.Pieces
       return piece;
     }
 
-    protected override Texture2D GetWeaponTower()
+    protected override Projectile CreateProjectile()
     {
-      return AllianceGame.Textures["shockwaveGenerator"];
+      BoxF bounds = new BoxF(this.Position, this.Size);
+      ShockwaveProjectile projectile = new ShockwaveProjectile(bounds, 1.0);
+      projectile.Size = new SizeF(Width * .25f, Height * .25f);
+      return projectile;
     }
 
-    protected override void DrawWeaponTower(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
+    protected override Texture2D GetTowerImage()
     {
-      Texture2D wtower = GetWeaponTower();
-      SizeF imgSize = new SizeF(wtower.Width, wtower.Height);
-      SizeF actSize = new SizeF(bounds.Width, bounds.Height);
-
-      Vector2 scale = Utils.ComputeScale(imgSize, actSize);
-      Vector2 imgCenter = imgSize.ToVector2() * .5f;
-      Vector2 myCenter = actSize.ToVector2() * .5f;
-
-      if (!FaceTarget)
-        mOrientation = 0;
-
-      Color color = Color.Gray;
-      spriteBatch.Draw(
-        wtower,
-        bounds.Location + myCenter,
-        null,
-        color,
-        mOrientation,
-        imgCenter,
-        scale,
-        SpriteEffects.None,
-        0f);
+      return AllianceGame.Textures["shockwaveGenerator"];
     }
 
     protected override void DrawWeaponBase(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
@@ -90,10 +87,21 @@ namespace Alliance.Pieces
       // don't draw the weapon base
     }
 
-    protected override Projectile CreateProjectile()
+    protected override void DrawWeaponTower(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
     {
-      Projectile projectile = new Projectile(0.85);
-      return projectile;
+      Texture2D tower = GetTowerImage();
+      Vector2 scale = Utils.ComputeScale(new SizeF(tower.Width, tower.Height), bounds.Size);
+
+      spriteBatch.Draw(
+        tower,
+        bounds.Location,
+        null,
+        Color.White,
+        0f,
+        Vector2.Zero,
+        scale,
+        SpriteEffects.None,
+        0f);
     }
   }
 }

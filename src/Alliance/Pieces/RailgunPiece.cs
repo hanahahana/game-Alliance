@@ -42,9 +42,24 @@ namespace Alliance.Pieces
       get { return mRadius; }
     }
 
-    protected override float ProjectilesPerSecond
+    public override float Attack
     {
-      get { return .4f; }
+      get { return 2500f; }
+    }
+
+    public override float ProjectilesPerSecond
+    {
+      get { return .09f; }
+    }
+
+    public override float ProjectileLifeSeconds
+    {
+      get { return 5.5f; }
+    }
+
+    public override int NumberProjectilesToFire
+    {
+      get { return 3; }
     }
 
     protected override Piece CreatePiece(Cell[] cells)
@@ -53,18 +68,16 @@ namespace Alliance.Pieces
       return piece;
     }
 
-    protected override Texture2D GetWeaponTower()
-    {
-      return AllianceGame.Textures["railgun"];
-    }
-
     protected override Projectile CreateProjectile()
     {
-      SizeF size = new SizeF(30, 4);
-      Projectile projectile = new Projectile(5.85);
-      projectile.Bounds = new BoxF(mPosition + (mSize.ToVector2() * .5f) - (size.ToVector2() * .5f), size);
-      projectile.Color = Color.DarkRed;
+      RailgunProjectile projectile = new RailgunProjectile(this, ProjectileLifeSeconds);
+      projectile.Size = new SizeF(Width * 2f, Height * .25f);
       return projectile;
+    }
+
+    protected override Texture2D GetTowerImage()
+    {
+      return AllianceGame.Textures["railgun"];
     }
   }
 }

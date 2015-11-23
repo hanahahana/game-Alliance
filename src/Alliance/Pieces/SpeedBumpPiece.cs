@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Alliance.Data;
 using Alliance.Projectiles;
 using Microsoft.Xna.Framework;
+using Alliance.Utilities;
 
 namespace Alliance.Pieces
 {
@@ -49,7 +50,17 @@ namespace Alliance.Pieces
       get { return mRadius; }
     }
 
+    public override float Attack
+    {
+      get { return .5f; }
+    }
+
     public override bool FaceTarget
+    {
+      get { return false; }
+    }
+
+    protected override bool CanFireProjectiles
     {
       get { return false; }
     }
@@ -60,19 +71,36 @@ namespace Alliance.Pieces
       return piece;
     }
 
+    protected override void DrawBackground(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
+    {
+      Color color = mSelected ? Color.DarkGreen : Color.Beige;
+      Shapes.FillRectangle(spriteBatch, bounds, color);
+    }
+
     protected override void DrawWeaponBase(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
     {
+      // draw a speed bump!
+      Texture2D speedbump = AllianceGame.Textures["speedbump"];
+      SizeF speedbumpSize = new SizeF(speedbump.Width, speedbump.Height);
 
+      Vector2 scale = Utils.ComputeScale(speedbumpSize, bounds.Size);
+      Color color = Color.White;
+
+      spriteBatch.Draw(
+        speedbump,
+        bounds.Location,
+        null,
+        color,
+        0f,
+        Vector2.Zero,
+        scale,
+        SpriteEffects.None,
+        0f);
     }
 
     protected override void DrawWeaponTower(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
     {
-
-    }
-
-    protected override Projectile CreateProjectile()
-    {
-      return null;
+      // don't draw a weapon tower
     }
   }
 }

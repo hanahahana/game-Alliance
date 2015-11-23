@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using MLA.Utilities;
 using Alliance.Data;
 using Microsoft.Xna.Framework.Graphics;
+using MLA.Utilities.Helpers;
 
 namespace Alliance.Utilities
 {
@@ -183,6 +184,20 @@ namespace Alliance.Utilities
       float b2 = b * b;
 
       return ((X2 / a2) + (Y2 / b2)) < 1;
+    }
+
+    public static Color RandomColor()
+    {
+      byte[] rgb = new byte[3];
+      RandomHelper.NextBytes(rgb);
+      return new Color(rgb[0], rgb[1], rgb[2]);
+    }
+
+    public static Vector2 ComputeProjectileDirection(float angle)
+    {
+      Vector2 v = new Vector2(1, 0);
+      Matrix rotMatrix = Matrix.CreateRotationZ(angle);
+      return Vector2.Transform(v, rotMatrix);
     }
   }
 }

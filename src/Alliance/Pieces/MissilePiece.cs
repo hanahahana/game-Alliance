@@ -43,24 +43,32 @@ namespace Alliance.Pieces
       get { return mRadius; }
     }
 
+    public override float Attack
+    {
+      get { return 50f; }
+    }
+
+    public override int NumberProjectilesToFire
+    {
+      get { return 5; }
+    }
+
     protected override Piece CreatePiece(Cell[] cells)
     {
       MissilePiece piece = new MissilePiece();
       return piece;
     }
 
-    protected override Texture2D GetWeaponTower()
-    {
-      return AllianceGame.Textures["missileLauncher"];
-    }
-
     protected override Projectile CreateProjectile()
     {
-      SizeF size = new SizeF(8, 4);
-      Projectile projectile = new Projectile(0.85);
-      projectile.Bounds = new BoxF(mPosition + new Vector2(Delta, 0) + (mSize.ToVector2() * .5f), size);
-      projectile.Color = Color.Gray;
+      MissileProjectile projectile = new MissileProjectile(base.ProjectileLifeSeconds);
+      projectile.Size = new SizeF(Width * .55f, Height * .25f);
       return projectile;
+    }
+
+    protected override Texture2D GetTowerImage()
+    {
+      return AllianceGame.Textures["missileLauncher"];
     }
   }
 }

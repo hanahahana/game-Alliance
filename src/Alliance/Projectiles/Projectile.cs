@@ -12,12 +12,13 @@ namespace Alliance.Projectiles
   {
     public const float MovementPerSecond = 5f;
 
-    private BoxF mBounds;
-    private Vector2 mVelocity;
-    private float mOrientation;
-    private bool mIsAlive;
-    private double mTimeToLive;
-    private Color mColor;
+    protected BoxF mBounds;
+    protected Vector2 mVelocity;
+    protected float mOrientation;
+    protected bool mIsAlive;
+    protected double mTimeToLive;
+    protected Color mColor;
+    protected float mAttack;
 
     public BoxF Bounds
     {
@@ -64,7 +65,7 @@ namespace Alliance.Projectiles
     public Vector2 Velocity
     {
       get { return mVelocity; }
-      set { mVelocity = value * MovementPerSecond; }
+      set { mVelocity = value; }
     }
 
     public float Orientation
@@ -85,44 +86,70 @@ namespace Alliance.Projectiles
       set { mColor = value; }
     }
 
-    public Projectile(double timeToLive)
+    public float Attack
     {
-      mTimeToLive = timeToLive;
+      get { return mAttack; }
+      set { mAttack = value; }
     }
 
-    public void Update(GameTime gameTime)
+    public Projectile(double timeToLiveInSeconds)
+    {
+      mIsAlive = true;
+      mTimeToLive = timeToLiveInSeconds;
+      mColor = Color.White;
+    }
+
+    protected virtual Texture2D GetProjectileImage()
+    {
+      return AllianceGame.Textures["bullet"];
+    }
+
+    public virtual void Update(GameTime gameTime)
+    {
+      UpdateTimeToLive(gameTime);
+      UpdatePosition(gameTime);
+    }
+
+    protected void UpdateTimeToLive(GameTime gameTime)
     {
       // update the time to live
       mTimeToLive -= gameTime.ElapsedGameTime.TotalSeconds;
       mTimeToLive = Math.Max(0, mTimeToLive);
       mIsAlive = mTimeToLive > 0;
+    }
 
-      if (mIsAlive)
+    protected void UpdatePosition(GameTime gameTime)
+    {
+      if (IsAlive)
       {
         // if we're still alive, then move the projectile
-        Position += Velocity;
+        Position += Velocity * MovementPerSecond;
       }
     }
 
-    public void Draw(SpriteBatch mSpriteBatch, Vector2 offset)
+    public virtual void Draw(SpriteBatch spriteBatch, Vector2 offset)
     {
-      // initialize if we need to
-      if (Shapes.InternalPixel == null)
-        Shapes.InitializePixelTexture(mSpriteBatch.GraphicsDevice);
+      Texture2D projectile = GetProjectileImage();
+      SizeF projectileSize = new SizeF(projectile.Width, projectile.Height);
 
-      // otherwise, draw the pixel as a projectile
-      Vector2 scale = Size.ToVector2();
-      Vector2 myCenter = scale * .5f;
-      mSpriteBatch.Draw(
-        Shapes.InternalPixel,
-        mBounds.Location + offset + myCenter,
-        null,
-        mColor,
-        mOrientation,
-        Vector2.One * .5f,
-        scale,
-        SpriteEffects.None,
-        0f);
+      Vector2 origin = new Vector2(0, projectileSize.Height / 2);
+      Vector2 scale = Utils.ComputeScale(projectileSize, Size);
+
+      spriteBatch.Draw(
+          projectile,
+          Position + offset,
+          null,
+          mColor,
+          mOrientation,
+          origin,
+          scale,
+          SpriteEffects.None,
+          0);
+    }
+
+    public virtual void UpdateOut(int frames)
+    {
+      // do nothing here
     }
   }
 }

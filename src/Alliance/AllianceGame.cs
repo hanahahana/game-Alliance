@@ -75,13 +75,31 @@ namespace Alliance
       Sounds = new SoundBank(audioEngine, "Content\\Sounds\\Sound Bank.xsb");
 
       Textures = new Dictionary<string, Texture2D>();
-      Textures.Add("tank", Content.Load<Texture2D>("Images\\tank"));
-      Textures.Add("mouse", Content.Load<Texture2D>("Images\\mouse"));
-      Textures.Add("towerBase", Content.Load<Texture2D>("Images\\towerBase"));
-      Textures.Add("railgun", Content.Load<Texture2D>("Images\\railgun"));
-      Textures.Add("turret", Content.Load<Texture2D>("Images\\turret"));
-      Textures.Add("missileLauncher", Content.Load<Texture2D>("Images\\missileLauncher"));
-      Textures.Add("shockwaveGenerator", Content.Load<Texture2D>("Images\\shockwaveGenerator"));
+
+      // load the bases
+      Textures.Add("towerBase", LoadImage("Bases\\towerBase"));
+
+      // load the enemies
+      Textures.Add("tank", LoadImage("Enemies\\tank"));
+      Textures.Add("mouse", LoadImage("Enemies\\mouse"));
+
+      // load the towers
+      Textures.Add("railgun", LoadImage("Towers\\railgun"));
+      Textures.Add("turret", LoadImage("Towers\\turret"));
+      Textures.Add("missileLauncher", LoadImage("Towers\\missileLauncher"));
+      Textures.Add("shockwaveGenerator", LoadImage("Towers\\shockwaveGenerator"));
+      Textures.Add("speedbump", LoadImage("Towers\\speedbump"));
+
+      // load the projectiles
+      Textures.Add("rocket", LoadImage("Projectiles\\rocket"));
+      Textures.Add("bullet", LoadImage("Projectiles\\bullet"));
+      Textures.Add("wave", LoadImage("Projectiles\\wave"));
+      Textures.Add("pulse", LoadImage("Projectiles\\pulse"));
+    }
+
+    private Texture2D LoadImage(string name)
+    {
+      return Content.Load<Texture2D>(string.Format("Images\\{0}", name));
     }
 
     /// <summary>

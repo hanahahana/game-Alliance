@@ -54,6 +54,35 @@ namespace Alliance.Data
       return new Vector2(size.Width, size.Height);
     }
 
+    public static SizeF operator *(SizeF value, float scaleFactor)
+    {
+      return Multiply(value, scaleFactor);
+    }
+
+    public static SizeF operator *(float scaleFactor, SizeF value)
+    {
+      return Multiply(value, scaleFactor);
+    }
+
+    public static SizeF operator /(SizeF value, float divider)
+    {
+      return Divide(value, divider);
+    }
+
+    public static SizeF Multiply(SizeF value, float scaleFactor)
+    {
+      SizeF size = new SizeF();
+      size.Width = value.Width * scaleFactor;
+      size.Height = value.Height * scaleFactor;
+      return size;
+    }
+
+    public static SizeF Divide(SizeF value, float divider)
+    {
+      float num = 1f / divider;
+      return Multiply(value, num);
+    }
+
     public bool IsEmpty
     {
       get

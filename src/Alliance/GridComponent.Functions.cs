@@ -247,6 +247,9 @@ namespace Alliance
 
     private bool AssertCanGetThrough(Piece piece)
     {
+      // if the piece isn't blocking, then we can get through
+      if (!piece.IsBlocking) return true;
+
       // check the horizontal path
       AStarNode[,] aStarGrid = BuildAStarGrid();
       AStarNode start = aStarGrid[HorzStartCell.Column, HorzStartCell.Row];
@@ -376,7 +379,7 @@ namespace Alliance
           resolve = true;
         }
 
-        mProjectiles.AddRange(piece.GetProjectiles());
+        mProjectiles.AddRange(piece.PopProjectiles());
       }
 
       if (resolve)
@@ -579,17 +582,17 @@ namespace Alliance
         if (projectile.IsAlive)
         {
           // go through each of the invaders
-          foreach (Entity invader in mEntities)
-          {
-            // if we hit one of them
-            if (projectile.Bounds.IntersectsWith(invader.Bounds))
-            {
-              // decrement the invaders life value
-              // set the projectile to dead
-              projectile.IsAlive = false;
-              break;
-            }
-          }
+          //foreach (Entity invader in mEntities)
+          //{
+          //  // if we hit one of them
+          //  if (projectile.Bounds.IntersectsWith(invader.Bounds))
+          //  {
+          //    // decrement the invaders life value
+          //    // set the projectile to dead
+          //    projectile.IsAlive = false;
+          //    break;
+          //  }
+          //}
         }
 
         // if the projectile is still alive, check to see if it went out of bounds
