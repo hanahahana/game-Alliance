@@ -8,6 +8,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Alliance.Pieces;
 using Alliance.Data;
 using Alliance.Utilities;
+using Alliance.Parameters;
+using Alliance.Components;
 
 namespace Alliance.Objects
 {
@@ -109,12 +111,19 @@ namespace Alliance.Objects
       mIsValid = false;
     }
 
-    public void Draw(SpriteBatch spriteBatch, Vector2 offset)
+    public void Draw(DrawParams dparams)
     {
       if (mGroup != null)
       {
-        Vector2 loc = mBounds.Location + offset;
-        Shapes.FillRectangle(spriteBatch, loc.X, loc.Y, mBounds.Width, mBounds.Height, mSelectionColor);
+        Vector2 loc = mBounds.Location + dparams.Offset;
+        if (dparams.FillMode == GridFillMode.Polygons)
+        {
+          Shapes.DrawRectangle(dparams.SpriteBatch, loc.X, loc.Y, mBounds.Width, mBounds.Height, mSelectionColor);
+        }
+        else
+        {
+          Shapes.FillRectangle(dparams.SpriteBatch, loc.X, loc.Y, mBounds.Width, mBounds.Height, mSelectionColor);
+        }
       }
     }
 

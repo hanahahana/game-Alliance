@@ -7,10 +7,11 @@ using Microsoft.Xna.Framework.Graphics;
 
 using Alliance.Data;
 using Alliance.Utilities;
-using Alliance.Entities;
+using Alliance.Invaders;
 using Alliance.Projectiles;
 using Alliance.Parameters;
 using Alliance.Objects;
+using MLA.Utilities;
 
 namespace Alliance.Pieces
 {
@@ -191,8 +192,12 @@ namespace Alliance.Pieces
       }
     }
 
-    protected override void DrawWeaponTower(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
+    protected override DrawData GetDrawData(Vector2 offset)
     {
+      Tuple<BoxF, BoxF> outin = GetOutsideInsideBounds(offset);
+      BoxF bounds = outin.First;
+      BoxF inside = outin.Second;
+
       Texture2D wtower = GetImage();
       SizeF imgSize = new SizeF(FrameSize.Width, FrameSize.Height);
       SizeF actSize = new SizeF(bounds.Width, bounds.Height);
@@ -201,18 +206,24 @@ namespace Alliance.Pieces
       Vector2 origin = imgSize.ToVector2() * .5f;
       Vector2 center = actSize.ToVector2() * .5f;
 
+      return new DrawData(wtower, imgSize, bounds.Location + center, origin, scale);
+    }
+
+    protected override void DrawWeaponTower(SpriteBatch spriteBatch, Vector2 offset)
+    {
+      DrawData data = GetDrawData(offset);
       Rectangle source = new Rectangle(
         mIndex * FrameSize.Width, 0,
         FrameSize.Width, FrameSize.Height);
 
       spriteBatch.Draw(
-        wtower,
-        bounds.Location + center,
+        data.Texture,
+        data.Position,
         source,
         Color,
         0,
-        origin,
-        scale,
+        data.Origin,
+        data.Scale,
         SpriteEffects.None,
         0f);
     }

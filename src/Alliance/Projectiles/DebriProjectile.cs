@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Alliance.Utilities;
 using Alliance.Data;
 using Alliance.Pieces;
-using Alliance.Entities;
+using Alliance.Invaders;
 
 namespace Alliance.Projectiles
 {

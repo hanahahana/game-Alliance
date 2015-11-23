@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 using Alliance.Data;
 using Alliance.Utilities;
-using Alliance.Entities;
+using Alliance.Invaders;
 using Alliance.Parameters;
 
 namespace Alliance.Projectiles
@@ -87,7 +87,7 @@ namespace Alliance.Projectiles
       // do nothing here
     }
 
-    public virtual void OnCollidedWithEntity(Entity entity)
+    public virtual void OnCollidedWithInvader(Invader invader)
     {
       IsAlive = false;
     }

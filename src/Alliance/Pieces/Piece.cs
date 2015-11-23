@@ -7,10 +7,12 @@ using Microsoft.Xna.Framework.Graphics;
 
 using Alliance.Data;
 using Alliance.Utilities;
-using Alliance.Entities;
+using Alliance.Invaders;
 using Alliance.Projectiles;
 using Alliance.Parameters;
 using Alliance.Objects;
+using Alliance.Components;
+using MLA.Utilities;
 
 namespace Alliance.Pieces
 {
@@ -34,7 +36,7 @@ namespace Alliance.Pieces
     protected PieceState mState;
     protected float mProgress = 0;
     protected int mLevel = 0;
-    protected Entity mTarget;
+    protected Invader mTarget;
     protected float mElapsedProjectileSeconds;
     protected List<Projectile> mQueuedProjectiles = new List<Projectile>(50);
 
@@ -246,19 +248,26 @@ namespace Alliance.Pieces
       }
     }
 
+    protected Tuple<BoxF, BoxF> GetOutsideInsideBounds(Vector2 offset)
+    {
+      BoxF bounds = new BoxF(X + offset.X, Y + offset.Y, Width, Height);
+      BoxF inside = new BoxF(bounds.X + Delta, bounds.Y + Delta, bounds.Width - Delta2, bounds.Height - Delta2);
+      return new Tuple<BoxF, BoxF>(bounds, inside);
+    }
+
     public void Draw(DrawParams dparams)
     {
       SpriteBatch spriteBatch = dparams.SpriteBatch;
-      Vector2 offset = dparams.Offset;
+      Tuple<BoxF, BoxF> outin = GetOutsideInsideBounds(dparams.Offset);
 
-      BoxF bounds = new BoxF(X + offset.X, Y + offset.Y, Width, Height);
-      BoxF inside = new BoxF(bounds.X + Delta, bounds.Y + Delta, bounds.Width - Delta2, bounds.Height - Delta2);
+      BoxF bounds = outin.First;
+      BoxF inside = outin.Second;
 
       DrawBackground(spriteBatch, bounds, inside);
       if (mState == PieceState.Idle)
       {
         DrawWeaponBase(spriteBatch, bounds, inside);
-        DrawWeaponTower(spriteBatch, bounds, inside);
+        DrawWeaponTower(spriteBatch, dparams.Offset);
         DrawCurrentLevel(spriteBatch, bounds, inside);
       }
       else if (mState == PieceState.Selling || mState == PieceState.Upgrading)
@@ -292,8 +301,12 @@ namespace Alliance.Pieces
         0f);
     }
 
-    protected virtual void DrawWeaponTower(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
+    protected override DrawData GetDrawData(Vector2 offset)
     {
+      Tuple<BoxF, BoxF> outin = GetOutsideInsideBounds(offset);
+      BoxF bounds = outin.First;
+      BoxF inside = outin.Second;
+
       Texture2D wtower = GetImage();
       SizeF imgSize = new SizeF(wtower.Width, wtower.Height);
       SizeF actSize = new SizeF(bounds.Width - Delta, inside.Height);
@@ -302,15 +315,21 @@ namespace Alliance.Pieces
       Vector2 imgCenter = imgSize.ToVector2() * .5f;
       Vector2 myCenter = actSize.ToVector2() * .5f;
 
+      return new DrawData(wtower, imgSize, inside.Location + myCenter, imgCenter, scale);
+    }
+
+    protected virtual void DrawWeaponTower(SpriteBatch spriteBatch, Vector2 offset)
+    {
+      DrawData data = GetDrawData(offset);
       Color color = Color.Gray;
       spriteBatch.Draw(
-        wtower,
-        inside.Location + myCenter,
+        data.Texture,
+        data.Position,
         null,
         color,
         mOrientation,
-        imgCenter,
-        scale,
+        data.Origin,
+        data.Scale,
         SpriteEffects.None,
         0f);
     }

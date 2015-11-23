@@ -7,10 +7,11 @@ using Microsoft.Xna.Framework.Graphics;
 
 using Alliance.Data;
 using Alliance.Utilities;
-using Alliance.Entities;
+using Alliance.Invaders;
 using Alliance.Projectiles;
 using Alliance.Parameters;
 using Alliance.Objects;
+using MLA.Utilities;
 
 namespace Alliance.Pieces
 {
@@ -62,21 +63,15 @@ namespace Alliance.Pieces
       // don't draw the weapon base
     }
 
-    protected override void DrawWeaponTower(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
+    protected override DrawData GetDrawData(Vector2 offset)
     {
-      Texture2D tower = GetImage();
-      Vector2 scale = Utils.ComputeScale(new SizeF(tower.Width, tower.Height), bounds.Size);
+      Tuple<BoxF, BoxF> outin = GetOutsideInsideBounds(offset);
+      BoxF bounds = outin.First;
+      BoxF inside = outin.Second;
 
-      spriteBatch.Draw(
-        tower,
-        bounds.Location,
-        null,
-        Color.White,
-        0f,
-        Vector2.Zero,
-        scale,
-        SpriteEffects.None,
-        0f);
+      DrawData data = base.GetDrawData(offset);
+      Vector2 scale = Utils.ComputeScale(data.TextureSize, bounds.Size);
+      return new DrawData(data.Texture, data.TextureSize, bounds.Location, Vector2.Zero, scale);
     }
   }
 }

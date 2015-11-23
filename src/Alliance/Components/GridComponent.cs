@@ -21,7 +21,7 @@ using Microsoft.Xna.Framework.Storage;
 using Alliance.Data;
 using Alliance.Utilities;
 using Alliance.Pieces;
-using Alliance.Entities;
+using Alliance.Invaders;
 using Alliance.Projectiles;
 using Alliance.Parameters;
 using Alliance.Objects;
@@ -47,12 +47,13 @@ namespace Alliance.Components
     private SizeF MiddleOffset;
     private SpriteBatch mSpriteBatch;
     private Vector2 mPosition;
+    private GridFillMode mFillMode;
     private SelectionPiece mSelectionPiece;
     private Piece mSelectedPiece;
-    private Entity mSelectedEntity;
+    private Invader mSelectedInvader;
 
     private List<Piece> mPieces;
-    private List<Entity> mEntities;
+    private List<Invader> mInvaders;
     private List<Projectile> mProjectiles;
 
     private GuiManager mGui;
@@ -67,6 +68,7 @@ namespace Alliance.Components
       : base(game)
     {
       game.IsMouseVisible = true;
+      mFillMode = GridFillMode.Solid;
 
       mGui = new GuiManager(game);
       game.Components.Add(mGui);
@@ -82,7 +84,7 @@ namespace Alliance.Components
     public override void Initialize()
     {
       base.Initialize();
-      Player.InitializePlayer(100000, 500);
+      Player.InitializePlayer(100000, 5000);
       InitializeVariables();
       InitializeProperties();
       InitializeGrid();
@@ -92,8 +94,12 @@ namespace Alliance.Components
 
     public override void Update(GameTime gameTime)
     {
-      // immediately add some invaders
-      AddInvaders();
+      // if the game isn't running slowly
+      if (!gameTime.IsRunningSlowly)
+      {
+        // immediately add some invaders
+        AddInvaders();
+      }
 
       // get the input provider
       InputProvider input = (InputProvider)Game.Services.GetService(typeof(InputProvider));
@@ -131,23 +137,15 @@ namespace Alliance.Components
       base.Update(gameTime);
     }
 
-    List<BoxF> boxes = new List<BoxF>();
-
     public override void Draw(GameTime gameTime)
     {
-      DrawParams dparams = new DrawParams(gameTime, (Vector2)MiddleOffset + mPosition, mSpriteBatch);
+      DrawParams dparams = new DrawParams(gameTime, (Vector2)MiddleOffset + mPosition, mSpriteBatch, mFillMode);
       mSpriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.Deferred, SaveStateMode.SaveState);
 
       DrawGrid(dparams);
       DrawPieces(dparams);
       DrawInvaders(dparams);
       DrawProjectiles(dparams);
-
-      for (int i = boxes.Count - 1; i > -1; --i)
-      {
-        Shapes.DrawRectangle(mSpriteBatch, boxes[i], Color.Black);
-        boxes.RemoveAt(i);
-      }
 
       mSpriteBatch.End();
 

@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework;
 
 using Alliance.Pieces;
 using Alliance.Data;
-using Alliance.Entities;
+using Alliance.Invaders;
 using Alliance.Parameters;
 
 namespace Alliance.Objects
@@ -20,14 +20,6 @@ namespace Alliance.Objects
     Empty,
     Blocked,
   };
-
-  [Flags()]
-  public enum DebugAttributes
-  {
-    None,
-    OccupiedByProjectile,
-    TargetedByEntity,
-  }
 
   public enum DijkstraType : int
   {
@@ -47,7 +39,6 @@ namespace Alliance.Objects
     private Piece mPiece;
     private GridCell[] mAdjacentCells;
     private int mAdjacentCellsIdx;
-    private DebugAttributes mAttributes;
     private DijkstraData[] mDijkstraData;
 
     public BoxF Bounds
@@ -113,12 +104,6 @@ namespace Alliance.Objects
     public GridCell[] AdjacentCells
     {
       get { return mAdjacentCells; }
-    }
-
-    public DebugAttributes Attributes
-    {
-      get { return mAttributes; }
-      set { mAttributes = value; }
     }
 
     public Piece Piece

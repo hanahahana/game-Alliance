@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 using Alliance.Data;
 using Alliance.Utilities;
-using Alliance.Entities;
+using Alliance.Invaders;
 using Alliance.Projectiles;
 using Alliance.Parameters;
 using Alliance.Objects;

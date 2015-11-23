@@ -5,7 +5,7 @@ using Alliance.Data;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Alliance.Parameters;
-using Alliance.Entities;
+using Alliance.Invaders;
 
 namespace Alliance.Projectiles
 {
@@ -43,7 +43,7 @@ namespace Alliance.Projectiles
       get { return "flame"; }
     }
 
-    public override void OnCollidedWithEntity(Entity entity)
+    public override void OnCollidedWithInvader(Invader invader)
     {
       // we don't care!
     }

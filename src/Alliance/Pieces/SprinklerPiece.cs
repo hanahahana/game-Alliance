@@ -7,10 +7,11 @@ using Microsoft.Xna.Framework.Graphics;
 
 using Alliance.Data;
 using Alliance.Utilities;
-using Alliance.Entities;
+using Alliance.Invaders;
 using Alliance.Projectiles;
 using Alliance.Parameters;
 using Alliance.Objects;
+using MLA.Utilities;
 
 namespace Alliance.Pieces
 {
@@ -98,8 +99,11 @@ namespace Alliance.Pieces
       get { return "sprinkler"; }
     }
 
-    protected override void DrawWeaponTower(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
+    protected override DrawData GetDrawData(Vector2 offset)
     {
+      Tuple<BoxF, BoxF> outin = GetOutsideInsideBounds(offset);
+      BoxF bounds = outin.First;
+
       Texture2D wtower = GetImage();
       SizeF imgSize = new SizeF(wtower.Width, wtower.Height);
       SizeF actSize = new SizeF(bounds.Width, bounds.Height);
@@ -108,17 +112,7 @@ namespace Alliance.Pieces
       Vector2 origin = imgSize.ToVector2() * .5f;
       Vector2 center = actSize.ToVector2() * .5f;
 
-      Color color = Color.Gray;
-      spriteBatch.Draw(
-        wtower,
-        bounds.Location + center,
-        null,
-        color,
-        mOrientation,
-        origin,
-        scale,
-        SpriteEffects.None,
-        0f);
+      return new DrawData(wtower, imgSize, bounds.Location + center, origin, scale);
     }
   }
 }

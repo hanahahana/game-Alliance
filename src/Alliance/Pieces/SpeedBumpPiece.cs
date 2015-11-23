@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 using Alliance.Data;
 using Alliance.Utilities;
-using Alliance.Entities;
+using Alliance.Invaders;
 using Alliance.Projectiles;
 using Alliance.Parameters;
 using Alliance.Objects;
@@ -74,7 +74,7 @@ namespace Alliance.Pieces
         0f);
     }
 
-    protected override void DrawWeaponTower(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
+    protected override void DrawWeaponTower(SpriteBatch spriteBatch, Vector2 offset)
     {
       // don't draw a weapon tower
     }

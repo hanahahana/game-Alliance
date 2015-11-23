@@ -36,15 +36,18 @@ namespace Alliance.Components
     {
       string cashText = string.Format("Cash: {0:c2}", Player.Cash);
       Vector2 cashVec = new Vector2(5, 5);
-      Color cashColor = Color.Blue;
+      Color cashColor = Color.White;
 
       string lifeText = string.Format("Civilians: {0}", Player.Life);
       Vector2 lifeVec = new Vector2(cashVec.X + spriteFont.MeasureString(cashText).X + 60f, cashVec.Y);
-      Color lifeColor = Color.DarkGreen;
+      Color lifeColor = Color.White;
 
       spriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.Deferred, SaveStateMode.SaveState);
 
+      spriteBatch.DrawString(spriteFont, cashText, cashVec + Vector2.One, Color.Black);
       spriteBatch.DrawString(spriteFont, cashText, cashVec, cashColor);
+
+      spriteBatch.DrawString(spriteFont, lifeText, lifeVec + Vector2.One, Color.Black);
       spriteBatch.DrawString(spriteFont, lifeText, lifeVec, lifeColor);
 
       spriteBatch.End();

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 using Alliance.Pieces;
-using Alliance.Entities;
+using Alliance.Invaders;
 
 namespace Alliance.Objects
 {
@@ -64,7 +64,7 @@ namespace Alliance.Objects
       mCash += cash;
     }
 
-    public static void InvaderGotThrough(Entity entity)
+    public static void InvaderGotThrough(Invader invader)
     {
       --mLife;
     }
@@ -74,9 +74,9 @@ namespace Alliance.Objects
       return (mCash - piece.Price) >= 0;
     }
 
-    public static void CollectSpoils(Entity entity)
+    public static void CollectSpoils(Invader invader)
     {
-      mCash += entity.Cash;
+      mCash += invader.Cash;
     }
   }
 }

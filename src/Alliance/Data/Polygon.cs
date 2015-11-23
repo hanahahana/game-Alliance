@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Alliance.Parameters;
 using Alliance.Utilities;
 using Microsoft.Xna.Framework.Graphics;
+using Alliance.Components;
 
 namespace Alliance.Data
 {

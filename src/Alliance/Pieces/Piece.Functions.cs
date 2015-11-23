@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 
 using Alliance.Projectiles;
 using Alliance.Data;
-using Alliance.Entities;
+using Alliance.Invaders;
 using Alliance.Objects;
 
 namespace Alliance.Pieces
@@ -151,10 +151,10 @@ namespace Alliance.Pieces
       }
     }
 
-    public void SetTarget(Entity entity)
+    public void SetTarget(Invader invader)
     {
       if (mTarget == null)
-        mTarget = entity;
+        mTarget = invader;
     }
 
     public void ClearTarget()

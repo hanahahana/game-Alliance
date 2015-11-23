@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 using Alliance.Data;
 using Alliance.Utilities;
-using Alliance.Entities;
+using Alliance.Invaders;
 using Alliance.Projectiles;
 using Alliance.Parameters;
 using Alliance.Objects;
@@ -23,7 +23,7 @@ namespace Alliance.Pieces
     {
       // setup the description
       StringBuilder sb = new StringBuilder();
-      sb.Append("Fires a constant stream of bullets at the enemy. These are very very weak, but very very fast.");
+      sb.Append("Fires a constant stream of bullets at the enemy. These are very weak, but very fast. These also turn very slow...");
 
       // set the properties of the piece
       mDescription = sb.ToString();

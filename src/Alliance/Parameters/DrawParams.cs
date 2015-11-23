@@ -5,6 +5,8 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using Alliance.Components;
+
 namespace Alliance.Parameters
 {
   public class DrawParams
@@ -27,11 +29,18 @@ namespace Alliance.Parameters
       get { return mSpriteBatch; }
     }
 
-    public DrawParams(GameTime gameTime, Vector2 offset, SpriteBatch spriteBatch)
+    private GridFillMode mFillMode;
+    public GridFillMode FillMode
+    {
+      get { return mFillMode; }
+    }
+
+    public DrawParams(GameTime gameTime, Vector2 offset, SpriteBatch spriteBatch, GridFillMode gridFillMode)
     {
       mGameTime = gameTime;
       mOffset = offset;
       mSpriteBatch = spriteBatch;
+      mFillMode = gridFillMode;
     }
   }
 }

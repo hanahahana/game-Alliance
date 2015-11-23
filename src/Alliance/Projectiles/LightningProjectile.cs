@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 using Alliance.Utilities;
 using Alliance.Data;
-using Alliance.Entities;
+using Alliance.Invaders;
 using Alliance.Parameters;
 
 namespace Alliance.Projectiles
@@ -17,10 +17,10 @@ namespace Alliance.Projectiles
     private const float SecondsPerFrame = 1f / 22.3456789f;
     private float mSecondsSinceUpdate = 0;
 
-    private Entity mTarget;
+    private Invader mTarget;
     private SpriteEffects effects = SpriteEffects.None;
 
-    public LightningProjectile(double timeToLiveInSeconds, Entity target)
+    public LightningProjectile(double timeToLiveInSeconds, Invader target)
       : base(timeToLiveInSeconds)
     {
       mTarget = target;

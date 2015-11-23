@@ -194,7 +194,15 @@ namespace Alliance
     /// <param name="gameTime">Provides a snapshot of timing values.</param>
     protected override void Update(GameTime gameTime)
     {
-      base.Update(gameTime);
+      if (IsActive)
+      {
+        grid.FillMode = GridFillMode.Solid;
+        if (Keyboard.GetState().IsKeyDown(Keys.Space))
+        {
+          grid.FillMode = GridFillMode.Polygons;
+        }
+        base.Update(gameTime);
+      }
     }
 
     /// <summary>

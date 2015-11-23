@@ -21,13 +21,30 @@ using Microsoft.Xna.Framework.Storage;
 using Alliance.Data;
 using Alliance.Utilities;
 using Alliance.Pieces;
-using Alliance.Entities;
+using Alliance.Invaders;
 using Alliance.Projectiles;
 using Alliance.Parameters;
 using Alliance.Objects;
 
 namespace Alliance.Components
 {
+  /// <summary>
+  /// An enumeration containing the different fill modes for a GridComponent. This differs from
+  /// the Microsoft.Xna.Framework.Graphics.FillMode.
+  /// </summary>
+  public enum GridFillMode
+  {
+    /// <summary>
+    /// Draw the grid's objects normally with all their corresponding images
+    /// </summary>
+    Solid,
+
+    /// <summary>
+    /// Draw the grid's objects as their bounding convex polygons.
+    /// </summary>
+    Polygons,
+  };
+
   public partial class GridComponent
   {
     #region Properties
@@ -52,6 +69,12 @@ namespace Alliance.Components
       set { mPosition.Y = value; }
     }
 
+    public GridFillMode FillMode
+    {
+      get { return mFillMode; }
+      set { mFillMode = value; }
+    }
+
     #endregion
 
     #region Initialization Functions
@@ -59,7 +82,7 @@ namespace Alliance.Components
     private void InitializeVariables()
     {
       mPieces = new List<Piece>(100);
-      mEntities = new List<Entity>(100);
+      mInvaders = new List<Invader>(100);
       mProjectiles = new List<Projectile>(100);
       mSelectionPiece = new SelectionPiece();
     }
@@ -95,6 +118,7 @@ namespace Alliance.Components
       cptDescription.BorderThickness = 1;
       cptDescription.Font = captionFont;
       cptDescription.CenterCaption = true;
+      cptDescription.Visible = false;
 
       txtDescription = new TextBox();
       txtDescription.X = lstPieces.X;
@@ -105,6 +129,7 @@ namespace Alliance.Components
       txtDescription.BackColor = Color.White;
       txtDescription.BorderColor = Color.Blue;
       txtDescription.BorderThickness = 1;
+      txtDescription.Visible = false;
 
       mGui.Controls.Add(cptDescription);
       mGui.Controls.Add(txtDescription);
@@ -209,7 +234,7 @@ namespace Alliance.Components
           }
 
           Tank tank = new Tank(start, goal, key);
-          mEntities.Add(tank);
+          mInvaders.Add(tank);
         }
       }
     }
@@ -288,10 +313,10 @@ namespace Alliance.Components
 
       // if each of the entities can get through
       bool canGetThrough = true;
-      for (int i = 0; canGetThrough && i < mEntities.Count; ++i)
+      for (int i = 0; canGetThrough && i < mInvaders.Count; ++i)
       {
-        Entity entity = mEntities[i];
-        canGetThrough &= entity.CanPlacePiece(piece);
+        Invader invader = mInvaders[i];
+        canGetThrough &= invader.CanPlacePiece(piece);
       }
 
       // return if we can get through
@@ -324,7 +349,7 @@ namespace Alliance.Components
       mSelectedPiece = null;
 
       // set the selected entity to null
-      mSelectedEntity = null;
+      mSelectedInvader = null;
     }
 
     private void SetSelection(Piece newPiece)
@@ -386,32 +411,32 @@ namespace Alliance.Components
       return piece;
     }
 
-    private Entity RetrieveCurrentSelectedEntity(UpdateParams uparams)
+    private Invader RetrieveCurrentSelectedInvader(UpdateParams uparams)
     {
-      Entity retval = mSelectedEntity;
-      if (retval != null && retval.State != EntityState.Alive)
+      Invader retval = mSelectedInvader;
+      if (retval != null && retval.State != InvaderState.Alive)
         retval = null;
 
       if (uparams.Input.SelectClick)
       {
         // if they click, then reset the selection
         retval = null;
-        for (int i = mEntities.Count - 1; i > -1; --i)
+        for (int i = mInvaders.Count - 1; i > -1; --i)
         {
-          Entity entity = mEntities[i];
-          if (entity.State == EntityState.Alive)
+          Invader invader = mInvaders[i];
+          if (invader.State == InvaderState.Alive)
           {
-            BoxF box = entity.GetBoundingBox(uparams.Offset);
+            BoxF box = invader.GetBoundingBox(uparams.Offset);
             if (box.Contains(uparams.Input.CursorPosition))
             {
-              retval = entity;
+              retval = invader;
               i = -1;
             }
           }
         }
       }
 
-      mSelectedEntity = retval;
+      mSelectedInvader = retval;
       return retval;
     }
 
@@ -437,22 +462,22 @@ namespace Alliance.Components
     private void CheckCollisions(Projectile projectile, Polygon projectilePolygon, UpdateParams uparams)
     {
       // cycle through all of the entities
-      for (int i = mEntities.Count - 1; i > -1; --i)
+      for (int i = mInvaders.Count - 1; i > -1; --i)
       {
         // get the entity
-        Entity entity = mEntities[i];
+        Invader invader = mInvaders[i];
 
         // get the entity polygon
-        Polygon entityPolygon = entity.GetHull(uparams.Offset);
+        Polygon entityPolygon = invader.GetHull(uparams.Offset);
 
         // let the entity and polygon know they were attacked
         if (entityPolygon.IntersectsWith(projectilePolygon))
         {
           // let the projectile know it collided
-          projectile.OnCollidedWithEntity(entity);
+          projectile.OnCollidedWithInvader(invader);
 
           // let the entity know it was attacked
-          entity.OnAttackedByProjectile(projectile);
+          invader.OnAttackedByProjectile(projectile);
         }
       }
     }
@@ -596,17 +621,17 @@ namespace Alliance.Components
     private void UpdateDescriptionText(UpdateParams uparams)
     {
       Piece piece = RetrieveCurrentSelectedPiece(uparams);
-      Entity entity = RetrieveCurrentSelectedEntity(uparams);
+      Invader invader = RetrieveCurrentSelectedInvader(uparams);
 
       txtDescription.Visible = false;
       cptDescription.Visible = false;
 
-      if (piece != null || entity != null)
+      if (piece != null || invader != null)
       {
         txtDescription.Visible = true;
         cptDescription.Visible = true;
 
-        ITextDisplay provider = (piece != null ? (ITextDisplay)piece : (ITextDisplay)entity);
+        ITextDisplay provider = (piece != null ? (ITextDisplay)piece : (ITextDisplay)invader);
         DisplayDescriptionForTextProvider(provider);
         DisplayCaptionForTextProvider(provider);
       }
@@ -614,14 +639,14 @@ namespace Alliance.Components
 
     private void UpdateInvaders(UpdateParams uparams)
     {
-      for (int i = mEntities.Count - 1; i > -1; --i)
+      for (int i = mInvaders.Count - 1; i > -1; --i)
       {
-        Entity entity = mEntities[i];
+        Invader entity = mInvaders[i];
         entity.Update(uparams.GameTime);
-        if (entity.State != EntityState.Alive)
+        if (entity.State != InvaderState.Alive)
         {
-          mEntities.RemoveAt(i);
-          if (entity.State == EntityState.MadeIt)
+          mInvaders.RemoveAt(i);
+          if (entity.State == InvaderState.MadeIt)
           {
             Player.InvaderGotThrough(entity);
             //AllianceGame.Sounds.PlayCue("alright");
@@ -657,7 +682,7 @@ namespace Alliance.Components
         piece.ClearTarget();
       }
 
-      foreach (Entity invader in mEntities)
+      foreach (Invader invader in mInvaders)
       {
         // define the center of the invader
         BoxF box = invader.Bounds;
@@ -723,12 +748,22 @@ namespace Alliance.Components
     {
       foreach (Piece piece in mPieces)
       {
-        //piece.Draw(dparams);
-
-        Polygon hull = piece.GetHull(dparams.Offset);
-        hull.Render(dparams, Color.Red);
+        switch (dparams.FillMode)
+        {
+          case GridFillMode.Polygons:
+            {
+              Polygon hull = piece.GetHull(dparams.Offset);
+              hull.Render(dparams, Color.Red);
+              break;
+            }
+          case GridFillMode.Solid:
+            {
+              piece.Draw(dparams);
+              break;
+            }
+        }
       }
-      mSelectionPiece.Draw(dparams.SpriteBatch, dparams.Offset);
+      mSelectionPiece.Draw(dparams);
     }
 
     private void DrawGrid(DrawParams dparams)
@@ -745,13 +780,19 @@ namespace Alliance.Components
 
           if (cell.IsOuter && !cell.IsThroughway)
           {
-            Shapes.FillRectangle(spriteBatch, bounds, Color.White);
-          }
-
-          if ((cell.Attributes & DebugAttributes.OccupiedByProjectile) != 0)
-          {
-            Shapes.FillRectangle(spriteBatch, bounds, Color.Red);
-            cell.Attributes = DebugAttributes.None;
+            switch (dparams.FillMode)
+            {
+              case GridFillMode.Solid:
+                {
+                  Shapes.FillRectangle(spriteBatch, bounds, Color.White);
+                  break;
+                }
+              case GridFillMode.Polygons:
+                {
+                  Shapes.DrawRectangle(spriteBatch, bounds, Color.White);
+                  break;
+                }
+            }
           }
         }
       }
@@ -759,12 +800,43 @@ namespace Alliance.Components
 
     private void DrawInvaders(DrawParams dparams)
     {
-      foreach (Entity invader in mEntities)
+      foreach (Invader invader in mInvaders)
       {
-        //invader.Draw(dparams);
+        switch (dparams.FillMode)
+        {
+          case GridFillMode.Polygons:
+            {
+              Polygon hull = invader.GetHull(dparams.Offset);
+              hull.Render(dparams, Color.DarkBlue);
+              break;
+            }
+          case GridFillMode.Solid:
+            {
+              invader.Draw(dparams);
+              break;
+            }
+        }
+      }
+    }
 
-        Polygon hull = invader.GetHull(dparams.Offset);
-        hull.Render(dparams, Color.Blue);
+    private void DrawProjectiles(DrawParams dparams)
+    {
+      foreach (Projectile projectile in mProjectiles)
+      {
+        switch (dparams.FillMode)
+        {
+          case GridFillMode.Polygons:
+            {
+              Polygon hull = projectile.GetHull(dparams.Offset);
+              hull.Render(dparams, Color.DarkGreen);
+              break;
+            }
+          case GridFillMode.Solid:
+            {
+              projectile.Draw(dparams);
+              break;
+            }
+        }
       }
     }
 
@@ -780,17 +852,6 @@ namespace Alliance.Components
         shapeBatch.FillEllipse(pos, size, Utils.NewAlpha(Color.SlateBlue, .5f));
         shapeBatch.DrawEllipse(pos, size, Color.Gold);
         shapeBatch.End();
-      }
-    }
-
-    private void DrawProjectiles(DrawParams dparams)
-    {
-      foreach (Projectile projectile in mProjectiles)
-      {
-        projectile.Draw(dparams);
-
-        Polygon hull = projectile.GetHull(dparams.Offset);
-        hull.Render(dparams, Color.DarkGreen);
       }
     }
 

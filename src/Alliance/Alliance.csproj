@@ -76,8 +76,8 @@
     <Compile Include="Data\SizeF.cs" />
     <Compile Include="Data\DijkstraData.cs" />
     <Compile Include="Parameters\DrawParams.cs" />
-    <Compile Include="Entities\Entity.cs" />
-    <Compile Include="Entities\Tank.cs" />
+    <Compile Include="Invaders\Invader.cs" />
+    <Compile Include="Invaders\Tank.cs" />
     <Compile Include="Components\GridComponent.cs" />
     <Compile Include="Objects\GridCell.cs" />
     <Compile Include="Components\GridComponent.Functions.cs" />
