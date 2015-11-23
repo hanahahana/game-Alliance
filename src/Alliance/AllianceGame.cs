@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Net;
 using Microsoft.Xna.Framework.Storage;
 using Alliance.Utilities;
+using Alliance.Components;
 
 namespace Alliance
 {
@@ -21,10 +22,10 @@ namespace Alliance
     private GraphicsDevice device;
     private SpriteBatch spriteBatch;
 
-    private Messages messages;
+    private MessageComponent messages;
     private GridComponent grid;
     private InputProvider input;
-    private PlayerComponent player;
+    private PlayerHudComponent player;
 
     public static Dictionary<string, Texture2D> Textures = null;
     public static Dictionary<string, Color[,]> TextureData = null;
@@ -42,13 +43,13 @@ namespace Alliance
       grid = new GridComponent(this);
       Components.Add(grid);
 
-      messages = new Messages(this);
+      messages = MessageComponent.CreateInstance(this);
       Components.Add(messages);
 
       input = new InputProvider(this);
       Components.Add(input);
 
-      player = new PlayerComponent(this);
+      player = new PlayerHudComponent(this);
       Components.Add(player);
 
       Services.AddService(typeof(InputProvider), input);

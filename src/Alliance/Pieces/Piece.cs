@@ -1,16 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+
 using Microsoft.Xna.Framework;
-using Alliance.Data;
 using Microsoft.Xna.Framework.Graphics;
+
+using Alliance.Data;
 using Alliance.Utilities;
 using Alliance.Entities;
 using Alliance.Projectiles;
+using Alliance.Parameters;
+using Alliance.Helpers;
 
 namespace Alliance.Pieces
 {
-  public abstract partial class Piece : ITextProvider
+  public abstract partial class Piece : ITextDisplay
   {
     public const int MaxLevel = 5;
     public const float MaxProgress = 100f;

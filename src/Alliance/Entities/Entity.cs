@@ -9,6 +9,8 @@ using Alliance.Data;
 using Alliance.Utilities;
 using Alliance.Pieces;
 using Alliance.Projectiles;
+using Alliance.Parameters;
+using Alliance.Helpers;
 
 namespace Alliance.Entities
 {
@@ -25,9 +27,10 @@ namespace Alliance.Entities
     None,
     SpeedBumpNoAffect,
     Selected,
+    Follow,
   };
 
-  public abstract class Entity : ITextProvider
+  public abstract class Entity : ITextDisplay
   {
     public const float MaxMovementPerSecond = 77.7f;
     public const float MinMovementPerSecond = 11.1f;
@@ -67,7 +70,9 @@ namespace Alliance.Entities
     protected float mMPS;
     protected float mCurrentLife;
     protected int mLevel;
+
     protected readonly string mID;
+    protected readonly DijkstraType mDijkstraKey;
 
     public abstract float MaximumLife { get; }
     public abstract EntityAttributes Attributes { get; set; }
@@ -157,21 +162,27 @@ namespace Alliance.Entities
       get { return mID; }
     }
 
-    public Entity(Cell startCell, Cell goalCell)
+    public Entity(Cell startCell, Cell goalCell, DijkstraType dijkstraKey)
     {
       mTargetCell = startCell;
       mGoalCell = goalCell;
       mState = EntityState.Alive;
       mOrientation = 0f;
 
-      mBounds.X = mTargetCell.X - mTargetCell.Width;
-      mBounds.Y = mTargetCell.Y;
+      float dx = (dijkstraKey == DijkstraType.Horizontal ? mTargetCell.Width : 0);
+      float dy = (dijkstraKey == DijkstraType.Vertical ? mTargetCell.Height : 0);
+
+      mBounds.X = mTargetCell.X - dx;
+      mBounds.Y = mTargetCell.Y - dy;
+
       mBounds.Width = mTargetCell.Width;
       mBounds.Height = mTargetCell.Height;
 
       mMPS = MaxMovementPerSecond;
       ComputeOrientation();
+
       mID = Guid.NewGuid().ToString();
+      mDijkstraKey = dijkstraKey;
     }
 
     public virtual bool CanPlacePiece(Piece piece)
@@ -182,7 +193,7 @@ namespace Alliance.Entities
         if (PieceIsOnCurrentCell(piece)) return false;
 
         // if the current node distance is less than zero, then we can't get to the goal
-        if (mCurrentCell.Distance < 0) return false;
+        if (mCurrentCell[mDijkstraKey].Distance < 0) return false;
       }
       return true;
     }
@@ -203,12 +214,20 @@ namespace Alliance.Entities
 
     private void ComputeOrientation()
     {
-      float dx = (mTargetCell != null ? mTargetCell.X : mCurrentCell.X) - X;
-      float dy = (mTargetCell != null ? mTargetCell.Y : mCurrentCell.Y) - Y;
+      if (mTargetCell == null)
+      {
+        mOrientation = mDijkstraKey == DijkstraType.Horizontal ? 
+          0f : MathHelper.PiOver2;
+      }
+      else
+      {
+        float dx = mTargetCell.X - X;
+        float dy = mTargetCell.Y - Y;
 
-      float desiredAngle = (float)Math.Atan2(dy, dx);
-      float difference = Utils.WrapAngle(desiredAngle - mOrientation);
-      mOrientation = Utils.WrapAngle(mOrientation + difference);
+        float desiredAngle = (float)Math.Atan2(dy, dx);
+        float difference = Utils.WrapAngle(desiredAngle - mOrientation);
+        mOrientation = Utils.WrapAngle(mOrientation + difference);
+      }
     }
 
     public virtual void Update(GameTime gameTime)
@@ -258,8 +277,19 @@ namespace Alliance.Entities
 
     private void MoveOffCurrentCell(float velocity, GameTime gameTime)
     {
-      X += (float)gameTime.ElapsedGameTime.TotalSeconds * velocity;
-      if (X > (mCurrentCell.X + mCurrentCell.Width))
+      bool madeIt = false;
+      if (mDijkstraKey == DijkstraType.Horizontal)
+      {
+        X += (float)gameTime.ElapsedGameTime.TotalSeconds * velocity;
+        madeIt = (X > (mCurrentCell.X + mCurrentCell.Width));
+      }
+      else if (mDijkstraKey == DijkstraType.Vertical)
+      {
+        Y += (float)gameTime.ElapsedGameTime.TotalSeconds * velocity;
+        madeIt = (Y > (mCurrentCell.Y + mCurrentCell.Height));
+      }
+
+      if (madeIt)
       {
         mState = EntityState.MadeIt;
         OnReadyForNextCell();
@@ -304,18 +334,17 @@ namespace Alliance.Entities
 
     private void OnReadyForNextCell()
     {
+      // switch the current cell
       BeforeCurrentCellChanged();
       mCurrentCell = mTargetCell;
       AfterCurrentCellChanged();
 
-      bool noTarget = (mTargetCell == null);
-      bool noCurrent = (mCurrentCell == null);
+      // set the next cell
+      if (mTargetCell != null)
+        mTargetCell = mTargetCell[mDijkstraKey].Parent;
 
-      if (!noTarget)
-        mTargetCell = mTargetCell.Parent;
-
-      if (!noTarget || !noCurrent)
-        ComputeOrientation();
+      // compute the orientation
+      ComputeOrientation();
     }
 
     private void AfterCurrentCellChanged()

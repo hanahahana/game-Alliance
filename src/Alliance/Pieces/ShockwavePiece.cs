@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+
 using Alliance.Data;
 using Alliance.Utilities;
 using Alliance.Projectiles;
+using Alliance.Helpers;
 
 namespace Alliance.Pieces
 {

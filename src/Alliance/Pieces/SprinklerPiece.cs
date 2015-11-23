@@ -1,17 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+
 using Microsoft.Xna.Framework;
-using Alliance.Utilities;
 using Microsoft.Xna.Framework.Graphics;
+
+using Alliance.Utilities;
 using Alliance.Data;
 using Alliance.Projectiles;
+using Alliance.Helpers;
 
 namespace Alliance.Pieces
 {
   public class SprinklerPiece : Piece
   {
     const float RadiansPerSecond = 5.5f;
+    const float TotalSeconds = MathHelper.TwoPi / RadiansPerSecond;
 
     private const string SprinklerName = "Sprinkler";
     private const string UltimateSprinklerName = "Sprayer";
@@ -21,7 +25,7 @@ namespace Alliance.Pieces
     private float mAttack;
     private int mPrice;
     private int mUpgradePercent;
-    private float mPiePieces = 2;
+    private float mPiePieces;
 
     public override string Description
     {
@@ -77,16 +81,13 @@ namespace Alliance.Pieces
       sb.AppendLine("Sprinkles projectiles around. This tower doesn't aim, just shoots. Good for closing up loose holes in paths.");
       mDescription = sb.ToString();
 
-      mRadius = 215;
-      mAttack = float.MaxValue;
+      mRadius = 20;
+      mAttack = 25;
 
-      // we rotate at RadiansPerSecond. so lets calculate how many seconds it would take to go around
-      // in a complete circle
-      float seconds = MathHelper.TwoPi / RadiansPerSecond;
-
-      mProjectilesPerSecond = seconds * mPiePieces;
+      mPiePieces = 2;
+      mProjectilesPerSecond = TotalSeconds * mPiePieces;
       mNumberProjectilesToFire = 1;
-      mUpgradePercent = 10;
+      mUpgradePercent = 15;
       mPrice = 100;
     }
 
@@ -103,12 +104,15 @@ namespace Alliance.Pieces
     protected override void UpgradeProjectileVariables(float factor)
     {
       base.UpgradeProjectileVariables(factor);
-      mUpgradePercent = (int)Math.Round(mUpgradePercent * factor * 1.5f);
-      mNumberProjectilesToFire = 1;
 
-      mPiePieces *= factor;
-      float seconds = MathHelper.TwoPi / RadiansPerSecond;
-      mProjectilesPerSecond = seconds * mPiePieces;
+      float mu = (float)mLevel / (float)MaxLevel;
+      mUpgradePercent = (int)Math.Round(mUpgradePercent * factor * 3.5f);
+
+      mProjectileVelocity = MathHelper.Lerp(DefaultProjectileVelocity, DefaultProjectileVelocity * 3f, mu);
+      mPiePieces = MathHelper.Lerp(2f, 16f, mu);
+
+      mNumberProjectilesToFire = 1;
+      mProjectilesPerSecond = TotalSeconds * mPiePieces;
     }
 
     protected override void FinalizeUpgrade()

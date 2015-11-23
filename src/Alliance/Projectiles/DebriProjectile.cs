@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Alliance.Utilities;
+
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+
+using Alliance.Utilities;
 using Alliance.Data;
 using Alliance.Pieces;
-using Microsoft.Xna.Framework;
 using Alliance.Entities;
 
 namespace Alliance.Projectiles

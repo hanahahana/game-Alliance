@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
-using Microsoft.Xna.Framework;
+
 using MLA.Utilities;
-using Alliance.Data;
-using Microsoft.Xna.Framework.Graphics;
 using MLA.Utilities.Helpers;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+
+using Alliance.Data;
 
 namespace Alliance.Utilities
 {

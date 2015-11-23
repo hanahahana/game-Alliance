@@ -1,9 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.Xna.Framework;
+
 using MLA.Utilities.Helpers;
+
+using Microsoft.Xna.Framework;
+
 using Alliance.Utilities;
+using Alliance.Helpers;
 
 namespace Alliance.Entities
 {
@@ -29,8 +33,8 @@ namespace Alliance.Entities
       get { return mCash; }
     }
 
-    public Tank(Cell startCell, Cell goalCell)
-      : base(startCell, goalCell)
+    public Tank(Cell startCell, Cell goalCell, DijkstraType dijkstraType)
+      : base(startCell, goalCell, dijkstraType)
     {
       // set the attributes
       mAttributes = RandomHelper.NextRareBool() ? EntityAttributes.SpeedBumpNoAffect : EntityAttributes.None;
