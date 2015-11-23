@@ -15,6 +15,7 @@ using Alliance.Data;
 using Alliance.Utilities;
 using Alliance.Pieces;
 using Alliance.Entities;
+using Alliance.Projectiles;
 
 using MLA.Xna.Gui;
 using MLA.Xna.Gui.Controls;
@@ -22,13 +23,13 @@ using MLA.Utilities.Algorithms;
 using MLA.Utilities.Algorithms.Data;
 using MLA.Utilities.Helpers;
 using MLA.Utilities;
-using Alliance.Projectiles;
 
 namespace Alliance
 {
   public partial class GridComponent
   {
     #region Properties
+
     protected ContentManager Content { get { return Game.Content; } }
 
     public Vector2 Position
@@ -48,9 +49,11 @@ namespace Alliance
       get { return mPosition.Y; }
       set { mPosition.Y = value; }
     }
+
     #endregion
 
     #region Initialization Functions
+
     private void InitializeVariables()
     {
       mPieces = new List<Piece>(100);
@@ -66,7 +69,7 @@ namespace Alliance
       lstPieces.X = (int)(X + Width + ListDelta);
       lstPieces.Y = (int)(Y + MiddleOffset.Height);
       lstPieces.Width = (GraphicsDevice.Viewport.Width - (lstPieces.X + ListDelta));
-      lstPieces.Height = (int)(lstPieces.Width * .85f);
+      lstPieces.Height = (int)(lstPieces.Width * .70f);
       lstPieces.HideSelection = false;
 
       List<Piece> pieces = Utils.RetrieveAllSublcassesOf<Piece>();
@@ -95,7 +98,7 @@ namespace Alliance
       txtDescription.X = lstPieces.X;
       txtDescription.Y = (cptDescription.Y + cptDescription.Height - 1);
       txtDescription.Width = lstPieces.Width;
-      txtDescription.Height = (int)(Y + Height) - (txtDescription.Y + 4);
+      txtDescription.Height = (int)(Height - (Y + lstPieces.Height + cptDescription.Height - 13));
 
       txtDescription.BackColor = Color.White;
       txtDescription.BorderColor = Color.Blue;
@@ -168,8 +171,6 @@ namespace Alliance
 
     private void InitializeProperties()
     {
-      base.Initialize();
-
       Width = (int)((double)GraphicsDevice.Viewport.Height * .85);
       Height = Width;
 
@@ -182,6 +183,7 @@ namespace Alliance
 
       mPosition = new Vector2(0f, (GraphicsDevice.Viewport.Height / 2f) - (Height / 2f));
     }
+
     #endregion
 
     #region Helper Functions
@@ -190,7 +192,7 @@ namespace Alliance
     {
       if (RandomHelper.NextRareBool())
       {
-        int count = RandomHelper.Next(1, 5);
+        int count = RandomHelper.Next(3, 7);
         for (int i = 0; i < count; ++i)
         {
           Tank tank = new Tank(HorzStartCell, HorzGoalCell);
@@ -299,6 +301,9 @@ namespace Alliance
 
       // set the selected piece to null
       mSelectedPiece = null;
+
+      // set the selected entity to null
+      mSelectedEntity = null;
     }
 
     private void SetSelection(Piece newPiece)
@@ -358,6 +363,91 @@ namespace Alliance
       }
 
       return piece;
+    }
+
+    private Entity RetrieveCurrentSelectedEntity(UpdateParams uparams)
+    {
+      Entity retval = mSelectedEntity;
+      if (retval != null && retval.State != EntityState.Alive)
+        retval = null;
+
+      if (uparams.Input.SelectClick)
+      {
+        // if they click, then reset the selection
+        retval = null;
+        for (int i = mEntities.Count - 1; i > -1; --i)
+        {
+          Entity entity = mEntities[i];
+          if (entity.State == EntityState.Alive)
+          {
+            BoxF box = entity.GetBoundingBox(uparams.Offset);
+            if (box.Contains(uparams.Input.CursorPosition))
+            {
+              retval = entity;
+              i = -1;
+            }
+          }
+        }
+      }
+
+      mSelectedEntity = retval;
+      return retval;
+    }
+
+    private void DisplayCaptionForTextProvider(ITextProvider provider)
+    {
+      txtDescription.Text = provider.GetText();
+    }
+
+    private void DisplayDescriptionForTextProvider(ITextProvider provider)
+    {
+      cptDescription.Text = provider.GetHeader();
+    }
+
+    private void OnProjectileRemoved(Projectile projectile)
+    {
+      if (projectile is MissileProjectile)
+      {
+        DebriProjectile[] debris = DebriProjectile.Create(projectile, RandomHelper.Next(12, 24));
+        mProjectiles.AddRange(debris);
+      }
+    }
+
+    private void CheckCollisions(Projectile projectile, UpdateParams uparams)
+    {
+      // get the bounding box of the projectile
+      BoxF bounds = projectile.GetBoundingBox(uparams.Offset);
+      for (int c = 0; c < NumCols; ++c)
+      {
+        for (int r = 0; r < NumRows; ++r)
+        {
+          Cell cell = Cells[c, r];
+          if (cell.RegisteredEntitiesCount > 0)
+          {
+            // get the cell bounds and offset it by the ...offset
+            BoxF cbounds = cell.Bounds;
+            cbounds.Location += uparams.Offset;
+
+            // if the cell intersects with the projectile 
+            // or the cell contains the projectile
+            if (cbounds.IntersectsWith(bounds) || cbounds.Contains(bounds))
+            {
+              // get the most recent entity and attack it!
+              Entity entity = cell.GetMostRecentRegisteredEntity();
+              projectile.IsAlive = false;
+              entity.CurrentLife -= projectile.Attack;
+
+              // if this entity is dead, then remove it from the cell
+              if (entity.CurrentLife <= 0)
+                cell.Unregister(entity);
+
+              // we're done checking
+              r = NumRows;
+              c = NumCols;
+            }
+          }
+        }
+      }
     }
 
     #endregion
@@ -486,42 +576,23 @@ namespace Alliance
     private void UpdateDescriptionText(UpdateParams uparams)
     {
       Piece piece = RetrieveCurrentSelectedPiece(uparams);
-      txtDescription.Visible = (piece != null);
-      cptDescription.Visible = (piece != null);
+      Entity entity = RetrieveCurrentSelectedEntity(uparams);
 
-      if (piece != null)
+      txtDescription.Visible = false;
+      cptDescription.Visible = false;
+
+      if (piece != null || entity != null)
       {
-        txtDescription.Text = piece.Description;
+        txtDescription.Visible = true;
+        cptDescription.Visible = true;
 
-        StringBuilder properties = new StringBuilder();
-        float newAttack = (float)Math.Round(piece.Attack * (1 + (piece.UpgradePercent / 100f)));
-
-        properties.AppendFormat("Attack: {0}", piece.Attack);
-        if (piece.CanUpgrade)
-        {
-          properties.AppendFormat(" + {0}", newAttack - piece.Attack);
-        }
-        properties.AppendLine();
-
-        txtDescription.AppendText(properties.ToString());
-
-        string caption = piece.Name;
-        if (0 < piece.Level)
-        {
-          if (piece.Level < Piece.MaxLevel)
-          {
-            caption = string.Concat(caption, " Lvl ", piece.Level);
-          }
-          else if (!(piece is SpeedBumpPiece))
-          {
-            caption = piece.UltimateName;
-          }
-        }
-        cptDescription.Text = caption;
+        ITextProvider provider = (piece != null ? (ITextProvider)piece : (ITextProvider)entity);
+        DisplayDescriptionForTextProvider(provider);
+        DisplayCaptionForTextProvider(provider);
       }
     }
 
-    private void UpdateInvaliders(UpdateParams uparams)
+    private void UpdateInvaders(UpdateParams uparams)
     {
       for (int i = mEntities.Count - 1; i > -1; --i)
       {
@@ -532,7 +603,13 @@ namespace Alliance
           mEntities.RemoveAt(i);
           if (entity.State == EntityState.MadeIt)
           {
+            Player.InvaderGotThrough(entity);
             //AllianceGame.Sounds.PlayCue("alright");
+          }
+          else
+          {
+            Player.CollectSpoils(entity);
+            //AllianceGame.Sounds.PlayCue("kaching");
           }
         }
       }
@@ -568,33 +645,11 @@ namespace Alliance
         // find all of the pieces that this invader is contained within
         List<Piece> pieces = mPieces.FindAll(new Predicate<Piece>(delegate(Piece piece)
         {
-          // get the radius squared
-          float rad2 = piece.Radius * piece.Radius;
-
           // get the center of the circle
           Vector2 center = new Vector2(piece.X + (piece.Width * .5f), piece.Y + (piece.Height * .5f));
 
-          /*
-           * if sqrt( (rectangleRight.x - circleCenter.x)^2 + (rectangleBottom.y - circleCenter.y)^2) < radius then they intersect
-           * if sqrt( (rectangleRight.x - circleCenter.x)^2 + (rectangleTop.y - circleCenter.y)^2) < radius then they intersect
-           * if sqrt( (rectangleLeft.x - circleCenter.x)^2 + (rectangleTop.y - circleCenter.y)^2) < radius then they intersect
-           * if sqrt( (rectangleLeft.x - circleCenter.x)^2 + (rectangleBottom.y - circleCenter.y)^2) < radius then they intersect
-           */
-
-          float rightMinusCenter = box.Right - center.X;
-          float leftMinusCenter = box.Left - center.X;
-          float bottomMinusCenter = box.Bottom - center.Y;
-          float topMinusCenter = box.Top - center.Y;
-
-          float dist1 = (rightMinusCenter * rightMinusCenter) + (bottomMinusCenter * bottomMinusCenter);
-          float dist2 = (rightMinusCenter * rightMinusCenter) + (topMinusCenter * topMinusCenter);
-          float dist3 = (leftMinusCenter * leftMinusCenter) + (topMinusCenter * topMinusCenter);
-          float dist4 = (leftMinusCenter * leftMinusCenter) + (bottomMinusCenter * bottomMinusCenter);
-
-          return dist1 < rad2 ||
-            dist2 < rad2 ||
-            dist3 < rad2 ||
-            dist4 < rad2;
+          // return if the circle contains the box
+          return Utils.CircleContains(center, piece.Radius, box);
         }));
 
         // for each piece, set their current target
@@ -613,56 +668,23 @@ namespace Alliance
         Projectile projectile = mProjectiles[i];
         projectile.Update(uparams.GameTime);
 
-        // if the projectile is still alive, check to see if it hit anything
-        if (projectile.IsAlive)
-        {
-          // get the bounding box of the projectile
-          BoxF box = projectile.GetBoundingBox(uparams.Offset);
-
-          // find all the invaders who's bounding box intersects this projectile
-          List<Entity> intersectingInvaders = mEntities.FindAll(new Predicate<Entity>(
-            delegate(Entity target)
-            {
-              BoxF targetBox = target.GetBoundingBox(uparams.Offset);
-              return box.IntersectsWith(targetBox);
-            }));
-
-          // if there are any
-          if (intersectingInvaders.Count > 0)
-          {
-            // get the center of the box
-            Vector2 center = box.Location + (box.Size.ToVector2() * .5f);
-
-            // sort the invaders by the one who is closests to me (the projectile)
-            intersectingInvaders.Sort(new Comparison<Entity>(
-              delegate(Entity a, Entity b)
-              {
-                double aDist = Utils.FastDist(a.GetCenter(uparams.Offset), center);
-                double bDist = Utils.FastDist(b.GetCenter(uparams.Offset), center);
-                return aDist.CompareTo(bDist);
-              }));
-
-            // get the entity and the collision variables
-            Entity invader = intersectingInvaders[0];
-
-            // we collide!
-            projectile.IsAlive = false;
-
-            // decrement the life
-            invader.CurrentLife -= projectile.Attack;
-          }
-        }
-
         // if the projectile is still alive, check to see if it went out of bounds
         if (projectile.IsAlive)
         {
           projectile.IsAlive = viewport.Contains(projectile.Bounds);
         }
 
+        // if the projectile is still alive, check to see if it hit anything
+        if (projectile.IsAlive)
+        {
+          CheckCollisions(projectile, uparams);
+        }
+
         // if the projectile is dead, then remove it from the list
         if (!projectile.IsAlive)
         {
           mProjectiles.RemoveAt(i);
+          OnProjectileRemoved(projectile);
         }
       }
     }
@@ -671,19 +693,20 @@ namespace Alliance
 
     #region Drawing Functions
 
-    private void DrawPieces()
+    private void DrawPieces(DrawParams dparams)
     {
-      Vector2 offset = (Vector2)MiddleOffset + mPosition;
       foreach (Piece piece in mPieces)
       {
-        piece.Draw(mSpriteBatch, offset);
+        piece.Draw(dparams);
       }
-      mSelectionPiece.Draw(mSpriteBatch, offset);
+      mSelectionPiece.Draw(dparams.SpriteBatch, dparams.Offset);
     }
 
-    private void DrawGrid()
+    private void DrawGrid(DrawParams dparams)
     {
-      Vector2 offset = (Vector2)MiddleOffset + mPosition;
+      Vector2 offset = dparams.Offset;
+      SpriteBatch spriteBatch = dparams.SpriteBatch;
+
       for (int c = 0; c < NumCols; ++c)
       {
         for (int r = 0; r < NumRows; ++r)
@@ -693,24 +716,23 @@ namespace Alliance
 
           if (node.IsOuter && !node.IsThroughway)
           {
-            Shapes.FillRectangle(mSpriteBatch, bounds, Color.White);
+            Shapes.FillRectangle(spriteBatch, bounds, Color.White);
           }
 
           if ((node.Attributes & DebugAttributes.OccupiedByProjectile) != 0)
           {
-            Shapes.FillRectangle(mSpriteBatch, bounds, Color.Red);
+            Shapes.FillRectangle(spriteBatch, bounds, Color.Red);
             node.Attributes = DebugAttributes.None;
           }
         }
       }
     }
 
-    private void DrawInvaders()
+    private void DrawInvaders(DrawParams dparams)
     {
-      Vector2 offset = (Vector2)MiddleOffset + mPosition;
       foreach (Entity invader in mEntities)
       {
-        invader.Draw(mSpriteBatch, offset);
+        invader.Draw(dparams);
       }
     }
 
@@ -729,12 +751,11 @@ namespace Alliance
       }
     }
 
-    private void DrawProjectiles()
+    private void DrawProjectiles(DrawParams dparams)
     {
-      Vector2 offset = (Vector2)MiddleOffset + mPosition;
       foreach (Projectile projectile in mProjectiles)
       {
-        projectile.Draw(mSpriteBatch, offset);
+        projectile.Draw(dparams);
       }
     }
 

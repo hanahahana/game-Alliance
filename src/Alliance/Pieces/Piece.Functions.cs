@@ -51,7 +51,7 @@ namespace Alliance.Pieces
     public float Height { get { return mSize.Height; } }
     public float Progress { get { return mProgress; } }
     public int Level { get { return mLevel; } }
-    public bool CanUpgrade { get { return mLevel < MaxLevel; } }
+    public bool CanUpgrade { get { return mLevel < MaxLevel && Player.EnoughCashFor(this); } }
     public PieceState State { get { return mState; } }
     public float Orientation { get { return mOrientation; } }
 
@@ -78,6 +78,22 @@ namespace Alliance.Pieces
       return Name;
     }
 
+    public int GetLifetimePrice()
+    {
+      // we get the price that it was to place the piece
+      int sum = mPriceAtLevels[0];
+
+      // cycle through the levels
+      for (int i = 0; i < mLevel; ++i)
+      {
+        // add on the price to upgrade for that level
+        sum += mPriceAtLevels[i];
+      }
+
+      // return the lifetime sum
+      return sum;
+    }
+
     public Piece Place(Cell[] cells, SelectionPiece selection)
     {
       Piece piece = CreatePiece(cells);
@@ -90,7 +106,10 @@ namespace Alliance.Pieces
       piece.mCells = cells;
       piece.mPosition = selection.Bounds.Location;
       piece.mSize = selection.Bounds.Size;
+      piece.SavePriceInfo();
 
+      if (!Player.PurchasePiece(this))
+        throw new Exception("Somehow you placed this without enough money!");
       return piece;
     }
 
@@ -123,6 +142,9 @@ namespace Alliance.Pieces
     {
       if (mState == PieceState.Idle && CanUpgrade)
       {
+        if (!Player.PurchasePiece(this))
+          throw new Exception("Somehow you upgraded this without enough money!");
+
         mProgress = 0;
         mState = PieceState.Upgrading;
       }
@@ -147,5 +169,52 @@ namespace Alliance.Pieces
         piece.mSize = mSelectionPiece.Bounds.Size;
       }
     }
+
+    #region ITextProvider Members
+
+    public string GetHeader()
+    {
+      string header = Name;
+      if (0 < Level)
+      {
+        if (Level < Piece.MaxLevel)
+        {
+          header = string.Concat(header, " Lvl ", Level);
+        }
+        else if (!(this is SpeedBumpPiece))
+        {
+          header = UltimateName;
+        }
+      }
+      return header;
+    }
+
+    public string GetText()
+    {
+      StringBuilder text = new StringBuilder();
+      List<string> lines = new List<string>();
+
+      text.AppendLine(Description);
+      float factor = ComputeUpgradeFactor();
+
+      float newAttack = UpgradeAttack(factor);
+      int newPrice = UpgradePrice(factor);
+
+      lines.Add(string.Format("Attack: {0}", Attack));
+      lines.Add(string.Format("Cost: {0:c2}", Price));
+
+      if (Level < MaxLevel)
+      {
+        lines[0] = string.Concat(lines[0], string.Format(" + {0}", newAttack - Attack));
+        lines[1] = string.Concat(lines[1], string.Format(" + {0:c2}", newPrice - Price));
+      }
+
+      text.AppendLine(lines[0]);
+      text.AppendLine(lines[1]);
+
+      return text.ToString();
+    }
+
+    #endregion
   }
 }

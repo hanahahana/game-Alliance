@@ -17,6 +17,7 @@ namespace Alliance.Pieces
     private string mDescription;
     private float mRadius;
     private float mAttack;
+    private int mPrice;
     private int mUpgradePercent;
 
     public ShockwavePiece()
@@ -30,6 +31,7 @@ namespace Alliance.Pieces
       mProjectilesPerSecond = .25f;
       mNumberProjectilesToFire = 3;
       mUpgradePercent = 15;
+      mPrice = 540;
     }
 
     public override string Description
@@ -62,6 +64,12 @@ namespace Alliance.Pieces
     {
       get { return mAttack; }
       protected set { mAttack = value; }
+    }
+
+    public override int Price
+    {
+      get { return mPrice; }
+      protected set { mPrice = value; }
     }
 
     public override int UpgradePercent

@@ -6,6 +6,8 @@ using Microsoft.Xna.Framework;
 using Alliance.Pieces;
 using MLA.Utilities;
 using MLA.Utilities.Algorithms.Data;
+using Alliance.Entities;
+using System.Collections.Specialized;
 
 namespace Alliance
 {
@@ -37,6 +39,7 @@ namespace Alliance
     private Cell[] mAdjacentCells;
     private int mAdjacentCellsIdx;
     private DebugAttributes mAttributes;
+    private OrderedDictionary mRegisteredEntities;
 
     public BoxF Bounds
     {
@@ -132,6 +135,11 @@ namespace Alliance
       get { return mPiece; }
     }
 
+    public int RegisteredEntitiesCount
+    {
+      get { return mRegisteredEntities.Count; }
+    }
+
     public Cell(int column, int row, bool isOuter, bool isThroughway)
     {
       mColumn = column;
@@ -142,6 +150,7 @@ namespace Alliance
       mIsThroughway = isThroughway;
       mAdjacentCells = new Cell[4];
       mAdjacentCellsIdx = 0;
+      mRegisteredEntities = new OrderedDictionary(50);
     }
 
     public override bool Equals(object obj)
@@ -200,6 +209,29 @@ namespace Alliance
     public void Add(Cell adjacent)
     {
       mAdjacentCells[mAdjacentCellsIdx++] = adjacent;
+    }
+
+    public void Register(Entity entity)
+    {
+      mRegisteredEntities[entity] = entity;
+    }
+
+    public void Unregister(Entity entity)
+    {
+      mRegisteredEntities.Remove(entity);
+    }
+
+    public Entity GetMostRecentRegisteredEntity()
+    {
+      Entity retval = null;
+      int idx = mRegisteredEntities.Count - 1;
+
+      if (idx > -1)
+      {
+        retval = mRegisteredEntities[idx] as Entity;
+      }
+
+      return retval;
     }
   }
 }

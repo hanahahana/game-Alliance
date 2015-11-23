@@ -28,8 +28,8 @@ namespace Alliance
 {
   public partial class GridComponent : DrawableGameComponent
   {
-    private const int CellWidth = 15;
-    private const int CellHeight = 15;
+    private const int CellWidth = 20;
+    private const int CellHeight = 20;
     private const int HalfThroughWay = 6;
     private const int OrthogonalCost = 12;
 
@@ -47,6 +47,7 @@ namespace Alliance
     private Vector2 mPosition;
     private SelectionPiece mSelectionPiece;
     private Piece mSelectedPiece;
+    private Entity mSelectedEntity;
 
     private List<Piece> mPieces;
     private List<Entity> mEntities;
@@ -71,14 +72,15 @@ namespace Alliance
 
     protected override void LoadContent()
     {
-      base.LoadContent();
       mSpriteBatch = new SpriteBatch(GraphicsDevice);
       shapeBatch = new ShapeBatch(GraphicsDevice);
-      captionFont = Content.Load<SpriteFont>("Fonts\\ComicSans");
+      captionFont = AllianceGame.Fonts["ComicSans"];
     }
 
     public override void Initialize()
     {
+      base.Initialize();
+      Player.InitializePlayer(100000, 500);
       InitializeVariables();
       InitializeProperties();
       InitializeGrid();
@@ -94,11 +96,19 @@ namespace Alliance
       // get the input provider
       InputProvider input = (InputProvider)Game.Services.GetService(typeof(InputProvider));
 
-      // get the current offset
-      Vector2 offset = (Vector2)MiddleOffset + mPosition;
-
       // construct new updata parameters for the functions
-      UpdateParams uparams = new UpdateParams(gameTime, input, offset);
+      UpdateParams uparams = new UpdateParams(gameTime, input, (Vector2)MiddleOffset + mPosition);
+
+      // update the list
+      foreach (ListBoxItem item in lstPieces.Items)
+      {
+        Piece piece = item.Value as Piece;
+        if (piece != null)
+        {
+          // this item can only be selected if the player has enough cash for it
+          item.CanSelect = Player.EnoughCashFor(piece);
+        }
+      }
 
       // update the selection the user has made
       UpdateSelectionPiece(uparams);
@@ -116,7 +126,7 @@ namespace Alliance
       UpdatePieces(uparams);
 
       // update all invaliders
-      UpdateInvaliders(uparams);
+      UpdateInvaders(uparams);
 
       // update the piece targets
       UpdatePieceTargets(uparams);
@@ -129,17 +139,17 @@ namespace Alliance
 
     public override void Draw(GameTime gameTime)
     {
+      DrawParams dparams = new DrawParams(gameTime, (Vector2)MiddleOffset + mPosition, mSpriteBatch);
       mSpriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.Deferred, SaveStateMode.SaveState);
 
-      DrawGrid();
-      DrawPieces();
-      DrawInvaders();
-      DrawProjectiles();
+      DrawGrid(dparams);
+      DrawPieces(dparams);
+      DrawInvaders(dparams);
+      DrawProjectiles(dparams);
 
       mSpriteBatch.End();
 
       DrawPieceRadius();
-
       base.Draw(gameTime);
     }
 

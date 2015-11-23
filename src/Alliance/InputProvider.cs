@@ -44,7 +44,7 @@ namespace Alliance
     public InputProvider(Game game)
       : base(game)
     {
-
+      UpdateOrder = 0;
     }
 
     public override void Update(GameTime gameTime)

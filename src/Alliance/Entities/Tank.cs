@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Xna.Framework;
 using MLA.Utilities.Helpers;
+using Alliance.Utilities;
 
 namespace Alliance.Entities
 {
@@ -10,6 +11,7 @@ namespace Alliance.Entities
   {
     private EntityAttributes mAttributes;
     private readonly float mMaximumLife;
+    private int mCash;
 
     public override float MaximumLife
     {
@@ -22,13 +24,35 @@ namespace Alliance.Entities
       set { mAttributes = value; }
     }
 
+    public override int Cash
+    {
+      get { return mCash; }
+    }
+
     public Tank(Cell startCell, Cell goalCell)
       : base(startCell, goalCell)
     {
-      mMPS = MathHelper.Lerp(MinMovementPerSecond, MaxMovementPerSecond, RandomHelper.NextSingle());
+      // set the attributes
       mAttributes = RandomHelper.NextRareBool() ? EntityAttributes.SpeedBumpNoAffect : EntityAttributes.None;
-      mMaximumLife = MathHelper.Lerp(5000f, 5000000f, RandomHelper.NextSingle());
+
+      // determine the level
+      mLevel = RandomHelper.Next(MaxEntityLevel) + 1;
+
+      // interpolate the varaibles
+      if (mLevel > MinEntityLevel)
+      {
+        mMaximumLife = Utils.SpLine(LvlLfeSamples, mLevel);
+        mMPS = Utils.SpLine(LvlMpsSamples, mLevel);
+      }
+      else
+      {
+        mMaximumLife = MinEntityLife;
+        mMPS = MinMovementPerSecond;
+      }
+
+      // set the remaining variables
       mCurrentLife = MaximumLife;
+      mCash = (int)Math.Round((float)mLevel * 1.5f);
     }
   }
 }

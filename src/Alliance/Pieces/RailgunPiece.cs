@@ -16,6 +16,7 @@ namespace Alliance.Pieces
     private string mDescription;
     private float mRadius;
     private float mAttack;
+    private int mPrice;
     private int mUpgradePercent;
 
     public RailgunPiece()
@@ -30,6 +31,7 @@ namespace Alliance.Pieces
       mNumberProjectilesToFire = 3;
       mProjectileLifeInSeconds = 5.5f;
       mUpgradePercent = 15;
+      mPrice = 250;
     }
 
     public override string Description
@@ -62,6 +64,12 @@ namespace Alliance.Pieces
     {
       get { return mAttack; }
       protected set { mAttack = value; }
+    }
+
+    public override int Price
+    {
+      get { return mPrice; }
+      protected set { mPrice = value; }
     }
 
     public override int UpgradePercent

@@ -10,7 +10,7 @@ using Alliance.Projectiles;
 
 namespace Alliance.Pieces
 {
-  public abstract partial class Piece
+  public abstract partial class Piece : ITextProvider
   {
     public const int MaxLevel = 5;
     public const float MaxProgress = 100f;
@@ -23,13 +23,14 @@ namespace Alliance.Pieces
     public const float DefaultTurnSpeed = .2f;
     public const int DefaultNumberProjectilesToFire = 1;
 
+    protected int[] mPriceAtLevels = new int[MaxLevel + 1];
     protected Vector2 mPosition;
     protected Cell[] mCells;
     protected SizeF mSize;
     protected bool mSelected;
     protected PieceState mState;
     protected float mProgress = 0;
-    protected int mLevel;
+    protected int mLevel = 0;
     protected Entity mTarget;
     protected float mOrientation;
     protected float mElapsedProjectileSeconds;
@@ -45,6 +46,7 @@ namespace Alliance.Pieces
     public abstract PieceGrouping Grouping { get; }
     public abstract float Radius { get; protected set; }
     public abstract float Attack { get; protected set; }
+    public abstract int Price { get; protected set; }
     public abstract int UpgradePercent { get; }
 
     public virtual bool IsBlocking { get { return true; } }
@@ -60,9 +62,16 @@ namespace Alliance.Pieces
 
     protected abstract Piece CreatePiece(Cell[] cells);
 
+    protected void SavePriceInfo()
+    {
+      if (mLevel < mPriceAtLevels.Length)
+        mPriceAtLevels[mLevel] = Price;
+    }
+
     private void TurnToFaceTarget()
     {
-      if (mTarget != null)
+      // if we have a target and we're supposed to be facing the target
+      if (mTarget != null && FaceTarget)
       {
         float dx = mTarget.X - X;
         float dy = mTarget.Y - Y;
@@ -105,7 +114,28 @@ namespace Alliance.Pieces
     protected virtual void FinalizeSell()
     {
       mState = PieceState.Sold;
+      Player.SellPiece(this);
       Clear();
+    }
+
+    private int UpgradePrice(float factor)
+    {
+      return (int)Math.Round(Price * factor);
+    }
+
+    private float UpgradeAttack(float factor)
+    {
+      return (float)Math.Round(Attack * factor);
+    }
+
+    private float ComputeUpgradeFactor()
+    {
+      return 1f + ((float)UpgradePercent / 100f);
+    }
+
+    private float UpgradeRadius(float factor)
+    {
+      return (Radius * factor);
     }
 
     protected virtual void FinalizeUpgrade()
@@ -113,11 +143,16 @@ namespace Alliance.Pieces
       mState = PieceState.Upgraded;
       ++mLevel;
 
-      // upgrade the attack and the radius
-      float factor = 1f + ((float)UpgradePercent / 100f);
-      Attack *= factor;
-      Radius *= factor;
-      Attack = (float)Math.Round(Attack);
+      // determine the factor to multiply by
+      float factor = ComputeUpgradeFactor();
+
+      // upgrade the attack, price and the radius
+      Attack = UpgradeAttack(factor);
+      Radius = UpgradeRadius(factor);
+      Price = UpgradePrice(factor);
+
+      // set the price
+      SavePriceInfo();
 
       // upgrade the projectile variables
       UpgradeProjectileVariables(factor);
@@ -187,8 +222,16 @@ namespace Alliance.Pieces
 
     private void UpdateSellingUpgrading(GameTime gameTime)
     {
-      // update the current progress
-      mProgress += (float)(ProgressPerSecond * gameTime.ElapsedGameTime.TotalSeconds);
+      if (Player.State == PlayerState.Designing)
+      {
+        // if we're designing, then the sell/upgrade is instant
+        mProgress = MaxProgress;
+      }
+      else
+      {
+        // update the current progress
+        mProgress += (float)(ProgressPerSecond * gameTime.ElapsedGameTime.TotalSeconds);
+      }
 
       // if we've exceeded the max progress
       if (mProgress >= MaxProgress)
@@ -210,13 +253,15 @@ namespace Alliance.Pieces
       }
     }
 
-    public void Draw(SpriteBatch spriteBatch, Vector2 offset)
+    public void Draw(DrawParams dparams)
     {
+      SpriteBatch spriteBatch = dparams.SpriteBatch;
+      Vector2 offset = dparams.Offset;
+
       BoxF bounds = new BoxF(X + offset.X, Y + offset.Y, Width, Height);
       BoxF inside = new BoxF(bounds.X + Delta, bounds.Y + Delta, bounds.Width - Delta2, bounds.Height - Delta2);
 
       DrawBackground(spriteBatch, bounds, inside);
-
       if (mState == PieceState.Idle)
       {
         DrawWeaponBase(spriteBatch, bounds, inside);
@@ -243,14 +288,14 @@ namespace Alliance.Pieces
 
       Color color = Utils.NewAlpha(Color.Gray, .5f);
       spriteBatch.Draw(
-        wbase, 
-        bounds.Location, 
-        null, 
-        color, 
-        0f, 
-        Vector2.Zero, 
-        scale, 
-        SpriteEffects.None, 
+        wbase,
+        bounds.Location,
+        null,
+        color,
+        0f,
+        Vector2.Zero,
+        scale,
+        SpriteEffects.None,
         0f);
     }
 
@@ -263,9 +308,6 @@ namespace Alliance.Pieces
       Vector2 scale = Utils.ComputeScale(imgSize, actSize);
       Vector2 imgCenter = imgSize.ToVector2() * .5f;
       Vector2 myCenter = actSize.ToVector2() * .5f;
-
-      if (!FaceTarget)
-        mOrientation = 0;
 
       Color color = Color.Gray;
       spriteBatch.Draw(

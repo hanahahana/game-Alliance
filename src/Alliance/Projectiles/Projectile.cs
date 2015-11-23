@@ -98,7 +98,7 @@ namespace Alliance.Projectiles
       mIsAlive = true;
       mTimeToLive = timeToLiveInSeconds;
       mColor = Color.White;
-      Size = new SizeF(12f, 3.625f);
+      Size = new SizeF(20f, 6.5f);
     }
 
     protected virtual Texture2D GetProjectileImage()
@@ -203,8 +203,11 @@ namespace Alliance.Projectiles
         dH * 2f);
     }
 
-    public virtual void Draw(SpriteBatch spriteBatch, Vector2 offset)
+    public virtual void Draw(DrawParams dparams)
     {
+      SpriteBatch spriteBatch = dparams.SpriteBatch;
+      Vector2 offset = dparams.Offset;
+
       DrawData data = GetDrawData(offset);
       spriteBatch.Draw(
           data.Texture,

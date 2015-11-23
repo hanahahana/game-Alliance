@@ -222,14 +222,13 @@ namespace Alliance
     protected override void LoadContent()
     {
       LoadStaticContent(Game);
-      base.LoadContent();
     }
 
     private static void LoadStaticContent(Game game)
     {
       if (mDefaultFont == null)
       {
-        mDefaultFont = game.Content.Load<SpriteFont>("Fonts\\Tahoma");
+        mDefaultFont = AllianceGame.Fonts["Tahoma"];
       }
 
       if (mSpriteBatch == null)

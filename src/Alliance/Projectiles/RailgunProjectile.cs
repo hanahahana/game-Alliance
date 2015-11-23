@@ -10,13 +10,11 @@ namespace Alliance.Projectiles
   public class RailgunProjectile : Projectile
   {
     const float PixelsPerSecond = 150f;
-    const float FactorOfWidth = 6f;
-    const float SecondsBeforeUpdate = 1f / PixelsPerSecond;
 
     public RailgunProjectile(double timeToLiveInSeconds)
       : base(timeToLiveInSeconds)
     {
-      mColor = Utils.GetIntermediateColor(Color.Yellow, Color.Red, .55f, 0f, 1f);
+      mColor = Utils.GetIntermediateColor(Color.Yellow, Color.Red, .65f, 0f, 1f);
     }
 
     protected override Texture2D GetProjectileImage()
@@ -31,7 +29,7 @@ namespace Alliance.Projectiles
 
     public override void UpdateByFrameCount(int frameCount)
     {
-      Position += (Velocity * MovementPerSecond * frameCount);
+      Position += (Velocity * MovementPerSecond * ((float)frameCount * .75f));
     }
   }
 }

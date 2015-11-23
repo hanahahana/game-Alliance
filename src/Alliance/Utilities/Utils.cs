@@ -262,5 +262,142 @@ namespace Alliance.Utilities
 
       return (dx * dx) + (dy * dy);
     }
+
+    public static float SpLine(List<Vector2> knownSamples, float unknownY)
+    {
+      int np = knownSamples.Count;
+      if (np > 1)
+      {
+        float[] a = new float[np];
+        float x1;
+        float x2;
+        float y;
+        float[] h = new float[np];
+
+        for (int i = 1; i <= np - 1; i++)
+        {
+          h[i] = knownSamples[i].X - knownSamples[i - 1].X;
+        }
+
+        if (np > 2)
+        {
+          float[] sub = new float[np - 1];
+          float[] diag = new float[np - 1];
+          float[] sup = new float[np - 1];
+
+          for (int i = 1; i <= np - 2; i++)
+          {
+            diag[i] = (h[i] + h[i + 1]) / 3;
+            sup[i] = h[i + 1] / 6;
+            sub[i] = h[i] / 6;
+
+            a[i] = (knownSamples[i + 1].Y - knownSamples[i].Y) / h[i + 1] -
+                   (knownSamples[i].Y - knownSamples[i - 1].Y) / h[i];
+          }
+
+          // SolveTridiag is a support function, see Marco Roello's original code
+          // for more information at
+          // http://www.codeproject.com/useritems/SplineInterpolation.asp
+          SolveTridiag(sub, diag, sup, ref a, np - 2);
+        }
+
+        int gap = 0;
+        float previous = float.MinValue;
+
+        // At the end of this iteration, "gap" will contain the index of the interval
+        // between two known values, which contains the unknown z, and "previous" will
+        // contain the biggest z value among the known samples, left of the unknown z
+        for (int i = 0; i < knownSamples.Count; i++)
+        {
+          if (knownSamples[i].X < unknownY && knownSamples[i].X > previous)
+          {
+            previous = knownSamples[i].X;
+            gap = i + 1;
+          }
+        }
+
+        x1 = unknownY - previous;
+        x2 = h[gap] - x1;
+        y = ((-a[gap - 1] / 6 * (x2 + h[gap]) * x1 + knownSamples[gap - 1].Y) * x2 +
+            (-a[gap] / 6 * (x1 + h[gap]) * x2 + knownSamples[gap].Y) * x1) / h[gap];
+
+        return y;
+      }
+
+      return 0;
+    }
+
+    private static void SolveTridiag(float[] sub, float[] diag, float[] sup, ref float[] b, int n)
+    {
+      /*                  solve linear system with tridiagonal n by n matrix a
+								using Gaussian elimination *without* pivoting
+								where   a(i,i-1) = sub[i]  for 2<=i<=n
+										a(i,i)   = diag[i] for 1<=i<=n
+										a(i,i+1) = sup[i]  for 1<=i<=n-1
+								(the values sub[1], sup[n] are ignored)
+								right hand side vector b[1:n] is overwritten with solution 
+								NOTE: 1...n is used in all arrays, 0 is unused */
+      int i;
+      /*                  factorization and forward substitution */
+      for (i = 2; i <= n; i++)
+      {
+        sub[i] = sub[i] / diag[i - 1];
+        diag[i] = diag[i] - sub[i] * sup[i - 1];
+        b[i] = b[i] - sub[i] * b[i - 1];
+      }
+      b[n] = b[n] / diag[n];
+      for (i = n - 1; i >= 1; i--)
+      {
+        b[i] = (b[i] - sup[i] * b[i + 1]) / diag[i];
+      }
+    }
+
+    public static Vector2 RandomVector2(float minXY, float maxXY)
+    {
+      float x = MathHelper.Lerp(minXY, maxXY, RandomHelper.NextSingle());
+      float y = MathHelper.Lerp(minXY, maxXY, RandomHelper.NextSingle());
+      return new Vector2(x, y);
+    }
+
+    public static bool CircleContains(Vector2 center, float radius, BoxF box)
+    {
+      /*
+           * if sqrt( (rectangleRight.x - circleCenter.x)^2 + (rectangleBottom.y - circleCenter.y)^2) < radius then they intersect
+           * if sqrt( (rectangleRight.x - circleCenter.x)^2 + (rectangleTop.y - circleCenter.y)^2) < radius then they intersect
+           * if sqrt( (rectangleLeft.x - circleCenter.x)^2 + (rectangleTop.y - circleCenter.y)^2) < radius then they intersect
+           * if sqrt( (rectangleLeft.x - circleCenter.x)^2 + (rectangleBottom.y - circleCenter.y)^2) < radius then they intersect
+           */
+
+      // get the radius squared
+      float rad2 = radius * radius;
+
+      float dR = box.Right - center.X;
+      float dL = box.Left - center.X;
+      float dB = box.Bottom - center.Y;
+      float dT = box.Top - center.Y;
+
+      float dist1 = (dR * dR) + (dB * dB);
+      float dist2 = (dR * dR) + (dT * dT);
+      float dist3 = (dL * dL) + (dT * dT);
+      float dist4 = (dL * dL) + (dB * dB);
+
+      return dist1 < rad2 ||
+        dist2 < rad2 ||
+        dist3 < rad2 ||
+        dist4 < rad2;
+    }
+
+    public static float ClampSpecial(float sign, float value, float minMax)
+    {
+      // if the sign is zero, then this isn't a special clamp
+      if(sign == 0) 
+        return value;
+
+      // if the sign is less than 0, that means that the value COULD fall below the minMax, so the minimum
+      // becomes the minMax and the maximum becomes the value.
+      return MathHelper.Clamp(value,
+        (sign < 0) ? minMax : value,
+        (sign < 0) ? value : minMax);
+    }
   }
 }

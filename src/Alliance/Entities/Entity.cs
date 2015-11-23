@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+
 using Alliance.Data;
 using Alliance.Utilities;
 using Alliance.Pieces;
@@ -25,10 +27,36 @@ namespace Alliance.Entities
     Selected,
   };
 
-  public abstract class Entity
+  public abstract class Entity : ITextProvider
   {
-    public const float MaxMovementPerSecond = 41.5f;
-    public const float MinMovementPerSecond = 11.5f;
+    public const float MaxMovementPerSecond = 77.7f;
+    public const float MinMovementPerSecond = 11.1f;
+
+    public const int MaxEntityLevel = 1000;
+    public const int MinEntityLevel = 1;
+
+    public const float MaxEntityLife = 8000000f;
+    public const float MinEntityLife = 5000f;
+
+    /// <summary>
+    /// Samples that are used to determine life given a level
+    /// </summary>
+    protected static readonly List<Vector2> LvlLfeSamples = new List<Vector2>(
+      new Vector2[] 
+      { 
+        new Vector2(MinEntityLevel, MinEntityLife), 
+        new Vector2(MaxEntityLevel, MaxEntityLife) 
+      });
+
+    /// <summary>
+    /// Samples that are used to determine MPS given a level
+    /// </summary>
+    protected static readonly List<Vector2> LvlMpsSamples = new List<Vector2>(
+      new Vector2[]
+      {
+        new Vector2(MinEntityLevel, MinMovementPerSecond), 
+        new Vector2(MaxEntityLevel, MaxMovementPerSecond) 
+      });
 
     protected Cell mTargetCell;
     protected Cell mCurrentCell;
@@ -38,9 +66,12 @@ namespace Alliance.Entities
     protected EntityState mState;
     protected float mMPS;
     protected float mCurrentLife;
+    protected int mLevel;
+    protected readonly string mID;
 
     public abstract float MaximumLife { get; }
     public abstract EntityAttributes Attributes { get; set; }
+    public abstract int Cash { get; }
 
     public Cell TargetCell
     {
@@ -50,6 +81,11 @@ namespace Alliance.Entities
     public Cell CurrentCell
     {
       get { return mCurrentCell; }
+    }
+
+    public int Level
+    {
+      get { return mLevel; }
     }
 
     public BoxF Bounds
@@ -116,6 +152,11 @@ namespace Alliance.Entities
       get { return mState; }
     }
 
+    public string ID
+    {
+      get { return mID; }
+    }
+
     public Entity(Cell startCell, Cell goalCell)
     {
       mTargetCell = startCell;
@@ -130,6 +171,7 @@ namespace Alliance.Entities
 
       mMPS = MaxMovementPerSecond;
       ComputeOrientation();
+      mID = Guid.NewGuid().ToString();
     }
 
     public virtual bool CanPlacePiece(Piece piece)
@@ -171,70 +213,128 @@ namespace Alliance.Entities
 
     public virtual void Update(GameTime gameTime)
     {
-      if (mState != EntityState.Alive) return;
-      if (mCurrentLife == 0) mState = EntityState.Dead;
-
-      float adjustedVelocity = mMPS;
-      if (mCurrentCell != null)
+      // if our life is 0, then we're dead
+      if (mCurrentLife == 0)
       {
-        if (mCurrentCell.Piece is SpeedBumpPiece && (Attributes & EntityAttributes.SpeedBumpNoAffect) == 0)
-        {
-          adjustedVelocity *= .5f;
-          CurrentLife -= mCurrentCell.Piece.Attack;
-        }
+        mState = EntityState.Dead;
       }
 
-      if (mTargetCell == null && mCurrentCell != null)
+      // if we're alive, then update
+      if (mState == EntityState.Alive)
       {
-        X += (float)gameTime.ElapsedGameTime.TotalSeconds * adjustedVelocity;
-        if (X > (mCurrentCell.X + mCurrentCell.Width))
+        // compute the velocity given the current cell that we're on
+        float velocity = ComputeVelocity();
+
+        // if we have no target cell, but we have a current cell
+        if (mTargetCell == null && mCurrentCell != null)
         {
-          mState = EntityState.MadeIt;
+          // then move off of it
+          MoveOffCurrentCell(velocity, gameTime);
         }
-      }
-      else
-      {
-        float tX = mTargetCell.X;
-        float tY = mTargetCell.Y;
-
-        float dX = tX - X;
-        float dY = tY - Y;
-
-        dX = Math.Sign(dX);
-        dY = Math.Sign(dY);
-
-        X += (float)gameTime.ElapsedGameTime.TotalSeconds * dX * adjustedVelocity;
-        Y += (float)gameTime.ElapsedGameTime.TotalSeconds * dY * adjustedVelocity;
-
-        if (dX > 0)
+        else
         {
-          X = (X >= tX ? tX : X);
-        }
-        else if (dX < 0)
-        {
-          X = (X <= tX ? tX : X);
-        }
-
-        if (dY > 0)
-        {
-          Y = (Y >= tY ? tY : Y);
-        }
-        else if (dY < 0)
-        {
-          Y = (Y <= tY ? tY : Y);
-        }
-
-        bool readyForNextNode = (X == tX) && (Y == tY);
-        if (readyForNextNode)
-        {
-          mCurrentCell = mTargetCell;
-          mTargetCell = mTargetCell.Parent;
-          ComputeOrientation();
+          // otherwise, move to the target cell
+          MoveToTargetCell(velocity, gameTime);
         }
       }
     }
 
-    public virtual Texture2D GetEntityImage()
+    private float ComputeVelocity()
+    {
+      float retval = mMPS;
+      if (mCurrentCell != null)
+      {
+        if (mCurrentCell.Piece is SpeedBumpPiece && (Attributes & EntityAttributes.SpeedBumpNoAffect) == 0)
+        {
+          // we go 1/4 as fast when over a speed bump
+          retval *= .25f;
+
+          // if this is a speed bump piece and speed bumps affect me, then I lose life
+          CurrentLife -= mCurrentCell.Piece.Attack;
+        }
+      }
+      return retval;
+    }
+
+    private void MoveOffCurrentCell(float velocity, GameTime gameTime)
+    {
+      X += (float)gameTime.ElapsedGameTime.TotalSeconds * velocity;
+      if (X > (mCurrentCell.X + mCurrentCell.Width))
+      {
+        mState = EntityState.MadeIt;
+        OnReadyForNextCell();
+      }
+    }
+
+    private void MoveToTargetCell(float velocity, GameTime gameTime)
+    {
+      float tX = mTargetCell.X;
+      float tY = mTargetCell.Y;
+
+      float dX = Math.Sign(tX - X);
+      float dY = Math.Sign(tY - Y);
+
+      X += (float)gameTime.ElapsedGameTime.TotalSeconds * dX * velocity;
+      Y += (float)gameTime.ElapsedGameTime.TotalSeconds * dY * velocity;
+
+      if (dX > 0)
+      {
+        X = (X >= tX ? tX : X);
+      }
+      else if (dX < 0)
+      {
+        X = (X <= tX ? tX : X);
+      }
+
+      if (dY > 0)
+      {
+        Y = (Y >= tY ? tY : Y);
+      }
+      else if (dY < 0)
+      {
+        Y = (Y <= tY ? tY : Y);
+      }
+
+      bool readyForNextNode = (X == tX) && (Y == tY);
+      if (readyForNextNode)
+      {
+        OnReadyForNextCell();
+      }
+    }
+
+    private void OnReadyForNextCell()
+    {
+      BeforeCurrentCellChanged();
+      mCurrentCell = mTargetCell;
+      AfterCurrentCellChanged();
+
+      bool noTarget = (mTargetCell == null);
+      bool noCurrent = (mCurrentCell == null);
+
+      if (!noTarget)
+        mTargetCell = mTargetCell.Parent;
+
+      if (!noTarget || !noCurrent)
+        ComputeOrientation();
+    }
+
+    private void AfterCurrentCellChanged()
+    {
+      if (mCurrentCell != null)
+      {
+        mCurrentCell.Register(this);
+      }
+    }
+
+    private void BeforeCurrentCellChanged()
+    {
+      if (mCurrentCell != null)
+      {
+        mCurrentCell.Unregister(this);
+      }
+    }
+
+    protected virtual Texture2D GetEntityImage()
     {
       return AllianceGame.Textures["tank"];
     }
@@ -308,8 +408,12 @@ namespace Alliance.Entities
         dH * 2f);
     }
 
-    public virtual void Draw(SpriteBatch spriteBatch, Vector2 offset)
+    public virtual void Draw(DrawParams dparams)
     {
+      // get the necessary parameters
+      SpriteBatch spriteBatch = dparams.SpriteBatch;
+      Vector2 offset = dparams.Offset;
+
       if (mState != EntityState.Alive) return;
       DrawData data = GetDrawData(offset);
 
@@ -342,6 +446,38 @@ namespace Alliance.Entities
         bar.Height,
         Color.Green);
       Shapes.DrawRectangle(spriteBatch, bar, Color.Black);
+
+      // draw the level
+      SpriteFont verdana = AllianceGame.Fonts["Georgia"];
+      string text = mLevel.ToString();
+      Vector2 pos = new Vector2(bar.X, bar.Y - (verdana.MeasureString(text).Y + 5f));
+      spriteBatch.DrawString(verdana,
+        text,
+        pos,
+        Color.Gold);
     }
+
+    #region ITextProvider Members
+
+    public string GetHeader()
+    {
+      return GetType().Name;
+    }
+
+    public string GetText()
+    {
+      StringBuilder text = new StringBuilder();
+      text.AppendLine("Abilities:");
+      text.AppendLine(string.Format("{0}", Attributes));
+      text.AppendLine();
+      text.AppendLine(string.Format("Life: {0}", (double)CurrentLife));
+      text.AppendLine(string.Format("Speed: {0}", MPS));
+      text.AppendLine(string.Format("Level: {0}", mLevel));
+      text.AppendLine(string.Format("Status: {0}", mState));
+      text.AppendLine(string.Format("{0}", Position));
+      return text.ToString();
+    }
+
+    #endregion
   }
 }

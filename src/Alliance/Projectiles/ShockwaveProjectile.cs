@@ -28,7 +28,8 @@ namespace Alliance.Projectiles
       : base(timeToLiveInSeconds)
     {
       mOwnerBounds = ownerBounds;
-      mColor = Utils.RandomColor();
+      mColor = RandomHelper.NextBool() ? Color.Gray :
+        RandomHelper.NextBool() ? Color.Black : Color.DarkGray;
     }
 
     public override void Update(GameTime gameTime)
@@ -47,7 +48,7 @@ namespace Alliance.Projectiles
     {
       mScale += elapsedSeconds * ScalesPerSecond;
       mOrientation += elapsedSeconds * RotationsPerSecond;
-      Size = mOwnerBounds.Size * mScale;
+      Size = mOwnerBounds.Size * .5f * mScale;
     }
 
     public override void UpdateByFrameCount(int frameCount)

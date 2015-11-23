@@ -15,6 +15,7 @@ namespace Alliance.Pieces
     private string mDescription;
     private float mRadius;
     private float mAttack;
+    private int mPrice;
 
     public SpeedBumpPiece()
     {
@@ -22,9 +23,11 @@ namespace Alliance.Pieces
       sb.Append("Slows the enemy down by threatening to destroy their transportation.");
       sb.AppendLine(" Careful, some enemies can roll right over them without feeling anything! (for now they're red).");
       mDescription = sb.ToString();
+      mPrice = 5;
       mLevel = Piece.MaxLevel;
       mRadius = 20;
       mAttack = .5f;
+      mPriceAtLevels[Piece.MaxLevel - 1] = mPrice;
     }
 
     public override bool IsBlocking
@@ -62,6 +65,12 @@ namespace Alliance.Pieces
     {
       get { return mAttack; }
       protected set { mAttack = value; }
+    }
+
+    public override int Price
+    {
+      get { return mPrice; }
+      protected set { mPrice = value; }
     }
 
     public override int UpgradePercent

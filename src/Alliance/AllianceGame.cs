@@ -24,9 +24,11 @@ namespace Alliance
     private Messages messages;
     private GridComponent grid;
     private InputProvider input;
+    private PlayerComponent player;
 
     public static Dictionary<string, Texture2D> Textures = null;
     public static Dictionary<string, Color[,]> TextureData = null;
+    public static Dictionary<string, SpriteFont> Fonts = null;
     public static SoundBank Sounds = null;
 
     private AudioEngine audioEngine;
@@ -44,8 +46,10 @@ namespace Alliance
       Components.Add(messages);
 
       input = new InputProvider(this);
-      input.UpdateOrder = 0;
       Components.Add(input);
+
+      player = new PlayerComponent(this);
+      Components.Add(player);
 
       Services.AddService(typeof(InputProvider), input);
     }
@@ -58,7 +62,21 @@ namespace Alliance
     /// </summary>
     protected override void Initialize()
     {
-      // TODO: Add your initialization logic here
+      // initialize the dictionaries
+      Textures = new Dictionary<string, Texture2D>();
+      TextureData = new Dictionary<string, Color[,]>();
+      Fonts = new Dictionary<string, SpriteFont>();
+
+      // load all of the fonts
+      LoadFonts();
+
+      // load all of the images
+      LoadImages();
+
+      // load all of the image data
+      LoadImageData();
+
+      // enumerate through the components
       base.Initialize();
     }
 
@@ -76,14 +94,16 @@ namespace Alliance
       waveBank = new WaveBank(audioEngine, "Content\\Sounds\\Wave Bank.xwb");
       Sounds = new SoundBank(audioEngine, "Content\\Sounds\\Sound Bank.xsb");
 
-      Textures = new Dictionary<string, Texture2D>();
-      TextureData = new Dictionary<string, Color[,]>();
+      // run through the components
+      base.LoadContent();
+    }
 
-      // load all of the images
-      LoadImages();
-
-      // load all of the image data
-      LoadImageData();
+    private void LoadFonts()
+    {
+      Fonts["ComicSans"] = LoadFont("ComicSans");
+      Fonts["Tahoma"] = LoadFont("Tahoma");
+      Fonts["Verdana"] = LoadFont("Verdana");
+      Fonts["Georgia"] = LoadFont("Georgia");
     }
 
     private void LoadImageData()
@@ -110,17 +130,25 @@ namespace Alliance
       Textures.Add("missileLauncher", LoadImage("Towers\\missileLauncher"));
       Textures.Add("shockwaveGenerator", LoadImage("Towers\\shockwaveGenerator"));
       Textures.Add("speedbump", LoadImage("Towers\\speedbump"));
+      Textures.Add("sprinkler", LoadImage("Towers\\sprinkler"));
 
       // load the projectiles
       Textures.Add("rocket", LoadImage("Projectiles\\rocket"));
       Textures.Add("bullet", LoadImage("Projectiles\\bullet"));
       Textures.Add("wave", LoadImage("Projectiles\\wave"));
       Textures.Add("pulse", LoadImage("Projectiles\\pulse"));
+      Textures.Add("debri", LoadImage("Projectiles\\debri"));
+      Textures.Add("fragment", LoadImage("Projectiles\\fragment"));
     }
 
     private Texture2D LoadImage(string name)
     {
       return Content.Load<Texture2D>(string.Format("Images\\{0}", name));
+    }
+
+    private SpriteFont LoadFont(string name)
+    {
+      return Content.Load<SpriteFont>(string.Format("Fonts\\{0}", name));
     }
 
     /// <summary>
