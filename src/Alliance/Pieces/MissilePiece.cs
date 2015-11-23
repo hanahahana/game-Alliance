@@ -48,9 +48,9 @@ namespace Alliance.Pieces
       return projectile;
     }
 
-    protected override Texture2D GetTowerImage()
+    protected override string ImageKey
     {
-      return AllianceGame.Textures["missileLauncher"];
+      get { return "missileLauncher"; }
     }
   }
 }

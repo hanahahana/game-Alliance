@@ -71,6 +71,8 @@
     </Compile>
     <Compile Include="Data\Box.cs" />
     <Compile Include="Data\BoxF.cs" />
+    <Compile Include="Data\Polygon.cs" />
+    <Compile Include="Data\Sprite.cs" />
     <Compile Include="Data\SizeF.cs" />
     <Compile Include="Data\DijkstraData.cs" />
     <Compile Include="Parameters\DrawParams.cs" />

@@ -429,52 +429,30 @@ namespace Alliance.Components
     {
       if (projectile is MissileProjectile)
       {
-        DebriProjectile[] debris = DebriProjectile.Create(projectile, RandomHelper.Next(12, 24));
+        DebriProjectile[] debris = DebriProjectile.Create(projectile, RandomHelper.Next(3, 9));
         mProjectiles.AddRange(debris);
       }
     }
 
-    private void CheckCollisions(Projectile projectile, UpdateParams uparams)
+    private void CheckCollisions(Projectile projectile, Polygon projectilePolygon, UpdateParams uparams)
     {
-      // get the bounding box of the projectile
-      BoxF bounds = projectile.GetBoundingBox(uparams.Offset);
-
-      // get the projectile image data
-      projectile.GetProjectileImageData();
-
-      for (int c = 0; c < NumCols; ++c)
+      // cycle through all of the entities
+      for (int i = mEntities.Count - 1; i > -1; --i)
       {
-        for (int r = 0; r < NumRows; ++r)
+        // get the entity
+        Entity entity = mEntities[i];
+
+        // get the entity polygon
+        Polygon entityPolygon = entity.GetHull(uparams.Offset);
+
+        // let the entity and polygon know they were attacked
+        if (entityPolygon.IntersectsWith(projectilePolygon))
         {
-          GridCell cell = Cells[c, r];
-          if (cell.RegisteredEntitiesCount > 0)
-          {
-            // get the cell bounds and offset it by the ...offset
-            BoxF cbounds = cell.Bounds;
-            cbounds.Location += uparams.Offset;
+          // let the projectile know it collided
+          projectile.OnCollidedWithEntity(entity);
 
-            // if the cell intersects with the projectile 
-            // or the cell contains the projectile
-            if (cbounds.IntersectsWith(bounds) || cbounds.Contains(bounds))
-            {
-              // get the most recent entity and attack it!
-              Entity entity = cell.GetMostRecentRegisteredEntity();
-
-              // let the projectile know it collided
-              projectile.OnCollidedWithEntity(entity);
-
-              // let the entity know it was attacked
-              entity.OnAttackedByProjectile(projectile);
-
-              // if this entity is dead, then remove it from the cell
-              if (entity.CurrentLife <= 0)
-                cell.Unregister(entity);
-
-              // we're done checking
-              r = NumRows;
-              c = NumCols;
-            }
-          }
+          // let the entity know it was attacked
+          entity.OnAttackedByProjectile(projectile);
         }
       }
     }
@@ -707,8 +685,14 @@ namespace Alliance.Components
       BoxF viewport = new BoxF(X - CellWidth, Y - CellHeight, Width + CellWidth, Height + CellHeight);
       for (int i = mProjectiles.Count - 1; i > -1; --i)
       {
+        // get the projectile
         Projectile projectile = mProjectiles[i];
+
+        // update the projectile data
         projectile.Update(uparams.GameTime);
+        
+        // get the polygon data
+        Polygon polygon = projectile.GetHull(uparams.Offset);
 
         // if the projectile is still alive, check to see if it went out of bounds
         if (projectile.IsAlive)
@@ -719,7 +703,7 @@ namespace Alliance.Components
         // if the projectile is still alive, check to see if it hit anything
         if (projectile.IsAlive)
         {
-          CheckCollisions(projectile, uparams);
+          CheckCollisions(projectile, polygon, uparams);
         }
 
         // if the projectile is dead, then remove it from the list
@@ -739,7 +723,10 @@ namespace Alliance.Components
     {
       foreach (Piece piece in mPieces)
       {
-        piece.Draw(dparams);
+        //piece.Draw(dparams);
+
+        Polygon hull = piece.GetHull(dparams.Offset);
+        hull.Render(dparams, Color.Red);
       }
       mSelectionPiece.Draw(dparams.SpriteBatch, dparams.Offset);
     }
@@ -774,7 +761,10 @@ namespace Alliance.Components
     {
       foreach (Entity invader in mEntities)
       {
-        invader.Draw(dparams);
+        //invader.Draw(dparams);
+
+        Polygon hull = invader.GetHull(dparams.Offset);
+        hull.Render(dparams, Color.Blue);
       }
     }
 
@@ -798,6 +788,9 @@ namespace Alliance.Components
       foreach (Projectile projectile in mProjectiles)
       {
         projectile.Draw(dparams);
+
+        Polygon hull = projectile.GetHull(dparams.Offset);
+        hull.Render(dparams, Color.DarkGreen);
       }
     }
 

@@ -14,7 +14,7 @@ using Alliance.Objects;
 
 namespace Alliance.Pieces
 {
-  public abstract partial class Piece : ITextDisplay
+  public abstract partial class Piece : Sprite, ITextDisplay
   {
     public const int MaxLevel = 5;
     public const float MaxProgress = 100f;
@@ -29,15 +29,12 @@ namespace Alliance.Pieces
     protected const int DefaultNumberProjectilesToFire = 1;
 
     protected int[] mPriceAtLevels = new int[MaxLevel + 1];
-    protected Vector2 mPosition;
     protected GridCell[] mCells;
-    protected SizeF mSize;
     protected bool mSelected;
     protected PieceState mState;
     protected float mProgress = 0;
     protected int mLevel = 0;
     protected Entity mTarget;
-    protected float mOrientation;
     protected float mElapsedProjectileSeconds;
     protected List<Projectile> mQueuedProjectiles = new List<Projectile>(50);
 
@@ -57,21 +54,6 @@ namespace Alliance.Pieces
     protected float mProjectileVelocity = DefaultProjectileVelocity;
     protected float mProjectileLifeInSeconds = DefaultProjectileLifeInSeconds;
     protected int mNumberProjectilesToFire = DefaultNumberProjectilesToFire;
-
-    public virtual string Description { get { return mDescription; } }
-    public virtual string Name { get { return mName; } }
-    public virtual string UltimateName { get { return mUltimateName; } }
-    public virtual PieceGrouping Grouping { get { return mGrouping; } }
-    public virtual float Radius { get { return mRadius; } }
-    public virtual float Attack { get { return mAttack; } }
-    public virtual int Price { get { return mPrice; } }
-    public virtual int UpgradePercent { get { return mUpgradePercent; } }
-    public virtual bool IsBlocking { get { return mIsBlocking; } }
-    public virtual bool FaceTarget { get { return mFaceTarget; } }
-    public virtual float ProjectilesPerSecond { get { return mProjectilesPerSecond; } }
-    public virtual float ProjectileVelocity { get { return mProjectileVelocity; } }
-    public virtual float ProjectileLifeInSeconds { get { return mProjectileLifeInSeconds; } }
-    public virtual int NumberProjectilesToFire { get { return mNumberProjectilesToFire; } }
 
     protected abstract Piece CreatePiece(GridCell[] cells);
 
@@ -180,11 +162,6 @@ namespace Alliance.Pieces
       mProjectileVelocity *= factor;
       mProjectileLifeInSeconds *= (1.001f);
       mNumberProjectilesToFire += (mLevel / 4);
-    }
-
-    protected virtual Texture2D GetTowerImage()
-    {
-      return AllianceGame.Textures["turret"];
     }
 
     public virtual void Update(GameTime gameTime)
@@ -317,7 +294,7 @@ namespace Alliance.Pieces
 
     protected virtual void DrawWeaponTower(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
     {
-      Texture2D wtower = GetTowerImage();
+      Texture2D wtower = GetImage();
       SizeF imgSize = new SizeF(wtower.Width, wtower.Height);
       SizeF actSize = new SizeF(bounds.Width - Delta, inside.Height);
 

@@ -37,7 +37,6 @@ namespace Alliance.Pieces
     private int mIndex;
     private float mAggregateTimeSinceUpdate;
     private TeslaState mTeslaState;
-    private Color mColor;
 
     public TeslaCoilPiece()
     {
@@ -61,8 +60,8 @@ namespace Alliance.Pieces
       mIndex = 0;
       mAggregateTimeSinceUpdate = 0;
       mTeslaState = TeslaState.Idle;
-      mColor = Color.White;
-      FrameSize = new Size(GetTowerImage().Width / (NumberIndexFrames + 1), GetTowerImage().Height);
+      Color = Color.White;
+      FrameSize = new Size(GetImage().Width / (NumberIndexFrames + 1), GetImage().Height);
       LightningColor = Utils.GetIntermediateColor(
         Utils.GetIntermediateColor(Color.Purple, Color.DarkBlue, .5f, 0, 1),
         Color.Red, .75f, 0, 1);
@@ -81,9 +80,9 @@ namespace Alliance.Pieces
       return projectile;
     }
 
-    protected override Texture2D GetTowerImage()
+    protected override string ImageKey
     {
-      return AllianceGame.Textures["teslaCoil"];
+      get { return "teslaCoil"; }
     }
 
     protected override void UpgradeProjectileVariables(float factor)
@@ -111,7 +110,7 @@ namespace Alliance.Pieces
         mIndex = 0;
       }
 
-      mColor = Utils.GetIntermediateColor(Color.Beige, LightningColor, mIndex, 0, NumberIndexFrames);
+      Color = Utils.GetIntermediateColor(Color.Beige, LightningColor, mIndex, 0, NumberIndexFrames);
     }
 
     private void UpdateTeslaState(GameTime gameTime)
@@ -194,7 +193,7 @@ namespace Alliance.Pieces
 
     protected override void DrawWeaponTower(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
     {
-      Texture2D wtower = GetTowerImage();
+      Texture2D wtower = GetImage();
       SizeF imgSize = new SizeF(FrameSize.Width, FrameSize.Height);
       SizeF actSize = new SizeF(bounds.Width, bounds.Height);
 
@@ -210,7 +209,7 @@ namespace Alliance.Pieces
         wtower,
         bounds.Location + center,
         source,
-        mColor,
+        Color,
         0,
         origin,
         scale,

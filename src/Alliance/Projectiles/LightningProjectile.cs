@@ -38,14 +38,9 @@ namespace Alliance.Projectiles
       }
     }
 
-    protected override Texture2D GetProjectileImage()
+    protected override string ImageKey
     {
-      return AllianceGame.Textures["lightning"];
-    }
-
-    public override Color[,] GetProjectileImageData()
-    {
-      return AllianceGame.TextureData["lightning"];
+      get { return "lightning"; }
     }
 
     public override void Draw(DrawParams dparams)
@@ -58,7 +53,7 @@ namespace Alliance.Projectiles
           data.Texture,
           data.Position,
           null,
-          mColor,
+          Color,
           mOrientation,
           data.Origin,
           data.Scale,

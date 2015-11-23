@@ -93,14 +93,14 @@ namespace Alliance.Pieces
       return projectile;
     }
 
-    protected override Texture2D GetTowerImage()
+    protected override string ImageKey
     {
-      return AllianceGame.Textures["sprinkler"];
+      get { return "sprinkler"; }
     }
 
     protected override void DrawWeaponTower(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
     {
-      Texture2D wtower = GetTowerImage();
+      Texture2D wtower = GetImage();
       SizeF imgSize = new SizeF(wtower.Width, wtower.Height);
       SizeF actSize = new SizeF(bounds.Width, bounds.Height);
 

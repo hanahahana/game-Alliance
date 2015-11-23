@@ -38,14 +38,9 @@ namespace Alliance.Projectiles
       Position += ((frameCount + 1) * Velocity * MovementPerSecond * 20f);
     }
 
-    protected override Texture2D GetProjectileImage()
+    protected override string ImageKey
     {
-      return AllianceGame.Textures["flame"];
-    }
-
-    public override Color[,] GetProjectileImageData()
-    {
-      return AllianceGame.TextureData["flame"];
+      get { return "flame"; }
     }
 
     public override void OnCollidedWithEntity(Entity entity)
@@ -63,7 +58,7 @@ namespace Alliance.Projectiles
           data.Texture,
           data.Position,
           null,
-          mColor,
+          Color,
           mOrientation,
           data.Origin,
           data.Scale,

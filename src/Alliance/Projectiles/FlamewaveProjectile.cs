@@ -32,7 +32,7 @@ namespace Alliance.Projectiles
       : base(timeToLiveInSeconds)
     {
       mOwnerBounds = ownerBounds;
-      mColor = Color.White;
+      Color = Color.White;
     }
 
     public override void Update(GameTime gameTime)
@@ -59,19 +59,14 @@ namespace Alliance.Projectiles
       UpdateScaleAndOrientation(frameCount * .3f);
     }
 
-    protected override Texture2D GetProjectileImage()
+    protected override string ImageKey
     {
-      return AllianceGame.Textures["flamewave"];
+      get { return "flamewave"; }
     }
 
-    public override Color[,] GetProjectileImageData()
+    protected override DrawData GetDrawData(Vector2 offset)
     {
-      return AllianceGame.TextureData["flamewave"];
-    }
-
-    public override DrawData GetDrawData(Vector2 offset)
-    {
-      Texture2D projectile = GetProjectileImage();
+      Texture2D projectile = GetImage();
       SizeF projectileSize = new SizeF(projectile.Width, projectile.Height);
 
       Vector2 origin = projectileSize.ToVector2() * .5f;

@@ -29,7 +29,7 @@ namespace Alliance
     private PlayerHudComponent player;
 
     public static Dictionary<string, Texture2D> Textures = null;
-    public static Dictionary<string, Color[,]> TextureData = null;
+    public static Dictionary<string, Vector2[]> TextureHulls = null;
     public static Dictionary<string, SpriteFont> Fonts = null;
 
     public AllianceGame()
@@ -65,7 +65,7 @@ namespace Alliance
     {
       // initialize the dictionaries
       Textures = new Dictionary<string, Texture2D>();
-      TextureData = new Dictionary<string, Color[,]>();
+      TextureHulls = new Dictionary<string, Vector2[]>();
       Fonts = new Dictionary<string, SpriteFont>();
 
       // load all of the fonts
@@ -100,7 +100,31 @@ namespace Alliance
       foreach (string key in Textures.Keys)
       {
         Texture2D texture = Textures[key];
-        TextureData[key] = Utils.TextureTo2DArray(texture);
+        Color[] colorData = new Color[texture.Width * texture.Height];
+        texture.GetData<Color>(colorData);
+
+        List<Vector2> pixels = new List<Vector2>(colorData.Length);
+        for (int x = 0; x < texture.Width; ++x)
+        {
+          for (int y = 0; y < texture.Height; ++y)
+          {
+            Color color = colorData[x + (y * texture.Width)];
+            if (color.A > 250)
+            {
+              pixels.Add(new Vector2(x, y));
+            }
+          }
+        }
+
+        Vector2[] polygon = pixels.ToArray();
+        Vector2[] H = new Vector2[polygon.Length];
+        int n = Utils.Chain2DConvexHull(polygon, polygon.Length, ref H);
+
+        Vector2[] values = new Vector2[n];
+        Array.Copy(H, values, n);
+
+        // store the values
+        TextureHulls[key] = values;
       }
     }
 

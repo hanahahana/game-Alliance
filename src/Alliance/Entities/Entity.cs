@@ -30,7 +30,7 @@ namespace Alliance.Entities
     FireResistant = 6,
   };
 
-  public abstract class Entity : ITextDisplay
+  public abstract class Entity : Sprite, ITextDisplay
   {
     public const float MaxMovementPerSecond = 77.7f;
     public const float MinMovementPerSecond = 11.1f;
@@ -64,12 +64,11 @@ namespace Alliance.Entities
     protected GridCell mTargetCell;
     protected GridCell mCurrentCell;
     protected GridCell mGoalCell;
-    protected BoxF mBounds;
-    protected float mOrientation;
     protected EntityState mState;
     protected float mMPS;
     protected float mCurrentLife;
     protected int mLevel;
+    protected Vector2 mOrigin;
 
     protected readonly string mID;
     protected readonly DijkstraType mDijkstraKey;
@@ -93,48 +92,6 @@ namespace Alliance.Entities
       get { return mLevel; }
     }
 
-    public BoxF Bounds
-    {
-      get { return mBounds; }
-      set { mBounds = value; }
-    }
-
-    public SizeF Size
-    {
-      get { return mBounds.Size; }
-      set { mBounds.Size = value; }
-    }
-
-    public Vector2 Position
-    {
-      get { return mBounds.Location; }
-      set { mBounds.Location = value; }
-    }
-
-    public float X
-    {
-      get { return mBounds.X; }
-      set { mBounds.X = value; }
-    }
-
-    public float Y
-    {
-      get { return mBounds.Y; }
-      set { mBounds.Y = value; }
-    }
-
-    public float Width
-    {
-      get { return mBounds.Width; }
-      set { mBounds.Width = value; }
-    }
-
-    public float Height
-    {
-      get { return mBounds.Height; }
-      set { mBounds.Height = value; }
-    }
-
     public float MPS
     {
       get { return mMPS; }
@@ -147,11 +104,6 @@ namespace Alliance.Entities
       set { mCurrentLife = Math.Max(0, value); }
     }
 
-    public float Orientation
-    {
-      get { return mOrientation; }
-    }
-
     public EntityState State
     {
       get { return mState; }
@@ -162,27 +114,42 @@ namespace Alliance.Entities
       get { return mID; }
     }
 
+    protected override string ImageKey
+    {
+      get { return "tank"; }
+    }
+
+    protected override Vector2 Origin
+    {
+      get { return mOrigin; }
+    }
+
     public Entity(GridCell startCell, GridCell goalCell, DijkstraType dijkstraKey)
     {
       mTargetCell = startCell;
       mGoalCell = goalCell;
       mState = EntityState.Alive;
-      mOrientation = 0f;
 
       float dx = (dijkstraKey == DijkstraType.Horizontal ? mTargetCell.Width : 0);
       float dy = (dijkstraKey == DijkstraType.Vertical ? mTargetCell.Height : 0);
 
-      mBounds.X = mTargetCell.X - dx;
-      mBounds.Y = mTargetCell.Y - dy;
+      X = mTargetCell.X - dx;
+      Y = mTargetCell.Y - dy;
 
-      mBounds.Width = mTargetCell.Width;
-      mBounds.Height = mTargetCell.Height;
+      Width = mTargetCell.Width;
+      Height = mTargetCell.Height;
 
       mMPS = MaxMovementPerSecond;
       ComputeOrientation();
 
       mID = Guid.NewGuid().ToString();
       mDijkstraKey = dijkstraKey;
+
+      // get the projectile image and size
+      Texture2D texture = GetImage();
+
+      // compute the origin and the scale
+      mOrigin = new Vector2(texture.Width / 2f, texture.Height / 2f);
     }
 
     public virtual bool CanPlacePiece(Piece piece)
@@ -216,7 +183,7 @@ namespace Alliance.Entities
     {
       if (mTargetCell == null)
       {
-        mOrientation = mDijkstraKey == DijkstraType.Horizontal ? 
+        mOrientation = (mDijkstraKey == DijkstraType.Horizontal) ? 
           0f : MathHelper.PiOver2;
       }
       else
@@ -335,9 +302,7 @@ namespace Alliance.Entities
     private void OnReadyForNextCell()
     {
       // switch the current cell
-      BeforeCurrentCellChanged();
       mCurrentCell = mTargetCell;
-      AfterCurrentCellChanged();
 
       // set the next cell
       if (mTargetCell != null)
@@ -345,32 +310,6 @@ namespace Alliance.Entities
 
       // compute the orientation
       ComputeOrientation();
-    }
-
-    private void AfterCurrentCellChanged()
-    {
-      if (mCurrentCell != null)
-      {
-        mCurrentCell.Register(this);
-      }
-    }
-
-    private void BeforeCurrentCellChanged()
-    {
-      if (mCurrentCell != null)
-      {
-        mCurrentCell.Unregister(this);
-      }
-    }
-
-    protected virtual Texture2D GetEntityImage()
-    {
-      return AllianceGame.Textures["tank"];
-    }
-
-    public virtual Color[,] GetEntityImageData()
-    {
-      return AllianceGame.TextureData["tank"];
     }
 
     public virtual void OnAttackedByProjectile(Projectile projectile)
@@ -383,68 +322,16 @@ namespace Alliance.Entities
       }
     }
 
-    public virtual DrawData GetDrawData(Vector2 offset)
+    protected override DrawData GetDrawData(Vector2 offset)
     {
-      Texture2D texture = GetEntityImage();
-      SizeF textureSize = new SizeF(texture.Width, texture.Height);
+      // get the draw data of the base
+      DrawData data = base.GetDrawData(offset);
 
-      Vector2 origin = textureSize.ToVector2() * .5f;
-      Vector2 scale = Utils.ComputeScale(textureSize, Size);
+      // get the correct position
+      Vector2 position = Position + offset + (Size.ToVector2() * .5f);
 
-      Vector2 myCenter = Size.ToVector2() * .5f;
-      Vector2 position = mBounds.Location + offset + myCenter;
-
-      return new DrawData(texture, textureSize, position, origin, scale);
-    }
-
-    public virtual Matrix ComputeTransform(Vector2 offset)
-    {
-      return ComputeTransform(GetDrawData(offset));
-    }
-
-    public virtual Matrix ComputeTransform(DrawData data)
-    {
-      // create the matrix for transforming the center
-      Matrix transform =
-        Matrix.CreateTranslation(-data.Origin.X, -data.Origin.Y, 0) *
-        Matrix.CreateRotationZ(mOrientation) *
-        Matrix.CreateScale(data.Scale.X, data.Scale.Y, 1f) *
-        Matrix.CreateTranslation(data.Position.X, data.Position.Y, 0);
-
-      // return the transform
-      return transform;
-    }
-
-    public virtual Vector2 GetCenter(Vector2 offset)
-    {
-      // get the drawing data
-      DrawData data = GetDrawData(offset);
-
-      // get the center of the image
-      Vector2 center = (data.TextureSize / 2f).ToVector2();
-
-      // compute the transform
-      Matrix transform = ComputeTransform(data);
-
-      // return the center transformated
-      Vector2 result;
-      Vector2.Transform(ref center, ref transform, out result);
-      return result;
-    }
-
-    public virtual BoxF GetBoundingBox(Vector2 offset)
-    {
-      // get the center
-      Vector2 center = GetCenter(offset);
-
-      // create a rough box that has the entity inside of it
-      float dW = Width * .5f;
-      float dH = Height * .5f;
-      return new BoxF(
-        center.X - dW,
-        center.Y - dH,
-        dW * 2f,
-        dH * 2f);
+      // return the updated draw data
+      return new DrawData(data.Texture, data.TextureSize, position, data.Origin, data.Scale);
     }
 
     public virtual void Draw(DrawParams dparams)

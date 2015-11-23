@@ -19,14 +19,9 @@ namespace Alliance.Projectiles
       Position += ((frameCount + 1) * Velocity * MovementPerSecond * 4);
     }
 
-    protected override Texture2D GetProjectileImage()
+    protected override string ImageKey
     {
-      return AllianceGame.Textures["bullet"];
-    }
-
-    public override Color[,] GetProjectileImageData()
-    {
-      return AllianceGame.TextureData["bullet"];
+      get { return "bullet"; }
     }
   }
 }

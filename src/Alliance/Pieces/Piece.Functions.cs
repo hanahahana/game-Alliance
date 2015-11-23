@@ -45,18 +45,26 @@ namespace Alliance.Pieces
 
   public partial class Piece
   {
-    public Vector2 Position { get { return mPosition; } }
-    public float X { get { return mPosition.X; } }
-    public float Y { get { return mPosition.Y; } }
     public GridCell[] Cells { get { return mCells; } }
-    public SizeF Size { get { return mSize; } }
-    public float Width { get { return mSize.Width; } }
-    public float Height { get { return mSize.Height; } }
     public float Progress { get { return mProgress; } }
     public int Level { get { return mLevel; } }
     public bool CanUpgrade { get { return mLevel < MaxLevel && Player.EnoughCashFor(this); } }
     public PieceState State { get { return mState; } }
-    public float Orientation { get { return mOrientation; } }
+
+    public virtual string Description { get { return mDescription; } }
+    public virtual string Name { get { return mName; } }
+    public virtual string UltimateName { get { return mUltimateName; } }
+    public virtual PieceGrouping Grouping { get { return mGrouping; } }
+    public virtual float Radius { get { return mRadius; } }
+    public virtual float Attack { get { return mAttack; } }
+    public virtual int Price { get { return mPrice; } }
+    public virtual int UpgradePercent { get { return mUpgradePercent; } }
+    public virtual bool IsBlocking { get { return mIsBlocking; } }
+    public virtual bool FaceTarget { get { return mFaceTarget; } }
+    public virtual float ProjectilesPerSecond { get { return mProjectilesPerSecond; } }
+    public virtual float ProjectileVelocity { get { return mProjectileVelocity; } }
+    public virtual float ProjectileLifeInSeconds { get { return mProjectileLifeInSeconds; } }
+    public virtual int NumberProjectilesToFire { get { return mNumberProjectilesToFire; } }
 
     public bool Selected
     {
@@ -64,22 +72,13 @@ namespace Alliance.Pieces
       set { mSelected = value; }
     }
 
-    public override int GetHashCode()
-    {
-      return (new BoxF(mPosition, mSize)).GetHashCode();
-    }
-
-    public override bool Equals(object obj)
-    {
-      Piece piece = obj as Piece;
-      if (piece == null) return false;
-      return piece.GetHashCode().Equals(this.GetHashCode());
-    }
-
     public override string ToString()
     {
       return Name;
     }
+
+    protected override string ImageKey { get { return "turret"; } }
+    protected override Vector2 Origin { get { return Vector2.Zero; } }
 
     public int GetLifetimePrice()
     {
@@ -107,8 +106,7 @@ namespace Alliance.Pieces
       }
 
       piece.mCells = cells;
-      piece.mPosition = selection.Bounds.Location;
-      piece.mSize = selection.Bounds.Size;
+      piece.Bounds = selection.Bounds;
       piece.SavePriceInfo();
 
       if (!Player.PurchasePiece(this))
@@ -168,8 +166,7 @@ namespace Alliance.Pieces
     {
       if (piece != null && mSelectionPiece != null)
       {
-        piece.mPosition = mSelectionPiece.Bounds.Location;
-        piece.mSize = mSelectionPiece.Bounds.Size;
+        piece.Bounds = mSelectionPiece.Bounds;
       }
     }
 

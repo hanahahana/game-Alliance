@@ -39,9 +39,9 @@ namespace Alliance.Pieces
       mGrouping = PieceGrouping.Four;
     }
 
-    protected override Texture2D GetTowerImage()
+    protected override string ImageKey
     {
-      return AllianceGame.Textures["flamethrower"];
+      get { return "flamethrower"; }
     }
 
     public override void Update(GameTime gameTime)
@@ -67,7 +67,7 @@ namespace Alliance.Pieces
         mRadius = 100;
 
         mProjectilesPerSecond = 10;
-        mProjectileLifeInSeconds = 9.1676f;
+        mProjectileLifeInSeconds = 1.1676f;
 
         StringBuilder sb = new StringBuilder();
         sb.AppendLine("Rotates to gain energy and releases a VERY powerful flame wave. Careful, some enemies can't be burned.");
@@ -97,7 +97,9 @@ namespace Alliance.Pieces
       }
       else
       {
+        float extra = mRadius / 2f;
         projectile = new FlameProjectile(mProjectileLifeInSeconds);
+        projectile.Size = new SizeF(projectile.Width + extra, projectile.Height + extra);
       }
       return projectile;
     }

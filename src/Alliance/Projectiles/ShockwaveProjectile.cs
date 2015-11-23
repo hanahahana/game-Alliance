@@ -32,7 +32,7 @@ namespace Alliance.Projectiles
       : base(timeToLiveInSeconds)
     {
       mOwnerBounds = ownerBounds;
-      mColor = RandomHelper.NextBool() ? Color.Gray :
+      Color = RandomHelper.NextBool() ? Color.Gray :
         RandomHelper.NextBool() ? Color.Black : Color.DarkGray;
     }
 
@@ -60,19 +60,14 @@ namespace Alliance.Projectiles
       UpdateScaleAndOrientation(frameCount * .1f);
     }
 
-    protected override Texture2D GetProjectileImage()
+    protected override string ImageKey
     {
-      return AllianceGame.Textures["wave"];
+      get { return "wave"; }
     }
 
-    public override Color[,] GetProjectileImageData()
+    protected override DrawData GetDrawData(Vector2 offset)
     {
-      return AllianceGame.TextureData["wave"];
-    }
-
-    public override DrawData GetDrawData(Vector2 offset)
-    {
-      Texture2D projectile = GetProjectileImage();
+      Texture2D projectile = GetImage();
       SizeF projectileSize = new SizeF(projectile.Width, projectile.Height);
 
       Vector2 origin = projectileSize.ToVector2() * .5f;

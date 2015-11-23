@@ -48,7 +48,6 @@ namespace Alliance.Objects
     private GridCell[] mAdjacentCells;
     private int mAdjacentCellsIdx;
     private DebugAttributes mAttributes;
-    private OrderedDictionary mRegisteredEntities;
     private DijkstraData[] mDijkstraData;
 
     public BoxF Bounds
@@ -127,11 +126,6 @@ namespace Alliance.Objects
       get { return mPiece; }
     }
 
-    public int RegisteredEntitiesCount
-    {
-      get { return mRegisteredEntities.Count; }
-    }
-
     public DijkstraData this[DijkstraType key]
     {
       get { return mDijkstraData[(int)key]; }
@@ -147,7 +141,6 @@ namespace Alliance.Objects
       mIsThroughway = isThroughway;
       mAdjacentCells = new GridCell[4];
       mAdjacentCellsIdx = 0;
-      mRegisteredEntities = new OrderedDictionary(50);
       InitializeDijsktraData();
     }
 
@@ -198,29 +191,6 @@ namespace Alliance.Objects
     public void Add(GridCell adjacent)
     {
       mAdjacentCells[mAdjacentCellsIdx++] = adjacent;
-    }
-
-    public void Register(Entity entity)
-    {
-      mRegisteredEntities[entity] = entity;
-    }
-
-    public void Unregister(Entity entity)
-    {
-      mRegisteredEntities.Remove(entity);
-    }
-
-    public Entity GetMostRecentRegisteredEntity()
-    {
-      Entity retval = null;
-      int idx = mRegisteredEntities.Count - 1;
-
-      if (idx > -1)
-      {
-        retval = mRegisteredEntities[idx] as Entity;
-      }
-
-      return retval;
     }
   }
 }

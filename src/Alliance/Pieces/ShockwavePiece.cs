@@ -52,9 +52,9 @@ namespace Alliance.Pieces
       return projectile;
     }
 
-    protected override Texture2D GetTowerImage()
+    protected override string ImageKey
     {
-      return AllianceGame.Textures["shockwaveGenerator"];
+      get { return "shockwaveGenerator"; }
     }
 
     protected override void DrawWeaponBase(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
@@ -64,7 +64,7 @@ namespace Alliance.Pieces
 
     protected override void DrawWeaponTower(SpriteBatch spriteBatch, BoxF bounds, BoxF inside)
     {
-      Texture2D tower = GetTowerImage();
+      Texture2D tower = GetImage();
       Vector2 scale = Utils.ComputeScale(new SizeF(tower.Width, tower.Height), bounds.Size);
 
       spriteBatch.Draw(

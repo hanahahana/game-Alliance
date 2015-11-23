@@ -14,18 +14,13 @@ namespace Alliance.Projectiles
     public SprinklerProjectile(double timeToLiveInSeconds)
       : base(timeToLiveInSeconds)
     {
-      mColor = Utils.GetIntermediateColor(Color.LightBlue, Color.DarkBlue, .65f, 0f, 1f);
+      Color = Utils.GetIntermediateColor(Color.LightBlue, Color.DarkBlue, .65f, 0f, 1f);
       Size = new SizeF(10f, 8f);
     }
 
-    protected override Texture2D GetProjectileImage()
+    protected override string ImageKey
     {
-      return AllianceGame.Textures["fragment"];
-    }
-
-    public override Color[,] GetProjectileImageData()
-    {
-      return AllianceGame.TextureData["fragment"];
+      get { return "fragment"; }
     }
   }
 }

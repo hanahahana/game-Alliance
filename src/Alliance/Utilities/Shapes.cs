@@ -84,6 +84,41 @@ namespace Alliance.Utilities
       DrawLine(spriteBatch, new Vector2(x + width, y), vertScale, color);
     }
 
+    public static void DrawPolygon(SpriteBatch spriteBatch, Color color, Vector2[] vectors)
+    {
+      if (!IsPixelInitialized)
+        InitializePixelTexture(spriteBatch.GraphicsDevice);
+
+      // cycle through the vectors
+      for (int i = 1; i < vectors.Length; i++)
+      {
+        // get the two vectors
+        Vector2 v1 = vectors[i - 1];
+        Vector2 v2 = vectors[i];
+
+        // calculate the distance between the two vectors
+        float distance = Vector2.Distance(v1, v2);
+
+        // calculate the scale
+        Vector2 scale = new Vector2(distance, 1f);
+
+        // calculate the angle between the two vectors
+        float angle = (float)Math.Atan2((double)(v2.Y - v1.Y), (double)(v2.X - v1.X));
+
+        // stretch the pixel between the two vectors
+        spriteBatch.Draw(
+          InternalPixel,
+          v1,
+          null,
+          color,
+          angle,
+          Vector2.Zero,
+          scale,
+          SpriteEffects.None,
+          0f);
+      }
+    }
+
     public static void FillRectangle(SpriteBatch spriteBatch, Rectangle rectangle, Color color)
     {
       FillRectangle(spriteBatch, rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height, color);

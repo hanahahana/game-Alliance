@@ -16,17 +16,12 @@ namespace Alliance.Projectiles
     public RailgunProjectile(double timeToLiveInSeconds)
       : base(timeToLiveInSeconds)
     {
-      mColor = Utils.GetIntermediateColor(Color.Yellow, Color.Red, .65f, 0f, 1f);
+      Color = Utils.GetIntermediateColor(Color.Yellow, Color.Red, .65f, 0f, 1f);
     }
 
-    protected override Texture2D GetProjectileImage()
+    protected override string ImageKey
     {
-      return AllianceGame.Textures["pulse"];
-    }
-
-    public override Color[,] GetProjectileImageData()
-    {
-      return AllianceGame.TextureData["pulse"];
+      get { return "pulse"; }
     }
 
     public override void UpdateByFrameCount(int frameCount)

@@ -17,23 +17,18 @@ namespace Alliance.Projectiles
     public DebriProjectile(Projectile projectile, float orientation)
       : base(.3)
     {
-      mColor = Utils.GetIntermediateColor(Color.Yellow, Color.Black, .55f, 0, 1);
-      mOrientation = orientation;
-      mVelocity = Utils.ComputeProjectileDirection(mOrientation);
+      mVelocity = Utils.ComputeProjectileDirection(orientation);
       mAttack = projectile.Attack * 3f;
 
+      Color = Utils.GetIntermediateColor(Color.Yellow, Color.Black, .55f, 0, 1);
+      mOrientation = orientation;
       Position = projectile.Position;
       Size = new SizeF(3.5f, 3.5f);
     }
 
-    protected override Texture2D GetProjectileImage()
+    protected override string ImageKey
     {
-      return AllianceGame.Textures["debri"];
-    }
-
-    public override Color[,] GetProjectileImageData()
-    {
-      return AllianceGame.TextureData["debri"];
+      get { return "debri"; }
     }
 
     public static DebriProjectile[] Create(Projectile projectile, int count)
