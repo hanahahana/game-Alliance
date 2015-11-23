@@ -27,6 +27,8 @@ namespace Alliance
 {
   public partial class GridComponent
   {
+    protected ContentManager Content { get { return Game.Content; } }
+
     #region Initialization Functions
     private void InitializeVariables()
     {
@@ -42,16 +44,41 @@ namespace Alliance
       lstPieces.X = (int)(X + Width + ListDelta);
       lstPieces.Y = (int)(Y + MiddleOffset.Height);
       lstPieces.Width = (GraphicsDevice.Viewport.Width - (lstPieces.X + ListDelta));
-      lstPieces.Height = lstPieces.Width;
+      lstPieces.Height = (int)(lstPieces.Width * .85f);
       lstPieces.HideSelection = false;
 
       List<Piece> pieces = Utils.RetrieveAllSublcassesOf<Piece>();
       foreach (Piece piece in pieces)
       {
-        lstPieces.Items.Add(new ListBox.ListBoxItem(piece));
+        lstPieces.Items.Add(new ListBoxItem(piece));
       }
 
       mGui.Controls.Add(lstPieces);
+    }
+
+    private void InitializeDescriptionBox()
+    {
+      cptDescription = new Caption();
+      cptDescription.X = lstPieces.X;
+      cptDescription.Y = (lstPieces.Y + lstPieces.Height) + 4;
+      cptDescription.Width = lstPieces.Width;
+      cptDescription.Height = (int)Math.Round(captionFont.MeasureString("Z").Y + 5);
+      cptDescription.BackColor = Color.DarkGray;
+      cptDescription.BorderColor = Color.DarkGray;
+      cptDescription.Font = captionFont;
+
+      txtDescription = new TextBox();
+      txtDescription.X = lstPieces.X;
+      txtDescription.Y = (cptDescription.Y + cptDescription.Height);
+      txtDescription.Width = lstPieces.Width;
+      txtDescription.Height = (int)(Y + Height) - (txtDescription.Y + 4);
+
+      txtDescription.BackColor = Color.LightGray;
+      txtDescription.BorderColor = Color.LightGray;
+      txtDescription.BorderThickness = 2;
+
+      mGui.Controls.Add(cptDescription);
+      mGui.Controls.Add(txtDescription);
     }
 
     private void InitializeGrid()
@@ -136,6 +163,7 @@ namespace Alliance
     #region Update Functions
     private void UpdatePieces(UpdateParams uparams)
     {
+      bool resolve = false;
       for (int i = mPieces.Count - 1; i > -1; --i)
       {
         Piece piece = mPieces[i];
@@ -145,12 +173,25 @@ namespace Alliance
         {
           // remove the piece
           mPieces.RemoveAt(i);
+
+          // if we remove a piece the grid needs to be re-solved
+          resolve = true;
         }
       }
+
+      if (resolve)
+        SolveGrid();
     }
 
-    private void ProcessPieceRequests(UpdateParams uparams)
+    private void ProcessInput(UpdateParams uparams)
     {
+      // if the user selects a group of cells
+      if (uparams.Input.SelectClick)
+      {
+        // process the selection click
+        OnSelectClick(uparams);
+      }
+
       bool selectedPieceValid = mSelectedPiece != null && mSelectedPiece.Selected;
       if (uparams.Input.SellRequested && selectedPieceValid)
       {
@@ -159,6 +200,11 @@ namespace Alliance
       if (uparams.Input.UpgradeRequested && selectedPieceValid)
       {
         mSelectedPiece.Upgrade();
+      }
+      if (uparams.Input.ClearSelections)
+      {
+        lstPieces.SelectedIndex = -1;
+        ClearSelection();
       }
     }
 
@@ -362,6 +408,40 @@ namespace Alliance
         }
       }
       return cells.ToArray();
+    }
+
+    private void UpdateDescriptionText(UpdateParams uparams)
+    {
+      Piece piece = ValidateCurrentDescriptionPiece(uparams);
+      if (piece != null)
+      {
+        txtDescription.Text = piece.Description;
+        cptDescription.Text = piece.Name;
+      }
+    }
+
+    private Piece ValidateCurrentDescriptionPiece(UpdateParams uparams)
+    {
+      Piece piece = null;
+      bool visible = lstPieces.SelectedIndex > -1 || mSelectedPiece != null;
+
+      if (visible)
+      {
+        piece = mSelectedPiece;
+        if (piece == null)
+        {
+          piece = lstPieces.Items[lstPieces.SelectedIndex].Value as Piece;
+        }
+        if (piece == null)
+        {
+          visible = false;
+        }
+      }
+
+      txtDescription.Visible = visible;
+      cptDescription.Visible = visible;
+
+      return piece;
     }
     #endregion
 

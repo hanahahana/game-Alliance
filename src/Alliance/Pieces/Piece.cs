@@ -72,6 +72,7 @@ namespace Alliance.Pieces
     public int Level { get { return mLevel; } }
     public bool CanUpgrade { get { return mLevel < MaxLevel; } }
     public PieceState State { get { return mState; } }
+    public virtual bool IsBlocking { get { return true; } }
 
     public bool Selected
     {

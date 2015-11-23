@@ -75,7 +75,7 @@ namespace Alliance
         cellSize.X = Math.Max(cell.Width, cellSize.X);
         cellSize.Y = Math.Max(cell.Height, cellSize.Y);
 
-        if (cell.Type == CellType.Blocked || cell.IsOuter)
+        if (cell.Type == CellType.Blocked || cell.IsOuter || cell.Piece != null)
         {
           blocked = true;
         }

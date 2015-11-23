@@ -29,6 +29,12 @@ namespace Alliance
       get { return mUpgradeRequested; }
     }
 
+    private bool mClearSelections;
+    public bool ClearSelections
+    {
+      get { return mClearSelections; }
+    }
+
     private Vector2 mCursorPosition;
     public Vector2 CursorPosition
     {
@@ -50,6 +56,7 @@ namespace Alliance
       mCursorPosition = new Vector2(currentMouse.X, currentMouse.Y);
       mSellRequested = IsKeyPress(currentKeys, Keys.S);
       mUpgradeRequested = IsKeyPress(currentKeys, Keys.U);
+      mClearSelections = IsKeyPress(currentKeys, Keys.Escape);
 
       previousKeys = currentKeys;
       previousMouse = currentMouse;

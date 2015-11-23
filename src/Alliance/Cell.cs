@@ -163,7 +163,8 @@ namespace Alliance
 
     public void SetPiece(Piece piece)
     {
-      mType = CellType.Blocked;
+      if (piece.IsBlocking)
+        mType = CellType.Blocked;
       mPiece = piece;
     }
 

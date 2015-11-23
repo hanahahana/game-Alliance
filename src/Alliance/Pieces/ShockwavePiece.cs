@@ -7,7 +7,7 @@ namespace Alliance.Pieces
 {
   public class ShockwavePiece : Piece
   {
-    const string ShockwaveName = "Shockwave";
+    private const string ShockwaveName = "Shockwave";
     private string mDescription;
 
     public ShockwavePiece()
@@ -29,7 +29,7 @@ namespace Alliance.Pieces
 
     public override PieceGrouping Grouping
     {
-      get { return PieceGrouping.Four; }
+      get { return PieceGrouping.Two; }
     }
 
     protected override Piece CreatePiece(Cell[] cells)

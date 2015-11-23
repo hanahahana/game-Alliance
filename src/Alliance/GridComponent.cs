@@ -30,7 +30,7 @@ namespace Alliance
     private const int CellWidth = 15;
     private const int CellHeight = 15;
     private const int HalfThroughWay = 6;
-    private const int OrthogonalCost = 10;
+    private const int OrthogonalCost = 12;
 
     private Cell[,] Cells;
     private int NumRows;
@@ -52,6 +52,9 @@ namespace Alliance
 
     private GuiManager mGui;
     private ListBox lstPieces;
+    private TextBox txtDescription;
+    private Caption cptDescription;
+    private SpriteFont captionFont;
 
     public Vector2 Position
     {
@@ -84,6 +87,7 @@ namespace Alliance
     {
       base.LoadContent();
       mSpriteBatch = new SpriteBatch(GraphicsDevice);
+      captionFont = Content.Load<SpriteFont>("Fonts\\ComicSans");
     }
 
     public override void Initialize()
@@ -92,10 +96,14 @@ namespace Alliance
       InitializeProperties();
       InitializeGrid();
       InitializeListBox();
+      InitializeDescriptionBox();
     }
 
     public override void Update(GameTime gameTime)
     {
+      // immediately add some invaders
+      AddInvaders();
+
       // get the input provider
       InputProvider input = (InputProvider)Game.Services.GetService(typeof(InputProvider));
 
@@ -108,21 +116,50 @@ namespace Alliance
       // update the selection the user has made
       UpdateSelectionPiece(uparams);
 
-      // if the user selects a group of cells
-      if (input.SelectClick)
-      {
-        // process the selection click
-        OnSelectClick(uparams);
-      }
-
       // process any requests from the user for a piece
-      ProcessPieceRequests(uparams);
+      ProcessInput(uparams);
+
+      // update the description text that is displayed
+      UpdateDescriptionText(uparams);
 
       // update all pieces
       UpdatePieces(uparams);
 
+      // update all invaliders
+      UpdateInvaliders(uparams);
+
       base.Update(gameTime);
     }
+
+    private void UpdateInvaliders(UpdateParams uparams)
+    {
+      for (int i = mEntities.Count - 1; i > -1; --i)
+      {
+        Entity entity = mEntities[i];
+        entity.Update(uparams.GameTime);
+        if (entity.State != EntityState.Alive)
+        {
+          mEntities.RemoveAt(i);
+          if (entity.State == EntityState.MadeIt)
+          {
+            AllianceGame.Sounds.PlayCue("alright");
+          }
+        }
+      }
+    }
+
+    private void AddInvaders()
+    {
+      if (RandomHelper.NextRareBool())
+      {
+        int count = RandomHelper.Next(1, 5);
+        for (int i = 0; i < count; ++i)
+        {
+          Tank tank = new Tank(HorzStartCell, HorzGoalCell);
+          mEntities.Add(tank);
+        }
+      }
+    }    
 
     public override void Draw(GameTime gameTime)
     {
@@ -130,9 +167,19 @@ namespace Alliance
 
       DrawGrid();
       DrawPieces();
+      DrawInvaders();
 
       mSpriteBatch.End();
       base.Draw(gameTime);
+    }
+
+    private void DrawInvaders()
+    {
+      Vector2 offset = (Vector2)MiddleOffset + mPosition;
+      foreach (Entity invader in mEntities)
+      {
+        invader.Draw(mSpriteBatch, offset);
+      }
     }
 
     #region Solve Grid

@@ -57,7 +57,8 @@ namespace Alliance
     protected override void Initialize()
     {
       // TODO: Add your initialization logic here
-
+      graphics.IsFullScreen = true;
+      graphics.ApplyChanges();
       base.Initialize();
     }
 
