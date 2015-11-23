@@ -1,22 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.Xna.Framework;
 
 namespace Alliance.Pieces
 {
-  public class ShockwavePiece : Piece
+  public class MissilePiece : Piece
   {
-    private const string ShockwaveName = "Shockwave";
+    private const string MissileName = "Missile";
     private string mDescription;
     private float mRadius;
 
-    public ShockwavePiece()
+    public MissilePiece()
     {
       StringBuilder sb = new StringBuilder();
-      sb.AppendLine("Creates a shockwave to send at the enemy!");
+      sb.Append("Slams multiple missiles into the enemy. They explode on contact and affect the surrounding pieces.");
+      sb.AppendLine(" Missiles are best with flying enemies but can sometimes damage friendly units.");
       mDescription = sb.ToString();
-      mRadius = 50;
+      mRadius = 80;
     }
 
     public override string Description
@@ -26,7 +26,7 @@ namespace Alliance.Pieces
 
     public override string Name
     {
-      get { return ShockwaveName; }
+      get { return MissileName; }
     }
 
     public override PieceGrouping Grouping
@@ -41,7 +41,7 @@ namespace Alliance.Pieces
 
     protected override Piece CreatePiece(Cell[] cells)
     {
-      ShockwavePiece piece = new ShockwavePiece();
+      MissilePiece piece = new MissilePiece();
       return piece;
     }
   }

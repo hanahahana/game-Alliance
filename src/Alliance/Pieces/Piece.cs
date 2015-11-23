@@ -51,6 +51,8 @@ namespace Alliance.Pieces
     public abstract string Description { get; }
     public abstract string Name { get; }
     public abstract PieceGrouping Grouping { get; }
+    public abstract float Radius { get; }
+
     protected abstract Piece CreatePiece(Cell[] cells);
 
     protected Vector2 mPosition;
@@ -72,6 +74,7 @@ namespace Alliance.Pieces
     public int Level { get { return mLevel; } }
     public bool CanUpgrade { get { return mLevel < MaxLevel; } }
     public PieceState State { get { return mState; } }
+
     public virtual bool IsBlocking { get { return true; } }
 
     public bool Selected
@@ -195,7 +198,7 @@ namespace Alliance.Pieces
       float y = inside.Y + ((inside.Height / 2f) - (height / 2f));
 
       float progWidth = width * Utils.CalculatePercent(mProgress, 0, MaxProgress);
-      Color progColor = Utils.GetIntermediateColor(Color.DarkBlue, Color.LightBlue, mProgress, 0, MaxProgress);
+      Color progColor = Utils.GetIntermediateColor(Color.Red, Color.DarkGreen, mProgress, 0, MaxProgress);
 
       Shapes.FillRectangle(spriteBatch, x, y, progWidth, height, progColor);
       Shapes.DrawRectangle(spriteBatch, x, y, width, height, Color.Black);
@@ -242,6 +245,15 @@ namespace Alliance.Pieces
       {
         mProgress = 0;
         mState = PieceState.Upgrading;
+      }
+    }
+
+    public static void Follow(Piece piece, SelectionPiece mSelectionPiece)
+    {
+      if (piece != null && mSelectionPiece != null)
+      {
+        piece.mPosition = mSelectionPiece.Bounds.Location;
+        piece.mSize = mSelectionPiece.Bounds.Size;
       }
     }
   }

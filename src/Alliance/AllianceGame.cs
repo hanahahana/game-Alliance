@@ -57,8 +57,6 @@ namespace Alliance
     protected override void Initialize()
     {
       // TODO: Add your initialization logic here
-      graphics.IsFullScreen = true;
-      graphics.ApplyChanges();
       base.Initialize();
     }
 
@@ -107,7 +105,7 @@ namespace Alliance
     /// <param name="gameTime">Provides a snapshot of timing values.</param>
     protected override void Draw(GameTime gameTime)
     {
-      device.Clear(Color.CornflowerBlue);
+      device.Clear(ClearOptions.Target | ClearOptions.DepthBuffer, Color.CornflowerBlue, 1f, 0);
       base.Draw(gameTime);
     }
   }

@@ -27,7 +27,27 @@ namespace Alliance
 {
   public partial class GridComponent
   {
+    #region Properties
     protected ContentManager Content { get { return Game.Content; } }
+
+    public Vector2 Position
+    {
+      get { return mPosition; }
+      set { mPosition = value; }
+    }
+
+    public float X
+    {
+      get { return mPosition.X; }
+      set { mPosition.X = value; }
+    }
+
+    public float Y
+    {
+      get { return mPosition.Y; }
+      set { mPosition.Y = value; }
+    }
+    #endregion
 
     #region Initialization Functions
     private void InitializeVariables()
@@ -160,51 +180,18 @@ namespace Alliance
     }
     #endregion
 
-    #region Update Functions
-    private void UpdatePieces(UpdateParams uparams)
-    {
-      bool resolve = false;
-      for (int i = mPieces.Count - 1; i > -1; --i)
-      {
-        Piece piece = mPieces[i];
-        piece.Update(uparams.GameTime);
+    #region Helper Functions
 
-        if (piece.State == PieceState.Sold)
+    private void AddInvaders()
+    {
+      if (RandomHelper.NextRareBool())
+      {
+        int count = RandomHelper.Next(1, 5);
+        for (int i = 0; i < count; ++i)
         {
-          // remove the piece
-          mPieces.RemoveAt(i);
-
-          // if we remove a piece the grid needs to be re-solved
-          resolve = true;
+          Tank tank = new Tank(HorzStartCell, HorzGoalCell);
+          mEntities.Add(tank);
         }
-      }
-
-      if (resolve)
-        SolveGrid();
-    }
-
-    private void ProcessInput(UpdateParams uparams)
-    {
-      // if the user selects a group of cells
-      if (uparams.Input.SelectClick)
-      {
-        // process the selection click
-        OnSelectClick(uparams);
-      }
-
-      bool selectedPieceValid = mSelectedPiece != null && mSelectedPiece.Selected;
-      if (uparams.Input.SellRequested && selectedPieceValid)
-      {
-        mSelectedPiece.Sell();
-      }
-      if (uparams.Input.UpgradeRequested && selectedPieceValid)
-      {
-        mSelectedPiece.Upgrade();
-      }
-      if (uparams.Input.ClearSelections)
-      {
-        lstPieces.SelectedIndex = -1;
-        ClearSelection();
       }
     }
 
@@ -252,68 +239,6 @@ namespace Alliance
             found = true;
             SetSelection(piece);
           }
-        }
-      }
-    }
-
-    private void UpdateSelectionPiece(UpdateParams uparams)
-    {
-      if (lstPieces.SelectedIndex < 0)
-      {
-        // clear the selection
-        mSelectionPiece.ClearSelection();
-      }
-      else
-      {
-        // the user has something selected in the list. Our goal is to show the user the
-        // available places where their selection can be set.
-
-        // get the piece thats associated with the selected item
-        Piece piece = lstPieces.Items[lstPieces.SelectedIndex].Value as Piece;
-
-        // figure out how much space this piece needs. This piece needs cellsNeeded by cellsNeeded
-        int cellsNeeded = (int)piece.Grouping;
-
-        // create a list to hold how many cells will be needed
-        int capacity = cellsNeeded * cellsNeeded;
-        List<Cell> group = new List<Cell>(capacity);
-
-        // if we only need one cell
-        if (cellsNeeded == 1)
-        {
-          // find the cell containing the cursor position
-          Index index = Utils.GetIndexCorrespondingTo(uparams.Input.CursorPosition, CellWidth, CellHeight, uparams.Offset);
-          if (Utils.IndexValid(index, NumCols, NumRows))
-          {
-            group.Add(Cells[index.C, index.R]);
-          }
-        }
-        else if (cellsNeeded > 1)
-        {
-          // if we need more cells, then select the cells whose center are contained within the current
-          // cursor position
-          float width = cellsNeeded * CellWidth;
-          float height = cellsNeeded * CellHeight;
-          BoxF cursorBox = new BoxF(
-            uparams.Input.CursorPosition.X - (width / 2),
-            uparams.Input.CursorPosition.Y - (height / 2),
-            width,
-            height);
-          Cell[] cells = GetCellsWithCenterContainedIn(cursorBox, uparams.Offset);
-          group.AddRange(cells);
-        }
-
-        // if we found the group of cells, then set the new selection
-        if (group.Count == capacity)
-        {
-          /// Set the current selection. This will determine the size of the selection when drawing, and the
-          /// color based on the group of cells.
-          mSelectionPiece.SetSelection(group, piece);
-        }
-        else
-        {
-          // the mouse isn't near anything, so just clear it
-          mSelectionPiece.ClearSelection();
         }
       }
     }
@@ -410,9 +335,143 @@ namespace Alliance
       return cells.ToArray();
     }
 
+    private Piece RetrieveCurrentSelectedPiece(UpdateParams uparams)
+    {
+      Piece piece = null;
+
+      bool validSelection = lstPieces.SelectedIndex > -1 || mSelectedPiece != null;
+      if (validSelection)
+      {
+        piece = mSelectedPiece;
+        if (piece == null)
+        {
+          piece = lstPieces.Items[lstPieces.SelectedIndex].Value as Piece;
+          Piece.Follow(piece, mSelectionPiece);
+        }
+      }
+
+      return piece;
+    }
+
+    #endregion
+
+    #region Update Functions
+
+    private void UpdatePieces(UpdateParams uparams)
+    {
+      bool resolve = false;
+      for (int i = mPieces.Count - 1; i > -1; --i)
+      {
+        Piece piece = mPieces[i];
+        piece.Update(uparams.GameTime);
+
+        if (piece.State == PieceState.Sold)
+        {
+          // remove the piece
+          mPieces.RemoveAt(i);
+
+          // if we remove a piece the grid needs to be re-solved
+          resolve = true;
+        }
+      }
+
+      if (resolve)
+        SolveGrid();
+    }
+
+    private void ProcessInput(UpdateParams uparams)
+    {
+      // if the user selects a group of cells
+      if (uparams.Input.SelectClick)
+      {
+        // process the selection click
+        OnSelectClick(uparams);
+      }
+
+      bool selectedPieceValid = mSelectedPiece != null && mSelectedPiece.Selected;
+      if (uparams.Input.SellRequested && selectedPieceValid)
+      {
+        mSelectedPiece.Sell();
+      }
+      if (uparams.Input.UpgradeRequested && selectedPieceValid)
+      {
+        mSelectedPiece.Upgrade();
+      }
+      if (uparams.Input.ClearSelections)
+      {
+        lstPieces.SelectedIndex = -1;
+        ClearSelection();
+      }
+    }
+
+    private void UpdateSelectionPiece(UpdateParams uparams)
+    {
+      if (lstPieces.SelectedIndex < 0)
+      {
+        // clear the selection
+        mSelectionPiece.ClearSelection();
+      }
+      else
+      {
+        // the user has something selected in the list. Our goal is to show the user the
+        // available places where their selection can be set.
+
+        // get the piece thats associated with the selected item
+        Piece piece = lstPieces.Items[lstPieces.SelectedIndex].Value as Piece;
+
+        // figure out how much space this piece needs. This piece needs cellsNeeded by cellsNeeded
+        int cellsNeeded = (int)piece.Grouping;
+
+        // create a list to hold how many cells will be needed
+        int capacity = cellsNeeded * cellsNeeded;
+        List<Cell> group = new List<Cell>(capacity);
+
+        // if we only need one cell
+        if (cellsNeeded == 1)
+        {
+          // find the cell containing the cursor position
+          Index index = Utils.GetIndexCorrespondingTo(uparams.Input.CursorPosition, CellWidth, CellHeight, uparams.Offset);
+          if (Utils.IndexValid(index, NumCols, NumRows))
+          {
+            group.Add(Cells[index.C, index.R]);
+          }
+        }
+        else if (cellsNeeded > 1)
+        {
+          // if we need more cells, then select the cells whose center are contained within the current
+          // cursor position
+          float width = cellsNeeded * CellWidth;
+          float height = cellsNeeded * CellHeight;
+          BoxF cursorBox = new BoxF(
+            uparams.Input.CursorPosition.X - (width / 2),
+            uparams.Input.CursorPosition.Y - (height / 2),
+            width,
+            height);
+          Cell[] cells = GetCellsWithCenterContainedIn(cursorBox, uparams.Offset);
+          group.AddRange(cells);
+        }
+
+        // if we found the group of cells, then set the new selection
+        if (group.Count == capacity)
+        {
+          /// Set the current selection. This will determine the size of the selection when drawing, and the
+          /// color based on the group of cells.
+          mSelectionPiece.SetSelection(group, piece);
+        }
+        else
+        {
+          // the mouse isn't near anything, so just clear it
+          mSelectionPiece.ClearSelection();
+        }
+      }
+    }
+
     private void UpdateDescriptionText(UpdateParams uparams)
     {
-      Piece piece = ValidateCurrentDescriptionPiece(uparams);
+      Piece piece = RetrieveCurrentSelectedPiece(uparams);
+      txtDescription.Visible = (piece != null);
+      cptDescription.Visible = (piece != null);
+
       if (piece != null)
       {
         txtDescription.Text = piece.Description;
@@ -420,41 +479,49 @@ namespace Alliance
       }
     }
 
-    private Piece ValidateCurrentDescriptionPiece(UpdateParams uparams)
+    private void UpdateInvaliders(UpdateParams uparams)
     {
-      Piece piece = null;
-      bool visible = lstPieces.SelectedIndex > -1 || mSelectedPiece != null;
-
-      if (visible)
+      for (int i = mEntities.Count - 1; i > -1; --i)
       {
-        piece = mSelectedPiece;
-        if (piece == null)
+        Entity entity = mEntities[i];
+        entity.Update(uparams.GameTime);
+        if (entity.State != EntityState.Alive)
         {
-          piece = lstPieces.Items[lstPieces.SelectedIndex].Value as Piece;
-        }
-        if (piece == null)
-        {
-          visible = false;
+          mEntities.RemoveAt(i);
+          if (entity.State == EntityState.MadeIt)
+          {
+            //AllianceGame.Sounds.PlayCue("alright");
+          }
         }
       }
-
-      txtDescription.Visible = visible;
-      cptDescription.Visible = visible;
-
-      return piece;
     }
+
+    private void UpdateSelectedPieceRadius(UpdateParams uparams)
+    {
+      Piece piece = RetrieveCurrentSelectedPiece(uparams);
+      currentArea = BoxF.Empty;
+
+      bool validPiece = (piece != null) && (piece.State == PieceState.Idle);
+      if (validPiece && !piece.Size.IsEmpty)
+      {
+        float dx = piece.Width * .5f;
+        float dy = piece.Height * .5f;
+        currentArea = new BoxF(piece.X + dx, piece.Y + dy, piece.Radius, piece.Radius);
+      }
+    }
+
     #endregion
 
     #region Drawing Functions
+
     private void DrawPieces()
     {
       Vector2 offset = (Vector2)MiddleOffset + mPosition;
-      mSelectionPiece.Draw(mSpriteBatch, offset);
-
       foreach (Piece piece in mPieces)
       {
         piece.Draw(mSpriteBatch, offset);
       }
+      mSelectionPiece.Draw(mSpriteBatch, offset);
     }
 
     private void DrawGrid()
@@ -465,15 +532,39 @@ namespace Alliance
         for (int r = 0; r < NumRows; ++r)
         {
           Cell node = Cells[c, r];
-          BoxF bounds = new BoxF(node.X + offset.X, node.Y + offset.Y, node.Width, node.Height);
-
           if (node.IsOuter && !node.IsThroughway)
           {
+            BoxF bounds = new BoxF(node.X + offset.X, node.Y + offset.Y, node.Width, node.Height);
             Shapes.FillRectangle(mSpriteBatch, bounds, Color.White);
           }
         }
       }
     }
+
+    private void DrawInvaders()
+    {
+      Vector2 offset = (Vector2)MiddleOffset + mPosition;
+      foreach (Entity invader in mEntities)
+      {
+        invader.Draw(mSpriteBatch, offset);
+      }
+    }
+
+    private void DrawPieceRadius()
+    {
+      if (!currentArea.IsEmpty)
+      {
+        Vector2 offset = (Vector2)MiddleOffset + mPosition;
+        Vector2 pos = currentArea.Location + offset;
+        Vector2 size = new Vector2(currentArea.Width, currentArea.Height);
+
+        shapeBatch.Begin(SaveStateMode.SaveState);
+        shapeBatch.FillEllipse(pos, size, Utils.NewAlpha(Color.SlateBlue, .5f));
+        shapeBatch.DrawEllipse(pos, size, Color.Gold);
+        shapeBatch.End();
+      }
+    }
+
     #endregion
   }
 }

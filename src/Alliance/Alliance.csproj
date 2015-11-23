@@ -74,6 +74,7 @@
     <Compile Include="GridComponent.Functions.cs" />
     <Compile Include="InputProvider.cs" />
     <Compile Include="Messages.cs" />
+    <Compile Include="Pieces\MissilePiece.cs" />
     <Compile Include="Pieces\Piece.cs" />
     <Compile Include="Pieces\ShockwavePiece.cs" />
     <Compile Include="Pieces\SpeedBumpPiece.cs" />
@@ -83,6 +84,7 @@
     <Compile Include="Data\Size.cs" />
     <Compile Include="SelectionPiece.cs" />
     <Compile Include="UpdateParams.cs" />
+    <Compile Include="Utilities\ShapeBatch.cs" />
     <Compile Include="Utilities\Utils.cs" />
     <Compile Include="Utilities\Shapes.cs" />
   </ItemGroup>

@@ -55,24 +55,8 @@ namespace Alliance
     private TextBox txtDescription;
     private Caption cptDescription;
     private SpriteFont captionFont;
-
-    public Vector2 Position
-    {
-      get { return mPosition; }
-      set { mPosition = value; }
-    }
-
-    public float X
-    {
-      get { return mPosition.X; }
-      set { mPosition.X = value; }
-    }
-
-    public float Y
-    {
-      get { return mPosition.Y; }
-      set { mPosition.Y = value; }
-    }
+    private ShapeBatch shapeBatch;
+    private BoxF currentArea = BoxF.Empty;
 
     public GridComponent(Game game)
       : base(game)
@@ -87,6 +71,7 @@ namespace Alliance
     {
       base.LoadContent();
       mSpriteBatch = new SpriteBatch(GraphicsDevice);
+      shapeBatch = new ShapeBatch(GraphicsDevice);
       captionFont = Content.Load<SpriteFont>("Fonts\\ComicSans");
     }
 
@@ -122,6 +107,9 @@ namespace Alliance
       // update the description text that is displayed
       UpdateDescriptionText(uparams);
 
+      // update the radius around the selected piece
+      UpdateSelectedPieceRadius(uparams);
+
       // update all pieces
       UpdatePieces(uparams);
 
@@ -130,36 +118,6 @@ namespace Alliance
 
       base.Update(gameTime);
     }
-
-    private void UpdateInvaliders(UpdateParams uparams)
-    {
-      for (int i = mEntities.Count - 1; i > -1; --i)
-      {
-        Entity entity = mEntities[i];
-        entity.Update(uparams.GameTime);
-        if (entity.State != EntityState.Alive)
-        {
-          mEntities.RemoveAt(i);
-          if (entity.State == EntityState.MadeIt)
-          {
-            AllianceGame.Sounds.PlayCue("alright");
-          }
-        }
-      }
-    }
-
-    private void AddInvaders()
-    {
-      if (RandomHelper.NextRareBool())
-      {
-        int count = RandomHelper.Next(1, 5);
-        for (int i = 0; i < count; ++i)
-        {
-          Tank tank = new Tank(HorzStartCell, HorzGoalCell);
-          mEntities.Add(tank);
-        }
-      }
-    }    
 
     public override void Draw(GameTime gameTime)
     {
@@ -170,16 +128,10 @@ namespace Alliance
       DrawInvaders();
 
       mSpriteBatch.End();
-      base.Draw(gameTime);
-    }
 
-    private void DrawInvaders()
-    {
-      Vector2 offset = (Vector2)MiddleOffset + mPosition;
-      foreach (Entity invader in mEntities)
-      {
-        invader.Draw(mSpriteBatch, offset);
-      }
+      DrawPieceRadius();
+
+      base.Draw(gameTime);
     }
 
     #region Solve Grid
